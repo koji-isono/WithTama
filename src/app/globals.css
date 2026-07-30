@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fffdf8;
+  --foreground: #312c29;
+  --primary: #a7654f;
+  --primary-foreground: #ffffff;
+  --secondary: #f3e8dc;
+  --muted: #f7f2ec;
+  --border: #e7ddd4;
+  --radius: 0.875rem;
+}
+
+* { border-color: var(--border); }
+body { background: var(--background); color: var(--foreground); font-family: Arial, Helvetica, sans-serif; }
+a { text-underline-offset: 4px; }

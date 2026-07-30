@@ -1,0 +1,1 @@
+export default function SignupPage() { return <main className="mx-auto max-w-md px-4 py-16"><h1 className="text-3xl font-bold">無料会員登録</h1><p className="mt-3 text-neutral-600">購入希望者・ブリーダー申請の入口をここに実装します。</p></main>; }

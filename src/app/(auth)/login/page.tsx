@@ -1,0 +1,1 @@
+export default function LoginPage() { return <main className="mx-auto max-w-md px-4 py-16"><h1 className="text-3xl font-bold">ログイン</h1><p className="mt-3 text-neutral-600">Supabase Auth接続後にフォームを実装します。</p></main>; }
