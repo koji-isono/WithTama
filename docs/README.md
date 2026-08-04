@@ -19,6 +19,26 @@ Google Drive は成果物保管用とします。
 | [09_開発履歴](./09_開発履歴/2026-08.md) | 月次の開発ログ |
 | [10_運用手順](./10_運用手順/README.md) | デプロイ・運用・障害対応 |
 
+## データベーステーブル一覧
+
+カラム名の正本は [05_データベース設計](./05_データベース設計/README.md) です。
+
+| テーブル | 状態 | 設計書 |
+|---------|------|--------|
+| `public.pets` | Version 1.1 確定 | [pets.md](./05_データベース設計/pets.md) |
+| `public.pet_photos` | Version 1.0 確定 | [pet_photos.md](./05_データベース設計/pet_photos.md) |
+| `public.breeders` | Version 1.1 確定 | [breeders.md](./05_データベース設計/breeders.md) |
+
+### 今後設計予定
+
+| テーブル | 概要 |
+|---------|------|
+| `buyers` | 購入希望者情報 |
+| `inquiries` | 問い合わせ |
+| `visits` | 見学管理 |
+| `favorites` | お気に入り |
+| `audit_logs` | 監査ログ |
+
 ## 関連ドキュメント
 
 - [DEVELOPMENT.md](./DEVELOPMENT.md) — 開発ワークフロー

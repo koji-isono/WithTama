@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Camera, Heart, ImageIcon, Pencil, Plus, Search, Sparkles } from "lucide-react";
 
@@ -8,82 +9,36 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-
-type ListingStatus = "published" | "draft" | "unpublished";
-
-type BreederPet = {
-  id: string;
-  managementName: string;
-  breed: string;
-  gender: string;
-  age: string;
-  status: ListingStatus;
-  statusLabel: string;
-  photoCount: number;
-  matchCount: number;
-  imageGradient: string;
-};
+import type { BreederPetListItem, PetStatus } from "@/types/pet";
 
 const STATUS_FILTERS = [
   { value: "all", label: "すべて" },
   { value: "published", label: "掲載中" },
   { value: "draft", label: "下書き" },
-  { value: "unpublished", label: "非掲載" },
+  { value: "under_review", label: "審査中" },
+  { value: "paused", label: "一時停止" },
+  { value: "family_decided", label: "家族決定" },
+  { value: "closed", label: "クローズ" },
 ] as const;
 
-const DUMMY_PETS: BreederPet[] = [
-  {
-    id: "1",
-    managementName: "タマちゃん",
-    breed: "ラグドール",
-    gender: "女の子",
-    age: "3か月",
-    status: "published",
-    statusLabel: "掲載中",
-    photoCount: 12,
-    matchCount: 5,
-    imageGradient: "from-rose-100 via-orange-50 to-amber-100",
-  },
-  {
-    id: "2",
-    managementName: "モカちゃん",
-    breed: "スコティッシュフォールド",
-    gender: "男の子",
-    age: "5か月",
-    status: "draft",
-    statusLabel: "下書き",
-    photoCount: 6,
-    matchCount: 0,
-    imageGradient: "from-stone-100 via-neutral-50 to-zinc-100",
-  },
-  {
-    id: "3",
-    managementName: "ソラくん",
-    breed: "ゴールデンレトリバー",
-    gender: "男の子",
-    age: "2か月",
-    status: "published",
-    statusLabel: "掲載中",
-    photoCount: 18,
-    matchCount: 9,
-    imageGradient: "from-sky-100 via-amber-50 to-orange-100",
-  },
-];
-
-function statusBadgeVariant(status: ListingStatus) {
+function statusBadgeVariant(status: PetStatus) {
   if (status === "published") return "default";
-  if (status === "draft") return "secondary";
+  if (status === "draft" || status === "under_review") return "secondary";
   return "outline";
 }
 
-export function PetManagementList() {
+type PetManagementListProps = {
+  pets: BreederPetListItem[];
+};
+
+export function PetManagementList({ pets }: PetManagementListProps) {
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTERS)[number]["value"]>("all");
 
   const filteredPets = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    return DUMMY_PETS.filter((pet) => {
+    return pets.filter((pet) => {
       const matchesStatus = statusFilter === "all" || pet.status === statusFilter;
       const matchesQuery =
         normalizedQuery.length === 0 ||
@@ -92,7 +47,7 @@ export function PetManagementList() {
 
       return matchesStatus && matchesQuery;
     });
-  }, [query, statusFilter]);
+  }, [pets, query, statusFilter]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10">
@@ -101,9 +56,14 @@ export function PetManagementList() {
           <p className="text-xs font-semibold tracking-widest text-[var(--primary)]">BR-07</p>
           <h1 className="mt-1 text-2xl font-bold sm:text-3xl">犬猫管理</h1>
         </div>
-        <Button className="h-10 w-full rounded-full bg-[var(--primary)] px-5 hover:bg-[var(--primary)]/90 sm:w-auto">
-          <Plus className="size-4" />
-          新しい犬猫を登録
+        <Button
+          asChild
+          className="h-10 w-full rounded-full bg-[var(--primary)] px-5 hover:bg-[var(--primary)]/90 sm:w-auto"
+        >
+          <Link href="/breeder/pets/new">
+            <Plus className="size-4" />
+            新しい犬猫を登録
+          </Link>
         </Button>
       </div>
 
@@ -166,7 +126,7 @@ export function PetManagementList() {
                 <p className="text-sm text-neutral-600">
                   {pet.breed}
                   <span className="mx-2 text-neutral-300">·</span>
-                  {pet.gender}
+                  {pet.sexLabel}
                   <span className="mx-2 text-neutral-300">·</span>
                   {pet.age}
                 </p>
@@ -208,8 +168,14 @@ export function PetManagementList() {
 
       {filteredPets.length === 0 && (
         <div className="mt-10 rounded-xl border border-dashed border-[var(--border)] bg-white px-6 py-12 text-center">
-          <p className="text-sm font-medium text-neutral-700">該当する犬猫が見つかりません</p>
-          <p className="mt-1 text-sm text-neutral-500">検索条件や掲載状態フィルターを変更してください</p>
+          <p className="text-sm font-medium text-neutral-700">
+            {pets.length === 0 ? "まだ登録されていません" : "該当する犬猫が見つかりません"}
+          </p>
+          {pets.length === 0 ? null : (
+            <p className="mt-1 text-sm text-neutral-500">
+              検索条件や掲載状態フィルターを変更してください
+            </p>
+          )}
         </div>
       )}
     </div>

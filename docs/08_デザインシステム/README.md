@@ -82,6 +82,31 @@ WithTama の UI は **Tailwind CSS** + **shadcn/ui** を基盤とします（Dec
 | ドメイン固有 | `src/components/{domain}/` | `PetManagementList` |
 | ページ専用 | `src/app/{route}/` | colocation 可 |
 
+## ブリーダー共通レイアウト
+
+BR-06〜BR-09 で共通利用する DashboardLayout。
+
+| コンポーネント | パス | 用途 |
+|---------------|------|------|
+| BreederSidebar | `src/components/layout/breeder-sidebar.tsx` | PC 左固定サイドバー（240px） |
+| BreederHeader | `src/components/layout/breeder-header.tsx` | 画面上部共通ヘッダー |
+| BreederMobileNav | `src/components/layout/breeder-mobile-nav.tsx` | スマホ下部固定ナビ |
+| BreederLayout | `src/app/breeder/layout.tsx` | `/breeder/*` 共通レイアウト |
+| ナビ設定 | `src/components/layout/breeder-nav-items.ts` | メニュー項目・アクティブ判定 |
+
+### レスポンシブ方針
+
+| デバイス | サイドバー | ヘッダー | 下部ナビ |
+|---------|-----------|---------|---------|
+| PC（md以上） | 表示 | 表示 | 非表示 |
+| スマホ | 非表示 | 表示 | 表示 |
+
+### アクティブ表示
+
+- 現在の URL（`usePathname`）でアクティブメニューを切り替え
+- サイドバー: 背景 `--secondary` + 文字 `--primary`
+- 下部ナビ: 文字 `--primary` + アイコン太線
+
 ## 関連ドキュメント
 
 - [画面設計](../04_画面設計/README.md)

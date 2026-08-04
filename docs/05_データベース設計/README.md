@@ -1,27 +1,59 @@
 # データベース設計
 
-## 概要
+## 目的
 
-WithTama のデータベースは Supabase（PostgreSQL）を使用します。
+本ドキュメントは、WithTama の Supabase（PostgreSQL）スキーマに関する**カラム名の正本**です。
 
-## 管理方針
+Supabase マイグレーション、TypeScript 型、Repository（`src/lib/supabase/`）、画面実装は、すべて本設計書に定義されたカラム名・制約に従います。設計書に存在しないカラム名をコードで使用してはいけません。
 
-- スキーマ変更は `supabase/migrations/` で管理
-- シードデータは `supabase/seed.sql`
-- ローカル開発は Supabase CLI
+## 共通方針
 
-## 主要エンティティ（予定）
+| 項目 | 方針 |
+|------|------|
+| DB テーブル名 | 複数形・スネークケース（例: `pets`, `pet_photos`） |
+| DB カラム名 | スネークケース（例: `management_name`, `public_display_name`） |
+| TypeScript 型名 | PascalCase（例: `PetRow`, `PetPhotoRow`） |
+| TypeScript プロパティ | camelCase（例: `managementName`, `publicDisplayName`） |
+| DBMS | Supabase PostgreSQL |
+| マイグレーション | `supabase/migrations/` |
+| シード | `supabase/seed.sql` |
 
-| テーブル | 説明 |
+## テーブル一覧
+
+| テーブル | 状態 | 設計書 |
+|---------|------|--------|
+| `public.pets` | Version 1.1 確定 | [pets.md](./pets.md) |
+| `public.pet_photos` | Version 1.0 確定 | [pet_photos.md](./pet_photos.md) |
+| `public.breeders` | Version 1.1 確定 | [breeders.md](./breeders.md) |
+
+## ER図
+
+- [ER図 Version 1.0](./ER図.md)
+
+## 今後設計予定
+
+| テーブル | 概要 |
 |---------|------|
-| profiles | ユーザープロフィール |
-| breeders | ブリーダー情報 |
-| pets | 犬猫情報（管理名・公開表示名を分離 — Decision No.23） |
-| pet_photos | 犬猫写真 |
-| matches | ご縁（問い合わせ） |
+| `buyers` | 購入希望者情報 |
+| `inquiries` | 問い合わせ |
+| `visits` | 見学管理 |
+| `favorites` | お気に入り |
+| `audit_logs` | 監査ログ |
+
+## 設計変更ルール
+
+スキーマを変更する場合は、以下を**同時に**更新してください。
+
+1. 本設計書（`docs/05_データベース設計/`）
+2. [DecisionLog](../01_設計変更管理/DecisionLog.md)（設計判断がある場合）
+3. Supabase マイグレーション（`supabase/migrations/`）
+4. TypeScript 型（`src/types/`）
+5. Repository（`src/lib/supabase/`）
+6. [開発履歴](../09_開発履歴/2026-08.md)
 
 ## 関連ドキュメント
 
 - [権限設計](../07_権限設計/README.md)
 - [API設計](../06_API設計/README.md)
+- [Decision Log](../01_設計変更管理/DecisionLog.md)
 - `supabase/migrations/README.md`
