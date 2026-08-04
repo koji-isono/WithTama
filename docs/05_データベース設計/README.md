@@ -25,19 +25,20 @@ Supabase マイグレーション、TypeScript 型、Repository（`src/lib/supab
 | `public.pets` | Version 1.1 確定 | [pets.md](./pets.md) |
 | `public.pet_photos` | Version 1.0 確定 | [pet_photos.md](./pet_photos.md) |
 | `public.breeders` | Version 1.1 確定 | [breeders.md](./breeders.md) |
+| `public.favorites` | Version 1.0 確定 | [favorites.md](./favorites.md) |
+| `public.inquiries` | Version 1.0 確定 | [inquiries.md](./inquiries.md) |
+| `public.inquiry_messages` | Version 1.0 確定 | [inquiry_messages.md](./inquiry_messages.md) |
+| `public.visits` | Version 1.0 確定 | [visits.md](./visits.md) |
 
 ## ER図
 
-- [ER図 Version 1.0](./ER図.md)
+- [ER図 Version 1.2](./ER図.md)
 
 ## 今後設計予定
 
 | テーブル | 概要 |
 |---------|------|
 | `buyers` | 購入希望者情報 |
-| `inquiries` | 問い合わせ |
-| `visits` | 見学管理 |
-| `favorites` | お気に入り |
 | `audit_logs` | 監査ログ |
 
 ## 設計変更ルール

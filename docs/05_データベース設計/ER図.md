@@ -2,7 +2,7 @@
 
 | 項目 | 内容 |
 |------|------|
-| Version | 1.0 |
+| Version | 1.2 |
 | 対象 | 第1期データベース構造 |
 | 状態 | 確定済みテーブルと設計予定テーブルを区別して記載 |
 
@@ -19,12 +19,13 @@ WithTama 第1期の主要テーブルとリレーションを示す。設計が�
 - `public.buyers`
 - `public.pets`
 - `public.pet_photos`
+- `public.favorites`
+- `public.inquiries`
+- `public.inquiry_messages`
+- `public.visits`
 
 **設計予定**
 
-- `public.favorites`
-- `public.inquiries`
-- `public.visits`
 - `public.audit_logs`
 
 ## Mermaid ER図
@@ -35,15 +36,18 @@ erDiagram
     AUTH_USERS ||--o| BUYERS : "1対0または1"
     BREEDERS ||--o{ PETS : "1対多"
     PETS ||--o{ PET_PHOTOS : "1対多"
+    BUYERS ||--o{ FAVORITES : "1対多"
+    PETS ||--o{ FAVORITES : "1対多"
 
-    BUYERS ||--o{ FAVORITES : "将来予定"
-    PETS ||--o{ FAVORITES : "将来予定"
-    BUYERS ||--o{ INQUIRIES : "将来予定"
-    PETS ||--o{ INQUIRIES : "将来予定"
-    BREEDERS ||--o{ INQUIRIES : "将来予定"
-    BUYERS ||--o{ VISITS : "将来予定"
-    PETS ||--o{ VISITS : "将来予定"
-    BREEDERS ||--o{ VISITS : "将来予定"
+    BUYERS ||--o{ INQUIRIES : "問い合わせ"
+    BREEDERS ||--o{ INQUIRIES : "受信"
+    PETS ||--o{ INQUIRIES : "対象"
+    INQUIRIES ||--o{ INQUIRY_MESSAGES : "メッセージ"
+    AUTH_USERS ||--o{ INQUIRY_MESSAGES : "送信"
+    INQUIRIES ||--o| VISITS : "0または1"
+    BUYERS ||--o{ VISITS : "見学"
+    BREEDERS ||--o{ VISITS : "対応"
+    PETS ||--o{ VISITS : "対象"
 
     AUTH_USERS {
         uuid id PK
@@ -108,9 +112,56 @@ erDiagram
         timestamptz created_at
         timestamptz updated_at
     }
+
+    FAVORITES {
+        uuid id PK
+        uuid buyer_id FK
+        uuid pet_id FK
+        timestamptz created_at
+    }
+
+    INQUIRIES {
+        uuid id PK
+        uuid buyer_id FK
+        uuid breeder_id FK
+        uuid pet_id FK
+        text status
+        text subject
+        timestamptz last_message_at
+        timestamptz deleted_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    INQUIRY_MESSAGES {
+        uuid id PK
+        uuid inquiry_id FK
+        text sender_type
+        uuid sender_user_id FK
+        text message
+        boolean is_read
+        timestamptz created_at
+    }
+
+    VISITS {
+        uuid id PK
+        uuid inquiry_id FK "UNIQUE"
+        uuid buyer_id FK
+        uuid breeder_id FK
+        uuid pet_id FK
+        timestamptz requested_at
+        timestamptz scheduled_at
+        text status
+        boolean animal_confirmed
+        boolean explanation_completed
+        text result
+        timestamptz deleted_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
 ```
 
-> **凡例:** カラム定義があるエンティティ（`AUTH_USERS`〜`PET_PHOTOS`）は設計確定済み。`FAVORITES` / `INQUIRIES` / `VISITS` はリレーションのみ示す設計予定テーブル（カラム未確定）。`AUDIT_LOGS` は設計予定だが Version 1.0 ではリレーション未定義。`将来予定` のリレーションは将来追加予定の関係を示す。
+> **凡例:** カラム定義があるエンティティは設計確定済み。`AUDIT_LOGS` は設計予定だが Version 1.2 ではリレーション未定義。
 
 ## リレーション一覧
 
@@ -122,19 +173,17 @@ erDiagram
 | `auth.users` | 1 対 0 または 1 | `buyers` | `buyers.user_id` → `auth.users.id` |
 | `breeders` | 1 対多 | `pets` | `pets.breeder_id` → `breeders.id`（最終方針） |
 | `pets` | 1 対多 | `pet_photos` | `pet_photos.pet_id` → `pets.id` |
-
-### 将来予定
-
-| 親 | 関係 | 子 | 備考 |
-|----|------|-----|------|
-| `buyers` | 1 対多 | `favorites` | 設計予定 |
-| `pets` | 1 対多 | `favorites` | 設計予定 |
-| `buyers` | 1 対多 | `inquiries` | 設計予定 |
-| `pets` | 1 対多 | `inquiries` | 設計予定 |
-| `breeders` | 1 対多 | `inquiries` | 設計予定 |
-| `buyers` | 1 対多 | `visits` | 設計予定 |
-| `pets` | 1 対多 | `visits` | 設計予定 |
-| `breeders` | 1 対多 | `visits` | 設計予定 |
+| `buyers` | 1 対多 | `favorites` | `favorites.buyer_id` → `buyers.id` |
+| `pets` | 1 対多 | `favorites` | `favorites.pet_id` → `pets.id` |
+| `buyers` | 1 対多 | `inquiries` | `inquiries.buyer_id` → `buyers.id` |
+| `breeders` | 1 対多 | `inquiries` | `inquiries.breeder_id` → `breeders.id` |
+| `pets` | 1 対多 | `inquiries` | `inquiries.pet_id` → `pets.id` |
+| `inquiries` | 1 対多 | `inquiry_messages` | `inquiry_messages.inquiry_id` → `inquiries.id` |
+| `auth.users` | 1 対多 | `inquiry_messages` | `inquiry_messages.sender_user_id` → `auth.users.id` |
+| `inquiries` | 1 対 0 または 1 | `visits` | `visits.inquiry_id` → `inquiries.id`（UNIQUE） |
+| `buyers` | 1 対多 | `visits` | `visits.buyer_id` → `buyers.id` |
+| `breeders` | 1 対多 | `visits` | `visits.breeder_id` → `breeders.id` |
+| `pets` | 1 対多 | `visits` | `visits.pet_id` → `pets.id` |
 
 ## 設計上の注意事項
 
@@ -147,7 +196,9 @@ erDiagram
 7. `pet_photos` の画像本体は Supabase Storage に保存し、DB には `storage_path` のみ保存する。
 8. `deleted_at` が NULL のデータを通常表示対象とする。
 9. 一般公開用データは View または API 経由で必要項目だけ返す。
-10. `favorites`、`inquiries`、`visits`、`audit_logs` は未設計のため、Version 1.0 では関係のみを示し、カラムは確定扱いにしない。
+10. `inquiries` には `visit_id` を持たせない。見学は `visits.inquiry_id`（UNIQUE）で 1 問い合わせ 0 または 1 件に関連付ける。
+11. 第1期ではリアルタイムチャットは実装せず、`inquiry_messages` でテキスト履歴を管理する。
+12. `audit_logs` は未設計のため、Version 1.2 ではリレーション未定義。
 
 ## テーブル一覧（補足）
 
@@ -158,9 +209,10 @@ erDiagram
 | `buyers` | 設計確定 | 購入希望者プロフィール |
 | `pets` | 設計確定 | 犬猫情報 |
 | `pet_photos` | 設計確定 | 犬猫写真 |
-| `favorites` | 設計予定 | お気に入り |
-| `inquiries` | 設計予定 | 問い合わせ |
-| `visits` | 設計予定 | 見学管理 |
+| `favorites` | 設計確定 | お気に入り（犬猫） |
+| `inquiries` | 設計確定 | 問い合わせ案件 |
+| `inquiry_messages` | 設計確定 | 問い合わせメッセージ履歴 |
+| `visits` | 設計確定 | 見学管理 |
 | `audit_logs` | 設計予定 | 操作履歴 |
 
 ## 関連ドキュメント
@@ -168,4 +220,8 @@ erDiagram
 - [breeders テーブル](./breeders.md)
 - [pets テーブル](./pets.md)
 - [pet_photos テーブル](./pet_photos.md)
+- [favorites テーブル](./favorites.md)
+- [inquiries テーブル](./inquiries.md)
+- [inquiry_messages テーブル](./inquiry_messages.md)
+- [visits テーブル](./visits.md)
 - [データベース設計 README](./README.md)
