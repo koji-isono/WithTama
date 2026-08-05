@@ -1,5 +1,7 @@
-import { ProfileStepPlaceholder } from "@/features/breeder-profile";
+import { IntroductionStepForm, loadIntroductionProfile } from "@/features/breeder-profile";
 
-export default function BreederProfileIntroductionPage() {
-  return <ProfileStepPlaceholder stepSlug="introduction" />;
+export default async function BreederProfileIntroductionPage() {
+  const initialInput = await loadIntroductionProfile();
+
+  return <IntroductionStepForm initialInput={initialInput} />;
 }

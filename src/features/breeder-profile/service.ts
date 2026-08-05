@@ -2,16 +2,41 @@
 
 import { createClient } from "@/lib/supabase/server";
 
-import { updateBasicProfile, updateLocationProfile } from "./repository";
+import { formatProfileSaveError } from "./format-save-error";
+import { formatBreederDocumentUploadError } from "./format-document-upload-error";
+import {
+  getVerificationProfile,
+  saveBreederDocumentPath,
+  updateBasicProfile,
+  updateIntroductionProfile,
+  updateLicenseProfile,
+  updateLocationProfile,
+  updateVerificationProfile,
+  uploadBreederDocument as uploadBreederDocumentToStorage,
+} from "./repository";
+import { validateProfileCompletion } from "./profile-completion";
 import type {
   BasicProfileInput,
+  BreederDocumentType,
+  CompleteBreederProfileInput,
+  CompleteBreederProfileResult,
+  IntroductionProfileInput,
+  LicenseProfileInput,
   LocationProfileInput,
   SaveBasicProfileResult,
+  SaveIntroductionProfileResult,
+  SaveLicenseProfileResult,
   SaveLocationProfileResult,
+  UploadBreederDocumentResult,
 } from "./types";
+import { buildBreederDocumentStoragePath, validateBreederDocumentFile } from "./document-utils";
 import {
   hasValidationErrors,
+  normalizeIntroductionProfileInput,
+  normalizeLicenseProfileInput,
   validateBasicProfile,
+  validateIntroductionProfile,
+  validateLicenseProfile,
   validateLocationProfile,
 } from "./validation";
 
@@ -84,6 +109,198 @@ export async function saveLocationProfile(
     return {
       success: false,
       error: error instanceof Error ? error.message : "保存に失敗しました。",
+    };
+  }
+}
+
+export async function saveLicenseProfile(
+  input: LicenseProfileInput,
+): Promise<SaveLicenseProfileResult> {
+  const normalized = normalizeLicenseProfileInput(input);
+  const fieldErrors = validateLicenseProfile(normalized);
+
+  if (hasValidationErrors(fieldErrors)) {
+    return { success: false, fieldErrors };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "ログインが必要です。" };
+  }
+
+  try {
+    await updateLicenseProfile(user.id, {
+      business_registration_type: normalized.businessRegistrationType,
+      business_registration_number: normalized.businessRegistrationNumber,
+      registration_authority: normalized.registrationAuthority,
+      registration_expires_at: normalized.registrationExpiresAt,
+    });
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: formatProfileSaveError(error),
+    };
+  }
+}
+
+/**
+ * Step 4 ブリーダー紹介の保存。
+ *
+ * TODO(AI): 第1期では Dify による AI 下書き生成は未実装。
+ * 将来: AI 下書き → ブリーダー確認・修正 → 管理者審査 → 公開。
+ * AI 生成文の自動公開は行わない。健康・性格・血統・安全性の断定は AI にさせない。
+ */
+export async function saveIntroductionProfile(
+  input: IntroductionProfileInput,
+): Promise<SaveIntroductionProfileResult> {
+  const normalized = normalizeIntroductionProfileInput(input);
+  const fieldErrors = validateIntroductionProfile(normalized);
+
+  if (hasValidationErrors(fieldErrors)) {
+    return { success: false, fieldErrors };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "ログインが必要です。" };
+  }
+
+  try {
+    await updateIntroductionProfile(user.id, {
+      profile_text: normalized.profileText,
+      breeding_policy: normalized.breedingPolicy,
+      health_policy: normalized.healthPolicy,
+      breeding_environment: normalized.breedingEnvironment,
+    });
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: formatProfileSaveError(error),
+    };
+  }
+}
+
+export async function uploadBreederDocument(
+  formData: FormData,
+): Promise<UploadBreederDocumentResult> {
+  const documentType = formData.get("documentType");
+  const file = formData.get("file");
+
+  if (documentType !== "identity" && documentType !== "license") {
+    return { success: false, error: "書類種別が不正です。" };
+  }
+
+  if (!(file instanceof File)) {
+    return { success: false, error: "ファイルを選択してください。" };
+  }
+
+  const validationError = validateBreederDocumentFile(file);
+
+  if (validationError) {
+    return { success: false, error: validationError };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "ログインが必要です。" };
+  }
+
+  const typedDocumentType = documentType as BreederDocumentType;
+  let storagePath: string;
+
+  try {
+    storagePath = buildBreederDocumentStoragePath(user.id, typedDocumentType, file);
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "ファイルを確認してください。",
+    };
+  }
+
+  try {
+    await uploadBreederDocumentToStorage(user.id, typedDocumentType, file, storagePath);
+
+    await saveBreederDocumentPath(user.id, typedDocumentType, storagePath);
+
+    return { success: true, documentType: typedDocumentType };
+  } catch (error) {
+    return {
+      success: false,
+      error: formatBreederDocumentUploadError(error, {
+        documentType: typedDocumentType,
+        storagePath,
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+      }),
+    };
+  }
+}
+
+export async function completeBreederProfile(
+  _input: CompleteBreederProfileInput = {},
+): Promise<CompleteBreederProfileResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "ログインが必要です。" };
+  }
+
+  try {
+    const profile = await getVerificationProfile(user.id);
+    const missingSteps = validateProfileCompletion(profile);
+
+    if (missingSteps.length > 0) {
+      return {
+        success: false,
+        error: "プロフィールの必須項目が不足しています。未入力のステップを確認してください。",
+        missingSteps,
+      };
+    }
+
+    if (!profile) {
+      return {
+        success: false,
+        error: "プロフィールが見つかりません。",
+      };
+    }
+
+    await updateVerificationProfile(user.id, {
+      identity_verification_status: "submitted",
+      business_verification_status: "submitted",
+      review_status: "submitted",
+      profile_completed: true,
+    });
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: formatProfileSaveError(error),
     };
   }
 }

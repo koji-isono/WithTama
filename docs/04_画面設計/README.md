@@ -89,9 +89,9 @@ flowchart TB
 | 入口 | `/breeder/profile` | BR-09 | プロフィール入口 | リダイレクト |
 | 編集 | `/breeder/profile/basic` | BR-09 | プロフィール Step 1 基本情報 | **実装済み** |
 | 編集 | `/breeder/profile/location` | BR-10 | プロフィール Step 2 所在地 | **実装済み** |
-| 編集 | `/breeder/profile/license` | BR-09 | プロフィール Step 3 第一種動物取扱業 | プレースホルダー |
-| 編集 | `/breeder/profile/introduction` | BR-09 | プロフィール Step 4 ブリーダー紹介 | プレースホルダー |
-| 編集 | `/breeder/profile/verification` | BR-09 | プロフィール Step 5 本人確認 | プレースホルダー |
+| 編集 | `/breeder/profile/license` | BR-09 | プロフィール Step 3 第一種動物取扱業 | 実装済み |
+| 編集 | `/breeder/profile/introduction` | BR-09 | プロフィール Step 4 ブリーダー紹介 | 実装済み |
+| 編集 | `/breeder/profile/verification` | BR-09 | プロフィール Step 5 本人確認 | 実装済み |
 | 編集 | `/breeder/settings` | BR-13 | 設定 | 未実装 |
 
 ### プロフィール遷移（Decision No.67）

@@ -28,6 +28,19 @@ WithTama ではロールベースアクセス制御（RBAC）を採用します�
 - ブリーダー画面（`/breeder/*`）は breeder ロール必須（次工程）
 - ロール別トップ URL（`/breeder`、`/buyer`）は入口専用。`profile_completed` に応じて `/profile` または `/dashboard` へリダイレクトする（Decision No.62）
 
+## Storage 権限（`breeder-documents`）
+
+| 操作 | buyer | breeder（本人） | admin |
+|------|-------|-----------------|-------|
+| 書類アップロード（INSERT） | — | ✅ 自分の `{userId}` 配下のみ | 別途（将来） |
+| 書類閲覧（SELECT） | — | ✅ 自分の配下のみ | Signed URL（将来） |
+| 書類更新（UPDATE） | — | ✅ 自分の配下のみ | 別途（将来） |
+| 書類削除（DELETE） | — | —（第1期） | 別途（将来） |
+
+- バケットは **private**。公開 URL は発行しない
+- Service Role Key をブラウザへ公開しない
+- Migration: `20260805140000_create_breeder_documents_storage.sql`
+
 ## 関連ドキュメント
 
 - [要件定義](../02_要件定義/第1期要件定義.md)

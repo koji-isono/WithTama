@@ -1,5 +1,7 @@
-import { ProfileStepPlaceholder } from "@/features/breeder-profile";
+import { LicenseStepForm, loadLicenseProfile } from "@/features/breeder-profile";
 
-export default function BreederProfileLicensePage() {
-  return <ProfileStepPlaceholder stepSlug="license" />;
+export default async function BreederProfileLicensePage() {
+  const initialInput = await loadLicenseProfile();
+
+  return <LicenseStepForm initialInput={initialInput} />;
 }

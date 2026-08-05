@@ -36,6 +36,12 @@ npm run format:check
 - 設計判断は [DecisionLog](../01_設計変更管理/DecisionLog.md) に追記
 - 開発ログは [09_開発履歴](../09_開発履歴/2026-08.md) に月次で記録
 
+## Supabase Storage（ブリーダー書類）
+
+- バケット `breeder-documents` は **private**
+- Migration 適用: `supabase db push` または Dashboard から `supabase/migrations/20260805140000_create_breeder_documents_storage.sql` を実行
+- 書類の公開 URL は発行しない。管理者閲覧は将来の管理画面で Signed URL を使用
+
 ## 関連ドキュメント
 
 - [DEVELOPMENT.md](../DEVELOPMENT.md)

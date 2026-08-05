@@ -207,6 +207,36 @@
 
 必須チェックはアプリケーション側で実施する。将来は DB 関数または制約での補強を検討する。
 
+## 書類 Storage（`breeder-documents`）
+
+| 項目 | 内容 |
+|------|------|
+| バケット名 | `breeder-documents` |
+| 公開設定 | **private**（公開 URL を発行しない） |
+| DB 保存 | Storage パスのみ（`identity_document_path` / `business_license_path`） |
+| パス例 | `breeders/{userId}/identity/{timestamp}-{uuid}.jpg` |
+
+### ファイル制限
+
+- 拡張子: jpg / jpeg / png / pdf
+- MIME: `image/jpeg`, `image/png`, `application/pdf`
+- 最大サイズ: 10MB / ファイル
+
+### RLS（Storage）
+
+- authenticated ユーザーのみ
+- `breeders/{auth.uid()}/...` 配下のみ INSERT / SELECT / UPDATE
+- 一般ユーザーの DELETE は第1期では不可
+- 管理者閲覧は管理画面から Signed URL を発行（別途ポリシー追加）
+
+### 本人確認書類の法的判断
+
+利用可能書類の正式な範囲については、弁護士または運営責任者への確認が必要。登録種別の適否については管轄自治体への確認が必要。
+
+### profile_completed 更新条件
+
+Step1〜Step4 の必須項目および Step5 の両書類パスがすべて揃った場合のみ、`completeBreederProfile` により `profile_completed = true` および `review_status = submitted` へ更新する。
+
 ## 住所・機密情報の公開方針
 
 一般公開向けの参照は、公開用 View または API 経由で必要項目のみ返す。

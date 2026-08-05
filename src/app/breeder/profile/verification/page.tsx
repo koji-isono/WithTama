@@ -1,5 +1,7 @@
-import { ProfileStepPlaceholder } from "@/features/breeder-profile";
+import { loadVerificationStepState, VerificationStepForm } from "@/features/breeder-profile";
 
-export default function BreederProfileVerificationPage() {
-  return <ProfileStepPlaceholder stepSlug="verification" />;
+export default async function BreederProfileVerificationPage() {
+  const initialState = await loadVerificationStepState();
+
+  return <VerificationStepForm initialState={initialState} />;
 }
