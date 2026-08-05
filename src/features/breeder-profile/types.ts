@@ -41,3 +41,32 @@ export type UpdateBasicProfileData = {
 export type SaveBasicProfileResult =
   | { success: true }
   | { success: false; fieldErrors?: BasicProfileFieldErrors; error?: string };
+
+export type LocationProfileInput = {
+  postalCode: string;
+  prefecture: string;
+  city: string;
+  addressLine: string;
+};
+
+export type LocationProfileFieldKey = keyof LocationProfileInput;
+
+export type LocationProfileFieldErrors = Partial<Record<LocationProfileFieldKey, string>>;
+
+export const INITIAL_LOCATION_PROFILE_INPUT: LocationProfileInput = {
+  postalCode: "",
+  prefecture: "",
+  city: "",
+  addressLine: "",
+};
+
+export type UpdateLocationProfileData = {
+  postal_code: string;
+  prefecture: string;
+  city: string;
+  address_line: string;
+};
+
+export type SaveLocationProfileResult =
+  | { success: true }
+  | { success: false; fieldErrors?: LocationProfileFieldErrors; error?: string };

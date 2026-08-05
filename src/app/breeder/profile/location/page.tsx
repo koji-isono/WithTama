@@ -1,5 +1,5 @@
-import { ProfileStepPlaceholder } from "@/features/breeder-profile";
+import { LocationStepForm } from "@/features/breeder-profile";
 
 export default function BreederProfileLocationPage() {
-  return <ProfileStepPlaceholder stepSlug="location" message="Step2 所在地（未実装）" />;
+  return <LocationStepForm />;
 }

@@ -76,6 +76,37 @@
 
 `/breeder/profile/location` へ遷移する。
 
+## saveLocationProfile
+
+| 項目 | 内容 |
+|------|------|
+| 種別 | Server Action |
+| 実装 | `src/features/breeder-profile/service.ts` |
+| 認証 | Supabase Auth セッション（`auth.getUser()`） |
+
+### リクエスト（LocationProfileInput）
+
+| フィールド | 型 | 必須 |
+|-----------|-----|------|
+| `postalCode` | string | はい（`NNN-NNNN`） |
+| `prefecture` | string | はい |
+| `city` | string | はい |
+| `addressLine` | string | はい |
+
+### 更新対象カラム
+
+| DB カラム | 内容 |
+|-----------|------|
+| `postal_code` | 郵便番号 |
+| `prefecture` | 都道府県 |
+| `city` | 市区町村 |
+| `address_line` | 番地・建物名 |
+| `updated_at` | 更新日時 |
+
+### 成功時の画面遷移
+
+`/breeder/profile/license` へ遷移する。
+
 ## 関連ドキュメント
 
 - [breeders テーブル](../05_データベース設計/breeders.md)

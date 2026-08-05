@@ -4,9 +4,9 @@
 
 ## 責務
 
-- Step 1 基本情報のバリデーションと DB 更新
+- Step 1 基本情報・Step 2 所在地のバリデーションと DB 更新
 - プロフィール共通 UI（`ProfileWizardShell`）
-- Step 2 以降は段階的に本モジュールへ追加
+- Step 3 以降は段階的に本モジュールへ追加
 
 ## ファイル構成
 
@@ -15,7 +15,7 @@
 | `types.ts` | 入力型、`SaveBasicProfileResult` |
 | `validation.ts` | `validateBasicProfile` |
 | `repository.ts` | `updateBasicProfile`（Supabase UPDATE） |
-| `service.ts` | `saveBasicProfile`（Server Action） |
+| `service.ts` | `saveBasicProfile`, `saveLocationProfile`（Server Action） |
 | `constants.ts` | Step 定義・URL |
 | `components/` | フォーム、共通フィールド |
 | `index.ts` | 公開 export |

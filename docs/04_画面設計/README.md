@@ -82,13 +82,13 @@ flowchart TB
 | 表示 | `/breeder/dashboard` | BR-06 | ブリーダーダッシュボード | **実装済み** |
 | 表示 | `/breeder/pets` | BR-07 | 犬猫管理一覧 | **実装済み** |
 | 編集 | `/breeder/pets/new` | BR-08 | 犬猫新規登録 | 一部実装 |
-| 編集 | `/breeder/pets/[petId]/edit` | BR-10 | 犬猫編集 | 未実装 |
+| 編集 | `/breeder/pets/[petId]/edit` | BR-11 | 犬猫編集 | 未実装 |
 | 表示 | `/breeder/visits` | BR-11 | 見学管理 | 未実装 |
 | 表示 | `/breeder/inquiries` | BR-12 | 問い合わせ一覧 | 未実装 |
 | 編集 | `/breeder/inquiries/[inquiryId]` | BR-12 | 問い合わせ詳細・返信 | 未実装 |
 | 入口 | `/breeder/profile` | BR-09 | プロフィール入口 | リダイレクト |
 | 編集 | `/breeder/profile/basic` | BR-09 | プロフィール Step 1 基本情報 | **実装済み** |
-| 編集 | `/breeder/profile/location` | BR-09 | プロフィール Step 2 所在地 | プレースホルダー |
+| 編集 | `/breeder/profile/location` | BR-10 | プロフィール Step 2 所在地 | **実装済み** |
 | 編集 | `/breeder/profile/license` | BR-09 | プロフィール Step 3 第一種動物取扱業 | プレースホルダー |
 | 編集 | `/breeder/profile/introduction` | BR-09 | プロフィール Step 4 ブリーダー紹介 | プレースホルダー |
 | 編集 | `/breeder/profile/verification` | BR-09 | プロフィール Step 5 本人確認 | プレースホルダー |
@@ -147,7 +147,7 @@ src/app/breeder/
 │   ├── page.tsx               # BR-07 一覧（表示）
 │   ├── new/page.tsx           # BR-08 新規（編集）
 │   └── [petId]/
-│       └── edit/page.tsx      # BR-10 編集（未実装）
+│       └── edit/page.tsx      # BR-11 編集（未実装）
 ├── visits/
 │   └── page.tsx               # BR-11（未実装）
 ├── inquiries/
@@ -178,7 +178,8 @@ src/app/breeder/
 | BR-07 | 犬猫管理一覧 | [BR-07_犬猫管理一覧](./BR-07_犬猫管理一覧.md) |
 | BR-08 | 犬猫新規登録 | [BR-08_犬猫新規登録](./BR-08_犬猫新規登録.md) |
 | BR-09 | ブリーダープロフィール | [BR-09_ブリーダープロフィール](./BR-09_ブリーダープロフィール.md) |
-| BR-10 | 犬猫編集 | [BR-10_犬猫編集](./BR-10_犬猫編集.md) |
+| BR-10 | 所在地（プロフィール Step 2） | [BR-10_所在地](./BR-10_所在地.md) |
+| BR-11 | 犬猫編集 | [BR-11_犬猫編集](./BR-11_犬猫編集.md) |
 
 ## 購入希望者画面
 

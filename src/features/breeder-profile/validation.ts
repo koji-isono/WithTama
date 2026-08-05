@@ -1,6 +1,13 @@
-import type { BasicProfileFieldErrors, BasicProfileInput } from "./types";
+import { JAPAN_PREFECTURES } from "./prefectures";
+import type {
+  BasicProfileFieldErrors,
+  BasicProfileInput,
+  LocationProfileFieldErrors,
+  LocationProfileInput,
+} from "./types";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const POSTAL_CODE_PATTERN = /^\d{3}-\d{4}$/;
 
 function isValidHttpUrl(value: string): boolean {
   try {
@@ -39,6 +46,36 @@ export function validateBasicProfile(input: BasicProfileInput): BasicProfileFiel
   return errors;
 }
 
-export function hasValidationErrors(errors: BasicProfileFieldErrors): boolean {
+export function validateLocationProfile(
+  input: LocationProfileInput,
+): LocationProfileFieldErrors {
+  const errors: LocationProfileFieldErrors = {};
+
+  const postalCode = input.postalCode.trim();
+  if (!postalCode) {
+    errors.postalCode = "郵便番号を入力してください。";
+  } else if (!POSTAL_CODE_PATTERN.test(postalCode)) {
+    errors.postalCode = "郵便番号は NNN-NNNN 形式で入力してください。";
+  }
+
+  const prefecture = input.prefecture.trim();
+  if (!prefecture) {
+    errors.prefecture = "都道府県を選択してください。";
+  } else if (!JAPAN_PREFECTURES.includes(prefecture as (typeof JAPAN_PREFECTURES)[number])) {
+    errors.prefecture = "都道府県を選択してください。";
+  }
+
+  if (!input.city.trim()) {
+    errors.city = "市区町村を入力してください。";
+  }
+
+  if (!input.addressLine.trim()) {
+    errors.addressLine = "住所を入力してください。";
+  }
+
+  return errors;
+}
+
+export function hasValidationErrors(errors: object): boolean {
   return Object.keys(errors).length > 0;
 }
