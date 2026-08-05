@@ -4,7 +4,7 @@
 
 本ドキュメントは、WithTama の Supabase（PostgreSQL）スキーマに関する**カラム名の正本**です。
 
-Supabase マイグレーション、TypeScript 型、Repository（`src/lib/supabase/`）、画面実装は、すべて本設計書に定義されたカラム名・制約に従います。設計書に存在しないカラム名をコードで使用してはいけません。
+Supabase マイグレーション、TypeScript 型、Repository（`src/features/` および `src/lib/supabase/`）、画面実装は、すべて本設計書に定義されたカラム名・制約に従います。設計書に存在しないカラム名をコードで使用してはいけません。
 
 ## 共通方針
 
@@ -31,6 +31,21 @@ Supabase マイグレーション、TypeScript 型、Repository（`src/lib/supab
 | `public.visits` | Version 1.0 確定 | [visits.md](./visits.md) |
 | `public.buyers` | Version 1.2 確定 | [buyers.md](./buyers.md) |
 
+## テーブルと機能モジュールの対応
+
+Decision No.73 に基づき、主要テーブルは `src/features/` の機能モジュール経由で更新する方針とする。
+
+| テーブル | Feature モジュール | 主な画面 URL |
+|---------|-------------------|-------------|
+| `breeders` | `src/features/breeder-profile/` | `/breeder/profile/*` |
+| `breeders`, `buyers` | `src/features/auth/` | 初回ログイン・入口リダイレクト |
+| `pets`, `pet_photos` | `src/lib/supabase/pets.ts`（将来 `breeder-pets`） | `/breeder/pets/*` |
+| `inquiries`, `inquiry_messages` | 未実装（将来 `breeder-inquiries`） | `/breeder/inquiries/*` |
+| `visits` | 未実装 | `/breeder/visits` |
+| `favorites` | 未実装 | 購入希望者画面 |
+
+詳細: [features モジュール構成](../../src/features/README.md) / [画面設計](../04_画面設計/README.md)
+
 ## ER図
 
 - [ER図 Version 1.4](./ER図.md)
@@ -49,7 +64,7 @@ Supabase マイグレーション、TypeScript 型、Repository（`src/lib/supab
 2. [DecisionLog](../01_設計変更管理/DecisionLog.md)（設計判断がある場合）
 3. Supabase マイグレーション（`supabase/migrations/`）
 4. TypeScript 型（`src/types/`）
-5. Repository（`src/lib/supabase/`）
+5. Repository（`src/features/` または `src/lib/supabase/`）
 6. [開発履歴](../09_開発履歴/2026-08.md)
 
 ## 関連ドキュメント

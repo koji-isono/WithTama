@@ -66,8 +66,8 @@ export default function LoginPage() {
         return;
       }
 
-      const { role, profileCompleted } = await ensureUserProfile(data.user);
-      router.push(getPostLoginPath(role, profileCompleted));
+      const { role } = await ensureUserProfile(data.user);
+      router.push(getPostLoginPath(role));
     } catch (error) {
       console.error(error);
 

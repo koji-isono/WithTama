@@ -311,4 +311,21 @@ Foreign Key 設定
 ## 関連画面
 
 - [BR-06 ブリーダーダッシュボード](../04_画面設計/BR-06_ブリーダーダッシュボード.md)
-- ブリーダープロフィール（将来）
+- [BR-09 ブリーダープロフィール](../04_画面設計/BR-09_ブリーダープロフィール.md)
+
+## アプリケーション更新（Step 1 基本情報）
+
+`saveBasicProfile` Server Action により、ブリーダー本人の `breeders` レコードを UPDATE する（Decision No.69）。
+
+| 更新カラム | 備考 |
+|-----------|------|
+| `business_name` | 必須 |
+| `representative_name` | 必須 |
+| `phone` | 必須 |
+| `public_email` | 任意（空は NULL） |
+| `website_url` | 任意（空は NULL） |
+| `updated_at` | 明示更新（DB トリガーでも自動更新） |
+
+- 実装: `src/features/breeder-profile/repository.ts` — `updateBasicProfile(userId, data)`
+- RLS: `breeders_update_own`（`user_id = auth.uid()`）
+- API 設計: [ブリーダープロフィール API](../06_API設計/breeder-profile.md)

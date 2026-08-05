@@ -26,6 +26,7 @@ WithTama ではロールベースアクセス制御（RBAC）を採用します�
 - Supabase Auth で認証
 - RLS（Row Level Security）でデータアクセス制御
 - ブリーダー画面（`/breeder/*`）は breeder ロール必須（次工程）
+- ロール別トップ URL（`/breeder`、`/buyer`）は入口専用。`profile_completed` に応じて `/profile` または `/dashboard` へリダイレクトする（Decision No.62）
 
 ## 関連ドキュメント
 

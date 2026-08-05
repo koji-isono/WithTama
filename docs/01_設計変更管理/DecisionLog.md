@@ -366,3 +366,136 @@
 - **完了時:** アプリケーション側で `profile_completed = true` に更新
 - **決定日:** 2026-08-05
 - **参照:** [breeders テーブル](../05_データベース設計/breeders.md) / [buyers テーブル](../05_データベース設計/buyers.md)
+
+---
+
+## Decision No.62
+
+**ロール別トップ URL は入口専用とし、profile_completed に応じてリダイレクトする**
+
+- **決定内容:** `/breeder` および `/buyer` は画面を持たず、入口 URL のみとする。サーバー側で `profile_completed` を確認し、`false` の場合は `/breeder/profile` または `/buyer/profile` へ、`true` の場合は `/breeder/dashboard` または `/buyer/dashboard` へリダイレクトする。
+- **理由:** ログイン後遷移と直接 URL アクセスの両方で、プロフィール未完了ユーザーを一貫してプロフィール入力へ誘導するため。ダッシュボード本体は `/dashboard` 配下に分離し、責務を明確化する。
+- **影響範囲:** `src/app/breeder/page.tsx`、`src/app/(buyer)/buyer/page.tsx`、ダッシュボード・プロフィール各画面、ログイン後遷移（`getPostLoginPath`）、ブリーダーナビゲーション
+- **決定日:** 2026-08-05
+- **参照:** [画面設計 — 画面遷移](../04_画面設計/README.md#画面遷移)
+
+---
+
+## Decision No.64
+
+**ブリーダープロフィールは 5 ステップのウィザード形式とする**
+
+- **決定内容:** ブリーダープロフィール入力は次の 5 ステップで構成する。
+  1. Step 1: 基本情報
+  2. Step 2: 所在地
+  3. Step 3: 第一種動物取扱業情報
+  4. Step 4: ブリーダー紹介
+  5. Step 5: 本人確認・登録証提出
+- **理由:** 入力項目が多く一度に表示すると負担が大きいため。段階的に入力・確認できる UI とする。
+- **影響範囲:** `/breeder/profile`、`src/features/breeder-profile/`、画面設計書 BR-09
+- **決定日:** 2026-08-05
+- **参照:** [BR-09 ブリーダープロフィール](../04_画面設計/BR-09_ブリーダープロフィール.md)
+
+---
+
+## Decision No.65
+
+**プロフィール完成度は DB へ保存せず、入力状況から都度計算する**
+
+- **決定内容:** プロフィール各ステップの入力率・完成度を専用カラムやテーブルに永続化しない。表示時に入力済みフィールドから都度算出する。完了判定の正本は引き続き `profile_completed`（Decision No.61）とする。
+- **理由:** 完成度表示用の冗長データを持たず、入力内容そのものを正とするため。
+- **決定日:** 2026-08-05
+- **参照:** [BR-09 ブリーダープロフィール](../04_画面設計/BR-09_ブリーダープロフィール.md)
+
+---
+
+## Decision No.67
+
+**プロフィールは URL 単位で 5 Step 管理する**
+
+- **決定内容:** ブリーダープロフィールを 5 ページ構成とし、各 Step を独立した URL で管理する。`/breeder/profile` は入口のみとし、次のパスへ分割する。
+  - `/breeder/profile/basic` — Step 1 基本情報
+  - `/breeder/profile/location` — Step 2 所在地
+  - `/breeder/profile/license` — Step 3 第一種動物取扱業情報
+  - `/breeder/profile/introduction` — Step 4 ブリーダー紹介
+  - `/breeder/profile/verification` — Step 5 本人確認・登録証提出
+- **理由:** Step ごとに URL を持つことで、ブックマーク・直接アクセス・将来の保存・戻る操作を明確にするため。
+- **影響範囲:** `src/app/breeder/profile/`、画面遷移、BR-09 設計書
+- **決定日:** 2026-08-05
+- **参照:** [画面設計 — ブリーダープロフィール遷移](../04_画面設計/README.md#ブリーダープロフィール遷移decision-no67)
+
+---
+
+## Decision No.68
+
+**プロフィール共通 UI は layout.tsx へ集約する**
+
+- **決定内容:** BR-09 ヘッダー（画面番号・タイトル・説明・Step 表示・プログレスバー）を `src/app/breeder/profile/layout.tsx` に集約する。各 Step ページは入力フォーム（またはプレースホルダー）のみを持つ。
+- **理由:** 共通 UI の重複を避け、Step ページの責務をフォーム実装に限定するため。
+- **影響範囲:** `src/app/breeder/profile/layout.tsx`、`src/features/breeder-profile/components/profile-wizard-shell.tsx`
+- **決定日:** 2026-08-05
+- **参照:** [BR-09 ブリーダープロフィール](../04_画面設計/BR-09_ブリーダープロフィール.md)
+
+---
+
+## Decision No.69
+
+**プロフィール機能も Repository パターンを採用する**
+
+- **決定内容:** ブリーダープロフィールの保存処理を `src/features/breeder-profile/` に集約し、Repository / Service / Validation に分離する。Repository は Supabase UPDATE のみ、Service はバリデーションと Repository 呼び出し、Validation は入力チェックを担当する。
+- **理由:** 認証機能（`src/features/auth/`）と同様に、データアクセスとビジネスロジックを分離し、テスト・再利用を容易にするため。
+- **影響範囲:** `src/features/breeder-profile/`、BR-09 Step 1、API 設計書
+- **決定日:** 2026-08-05
+- **参照:** [ブリーダープロフィール API](../06_API設計/breeder-profile.md)
+
+---
+
+## Decision No.70
+
+**ブリーダー画面の最終構成を README へ反映する**
+
+- **決定内容:** ブリーダー向け画面の URL 一覧、表示/編集の区分、App Router ディレクトリ構成、画面遷移図を [04_画面設計 README](../04_画面設計/README.md) に集約する。
+- **理由:** 画面追加・実装時の参照先を一本化し、入口 URL・ダッシュボード・各編集 URL の関係を明確にするため。
+- **影響範囲:** `docs/04_画面設計/`、`docs/README.md`
+- **決定日:** 2026-08-05
+- **参照:** [画面設計 — ブリーダー最終構成](../04_画面設計/README.md#ブリーダー画面--最終構成)
+
+---
+
+## Decision No.71
+
+**ダッシュボードは表示専用とし、編集画面を持たない**
+
+- **決定内容:** `/breeder/dashboard`（BR-06）はサマリー・アクティビティの表示と各機能への導線のみとする。プロフィール入力・犬猫編集・問い合わせ返信・設定変更のフォームはダッシュボード上に置かない。
+- **理由:** 閲覧と編集の責務を分離し、URL・権限・実装の見通しを良くするため。
+- **影響範囲:** BR-06、ダッシュボード UI、各機能へのリンク設計
+- **決定日:** 2026-08-05
+- **参照:** [BR-06 ブリーダーダッシュボード](../04_画面設計/BR-06_ブリーダーダッシュボード.md)
+
+---
+
+## Decision No.72
+
+**編集画面はすべて URL 単位で管理する**
+
+- **決定内容:** プロフィール・犬猫・問い合わせ・設定の編集 UI は、機能ごとに独立 URL を持つ。一覧やダッシュボード上のモーダル・インライン編集は採用しない。
+  - プロフィール … `/breeder/profile/*`
+  - 犬猫 … `/breeder/pets/new`, `/breeder/pets/[petId]/edit`
+  - 問い合わせ … `/breeder/inquiries/[inquiryId]`
+  - 設定 … `/breeder/settings/*`
+- **理由:** ブックマーク、直接アクセス、戻る操作、Step 管理を URL で一貫させるため（プロフィールは Decision No.67 と整合）。
+- **影響範囲:** ブリーダー全編集画面、`src/app/breeder/` ディレクトリ構成
+- **決定日:** 2026-08-05
+- **参照:** [画面設計 — 設計原則](../04_画面設計/README.md#設計原則)
+
+---
+
+## Decision No.73
+
+**features 配下を機能単位に整理する**
+
+- **決定内容:** ドメインロジックは `src/features/{機能名}/` に配置する。各 feature は README、`types`、`validation`（任意）、`repository`、`service`、`components` を基本構成とする。新規機能（犬猫・問い合わせ・設定）は同パターンで追加する。
+- **理由:** `app/` を薄く保ち、認証・プロフィールと同様にテスト・再利用可能なモジュール境界を設けるため。
+- **影響範囲:** `src/features/`、DB 設計 README のモジュール対応表、API 設計
+- **決定日:** 2026-08-05
+- **参照:** [src/features/README.md](../../src/features/README.md)

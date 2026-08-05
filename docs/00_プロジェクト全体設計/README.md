@@ -19,12 +19,16 @@ WithTama は、命を大切に育てるブリーダーと、家族として迎�
 ```
 src/
   app/          # Next.js App Router ページ・API
+  features/     # 機能モジュール（auth, breeder-profile 等）
   components/   # 共通 UI コンポーネント
   lib/          # ユーティリティ・Supabase クライアント
   types/        # ドメイン型定義
 docs/           # 設計書（本リポジトリの正本）
 supabase/       # マイグレーション・シード
 ```
+
+- 画面 URL と `app/` の対応 … [画面設計](../04_画面設計/README.md#ブリーダー画面--最終構成)
+- 機能モジュール … [src/features/README.md](../../src/features/README.md)
 
 ## 設計書管理方針
 

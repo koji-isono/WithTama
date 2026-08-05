@@ -46,25 +46,8 @@ export function emailLocalPart(email: string | undefined): string {
   return atIndex > 0 ? email.slice(0, atIndex) : email;
 }
 
-export function getPostLoginPath(
-  role: UserRole,
-  profileCompleted: boolean,
-): string {
-  if (role === "buyer") {
-    if (!profileCompleted) {
-      // TODO: プロフィール入力画面実装後は /buyer/profile へ遷移する
-      return "/buyer";
-    }
-
-    return "/buyer";
-  }
-
-  if (!profileCompleted) {
-    // TODO: プロフィール入力画面実装後は /breeder/profile へ遷移する
-    return "/breeder";
-  }
-
-  return "/breeder";
+export function getPostLoginPath(role: UserRole): string {
+  return role === "buyer" ? "/buyer" : "/breeder";
 }
 
 export class InvalidUserRoleError extends Error {

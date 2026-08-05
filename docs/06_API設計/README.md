@@ -6,9 +6,12 @@ WithTama の API は Next.js App Router の Route Handlers および Supabase �
 
 ## 現状
 
-| エンドポイント | メソッド | 説明 | 状態 |
-|---------------|---------|------|------|
+| エンドポイント / アクション | メソッド | 説明 | 状態 |
+|---------------------------|---------|------|------|
 | `/api/health` | GET | ヘルスチェック | 実装済み |
+| `saveBasicProfile` | Server Action | ブリーダープロフィール Step 1 基本情報保存 | 実装済み |
+
+詳細: [ブリーダープロフィール API](./breeder-profile.md)
 
 ## 今後追加予定
 

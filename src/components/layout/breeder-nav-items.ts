@@ -18,16 +18,16 @@ export type BreederNavItem = {
 };
 
 export const BREEDER_SIDEBAR_ITEMS: BreederNavItem[] = [
-  { label: "ダッシュボード", href: "/breeder", icon: Home, title: "ブリーダーダッシュボード" },
+  { label: "ダッシュボード", href: "/breeder/dashboard", icon: Home, title: "ブリーダーダッシュボード" },
   { label: "犬猫管理", href: "/breeder/pets", icon: PawPrint, title: "犬猫管理" },
   { label: "見学管理", href: "/breeder/visits", icon: CalendarDays, title: "見学管理" },
   { label: "問い合わせ", href: "/breeder/inquiries", icon: MessageCircle, title: "問い合わせ" },
-  { label: "プロフィール", href: "/breeder/profile", icon: User, title: "プロフィール" },
+  { label: "プロフィール", href: "/breeder/profile", icon: User, title: "ブリーダープロフィール" },
   { label: "設定", href: "/breeder/settings", icon: Settings, title: "設定" },
 ];
 
 export const BREEDER_MOBILE_ITEMS: BreederNavItem[] = [
-  { label: "ホーム", href: "/breeder", icon: Home, title: "ブリーダーダッシュボード" },
+  { label: "ホーム", href: "/breeder/dashboard", icon: Home, title: "ブリーダーダッシュボード" },
   { label: "犬猫", href: "/breeder/pets", icon: PawPrint, title: "犬猫管理" },
   { label: "見学", href: "/breeder/visits", icon: CalendarDays, title: "見学管理" },
   {
@@ -48,7 +48,7 @@ export const BREEDER_MOBILE_ITEMS: BreederNavItem[] = [
 
 export function isNavItemActive(pathname: string, item: BreederNavItem): boolean {
   if (item.match) return item.match(pathname);
-  if (item.href === "/breeder") return pathname === "/breeder";
+  if (item.href === "/breeder/dashboard") return pathname === "/breeder/dashboard";
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
