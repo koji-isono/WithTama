@@ -3,7 +3,7 @@
 | 項目 | 内容 |
 |------|------|
 | テーブル名 | `public.breeders` |
-| Version | 1.1 |
+| Version | 1.4 |
 | 状態 | 確定 |
 
 ## 目的
@@ -41,6 +41,7 @@
 | `business_verification_status` | text | NOT NULL | `unverified` | 登録証確認状態 |
 | `review_status` | text | NOT NULL | `draft` | 審査状態 |
 | `membership_status` | text | NOT NULL | `pending` | 利用状態 |
+| `profile_completed` | boolean | NOT NULL | `false` | プロフィール入力完了 |
 | `stripe_customer_id` | text | NULL | `null` | Stripe 顧客 ID |
 | `stripe_subscription_id` | text | NULL | `null` | Stripe 定期課金 ID |
 | `subscription_status` | text | NULL | `null` | Stripe 課金状態 |
@@ -75,6 +76,7 @@
 | `business_verification_status` | `businessVerificationStatus` |
 | `review_status` | `reviewStatus` |
 | `membership_status` | `membershipStatus` |
+| `profile_completed` | `profileCompleted` |
 | `stripe_customer_id` | `stripeCustomerId` |
 | `stripe_subscription_id` | `stripeSubscriptionId` |
 | `subscription_status` | `subscriptionStatus` |
@@ -145,18 +147,43 @@
 
 ## 仮登録方針
 
-メール認証後、`public.breeders` レコードを自動作成する（Decision No.46）。
+メール認証後の初回ログイン時に `public.breeders` レコードを自動作成する（Decision No.46, No.61）。
 
-### 自動作成時の初期値
+### アプリケーション側の INSERT 項目
+
+初回作成時は **`user_id` のみ** INSERT する。ダミー値（「未設定」、メールアドレス由来の代表者名、住所、電話番号、動物取扱業登録情報等）は入れない。
+
+### DB 初期値（自動設定）
 
 | カラム | 初期値 |
 |--------|--------|
-| `review_status` | `draft` |
-| `membership_status` | `pending` |
 | `identity_verification_status` | `unverified` |
 | `business_verification_status` | `unverified` |
+| `review_status` | `draft` |
+| `membership_status` | `pending` |
+| `profile_completed` | `false` |
+| `subscription_status` | `null`（初回は未設定。`inactive` は許可値に含まれない） |
+| `created_at` / `updated_at` | `now()` |
 
-`review_status` が `draft` の間は、申請に必要な基本情報が未入力でも保存可能とする。上記「NULL 許可」カラムは仮登録時点では NULL のまま作成してよい。
+`review_status` が `draft` の間は、申請に必要な基本情報が未入力でも保存可能とする。以下は NULL のまま作成してよい。
+
+| カラム | 備考 |
+|--------|------|
+| `business_name` | プロフィール入力画面で後から入力 |
+| `representative_name` | 同上 |
+| `postal_code` | 同上 |
+| `prefecture` | 同上 |
+| `city` | 同上 |
+| `address_line` | 同上 |
+| `phone` | 同上 |
+| `business_registration_number` | 同上 |
+| `business_registration_type` | 同上 |
+| `registration_authority` | 同上 |
+| `registration_expires_at` | 同上 |
+| `website_url` | 同上 |
+| `profile_text` | 同上 |
+
+プロフィール入力完了後、アプリケーション側で `profile_completed` を `true` に更新する。
 
 ## 審査申請時の必須チェック
 
@@ -244,7 +271,9 @@ RLS を有効化する。
 | ファイル | 内容 |
 |---------|------|
 | `20260804135800_create_breeders.sql` | Version 1.0 新規作成 |
-| `20260804144700_update_breeders_draft_nullable.sql` | Version 1.1 仮登録向け NULL 許可 |
+| `20260804144700_update_breeders_draft_nullable.sql` | Version 1.1 仮登録向け NULL 許可（審査申請項目） |
+| `20260805112007_update_breeders_profile_nullable.sql` | Version 1.2 プロフィール項目の NULL 許可（初回ログイン仮レコード） |
+| `20260805112809_update_profile_registration_flow.sql` | Version 1.4 仮登録フロー向け NULL 許可・`profile_completed` |
 
 ## 関連テーブル
 
@@ -277,6 +306,7 @@ Foreign Key 設定
 - [Decision No.44](../01_設計変更管理/DecisionLog.md#decision-no44) — 住所公開範囲
 - [Decision No.45](../01_設計変更管理/DecisionLog.md#decision-no45) — Stripe 保持範囲
 - [Decision No.46](../01_設計変更管理/DecisionLog.md#decision-no46) — 仮登録方式
+- [Decision No.61](../01_設計変更管理/DecisionLog.md#decision-no61) — `profile_completed` によるプロフィール完了管理
 
 ## 関連画面
 

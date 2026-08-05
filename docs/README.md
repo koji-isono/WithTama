@@ -27,16 +27,17 @@ Google Drive は成果物保管用とします。
 |---------|------|--------|
 | `public.pets` | Version 1.1 確定 | [pets.md](./05_データベース設計/pets.md) |
 | `public.pet_photos` | Version 1.0 確定 | [pet_photos.md](./05_データベース設計/pet_photos.md) |
-| `public.breeders` | Version 1.1 確定 | [breeders.md](./05_データベース設計/breeders.md) |
+| `public.breeders` | Version 1.4 確定 | [breeders.md](./05_データベース設計/breeders.md) |
+| `public.buyers` | Version 1.2 確定 | [buyers.md](./05_データベース設計/buyers.md) |
+| `public.favorites` | Version 1.0 確定 | [favorites.md](./05_データベース設計/favorites.md) |
+| `public.inquiries` | Version 1.0 確定 | [inquiries.md](./05_データベース設計/inquiries.md) |
+| `public.inquiry_messages` | Version 1.0 確定 | [inquiry_messages.md](./05_データベース設計/inquiry_messages.md) |
+| `public.visits` | Version 1.0 確定 | [visits.md](./05_データベース設計/visits.md) |
 
 ### 今後設計予定
 
 | テーブル | 概要 |
 |---------|------|
-| `buyers` | 購入希望者情報 |
-| `inquiries` | 問い合わせ |
-| `visits` | 見学管理 |
-| `favorites` | お気に入り |
 | `audit_logs` | 監査ログ |
 
 ## 関連ドキュメント

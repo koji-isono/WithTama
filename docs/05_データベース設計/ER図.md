@@ -2,7 +2,7 @@
 
 | 項目 | 内容 |
 |------|------|
-| Version | 1.2 |
+| Version | 1.4 |
 | 対象 | 第1期データベース構造 |
 | 状態 | 確定済みテーブルと設計予定テーブルを区別して記載 |
 
@@ -61,8 +61,10 @@ erDiagram
         text representative_name
         text prefecture
         text city
+        text address_line
         text review_status
         text membership_status
+        boolean profile_completed
         text subscription_status
         timestamptz deleted_at
         timestamptz created_at
@@ -81,6 +83,7 @@ erDiagram
         text preferred_breed
         boolean notification_enabled
         text membership_status
+        boolean profile_completed
         timestamptz deleted_at
         timestamptz created_at
         timestamptz updated_at
@@ -198,7 +201,8 @@ erDiagram
 9. 一般公開用データは View または API 経由で必要項目だけ返す。
 10. `inquiries` には `visit_id` を持たせない。見学は `visits.inquiry_id`（UNIQUE）で 1 問い合わせ 0 または 1 件に関連付ける。
 11. 第1期ではリアルタイムチャットは実装せず、`inquiry_messages` でテキスト履歴を管理する。
-12. `audit_logs` は未設計のため、Version 1.2 ではリレーション未定義。
+12. `breeders` / `buyers` は初回ログイン時に仮レコード（`user_id` のみ、または buyers は `display_name` 付き）を作成し、`profile_completed = false` で開始する（Decision No.61）。
+13. `audit_logs` は未設計のため、Version 1.4 ではリレーション未定義。
 
 ## テーブル一覧（補足）
 
@@ -221,6 +225,7 @@ erDiagram
 - [pets テーブル](./pets.md)
 - [pet_photos テーブル](./pet_photos.md)
 - [favorites テーブル](./favorites.md)
+- [buyers テーブル](./buyers.md)
 - [inquiries テーブル](./inquiries.md)
 - [inquiry_messages テーブル](./inquiry_messages.md)
 - [visits テーブル](./visits.md)
