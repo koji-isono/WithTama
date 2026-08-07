@@ -1,6 +1,16 @@
 import type { User } from "@supabase/supabase-js";
 
-export type UserRole = "buyer" | "breeder";
+/** 一般会員サインアップで選択可能なロール（Decision No.102） */
+export type PublicSignupRole = "buyer" | "breeder";
+
+/** buyer / breeder 会員向けロール（user_metadata.role） */
+export type MemberUserRole = PublicSignupRole;
+
+/** @deprecated MemberUserRole を使用してください */
+export type UserRole = MemberUserRole;
+
+/** ログイン済みユーザーのロール（admin は app_metadata のみ） */
+export type AuthenticatedUserRole = MemberUserRole | "admin";
 
 export type BuyerRow = {
   id: string;
@@ -23,11 +33,15 @@ export type BreederRow = {
 };
 
 export type EnsureUserProfileResult = {
-  role: UserRole;
+  role: MemberUserRole;
   profileCompleted: boolean;
 };
 
-export function parseUserRole(user: User): UserRole | null {
+export function isAdminUser(user: User): boolean {
+  return user.app_metadata?.role === "admin";
+}
+
+export function parseMemberUserRole(user: User): MemberUserRole | null {
   const role = user.user_metadata?.role;
 
   if (role === "buyer" || role === "breeder") {
@@ -35,6 +49,11 @@ export function parseUserRole(user: User): UserRole | null {
   }
 
   return null;
+}
+
+/** @deprecated parseMemberUserRole を使用してください */
+export function parseUserRole(user: User): MemberUserRole | null {
+  return parseMemberUserRole(user);
 }
 
 export function emailLocalPart(email: string | undefined): string {
@@ -46,8 +65,13 @@ export function emailLocalPart(email: string | undefined): string {
   return atIndex > 0 ? email.slice(0, atIndex) : email;
 }
 
-export function getPostLoginPath(role: UserRole): string {
+export function getMemberHomePath(role: MemberUserRole): string {
   return role === "buyer" ? "/buyer" : "/breeder";
+}
+
+/** @deprecated getMemberHomePath を使用してください */
+export function getPostLoginPath(role: MemberUserRole): string {
+  return getMemberHomePath(role);
 }
 
 export class InvalidUserRoleError extends Error {

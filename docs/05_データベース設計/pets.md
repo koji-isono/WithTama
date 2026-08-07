@@ -98,13 +98,52 @@
 - **表示順:** ブリーダー向け一覧は `display_order` 昇順、同順位は `created_at` 降順（Decision No.38）。
 - **監査:** 作成者・更新者は `created_by` / `updated_by` で追跡する（Decision No.39）。
 
+### 新規登録（下書き）
+
+- ブリーダーが `/breeder/pets/new` から基本情報を登録する際、`status` は必ず `draft` とする（Decision No.83）。
+- `breeder_id` はクライアントから受け取らず、ログインユーザーの `auth.users.id` から `public.breeders.user_id` を検索し、取得した `breeders.id` を保存する（Decision No.84）。
+- `published_at` は NULL、`display_order` は 0 で作成する。
+- 実装: `createPetDraft` / `createPet`（`src/features/pets/`）
+
 ## ステータス遷移
+
+### 掲載審査フロー（Decision No.96, No.97, No.98, No.105）
 
 ```
 draft
-  → under_review
-  → published
+  ↓ ブリーダー公開申請（submitPetForReview）
+under_review
+  ├─ 管理者承認 → published
+  └─ 管理者差戻し → draft → 修正 → 再申請 → under_review
 ```
+
+- 公開申請・承認・差戻しのたびに [pet_review_logs](./pet_review_logs.md) へ追記する
+- 申請日時は `pet_review_logs` の最新 `action = submitted` の `created_at` を使用する（`submitted_at` 等の専用カラムは追加しない）
+
+### DB 層での status 遷移制御（トリガー）
+
+`status` 列が変わる UPDATE の直前に `BEFORE UPDATE OF status` トリガー `pets_enforce_status_transition` が発火し、`public.enforce_pets_status_transition()` で許可遷移のみを通す。
+
+| レイヤー | 役割 |
+|---------|------|
+| RLS | 操作可能な行 |
+| トリガー | status 遷移 |
+
+**第1期で許可する status 変更（1 件のみ）**
+
+| 主体 | 遷移 | 条件 |
+|------|------|------|
+| breeder（本人） | `draft` → `under_review` | `pets.breeder_id` がログインユーザーの `breeders.id` |
+
+- `OLD.status = NEW.status` の場合は許可（通常の犬猫情報編集）
+- `auth.uid() IS NULL` で status が変わる UPDATE は拒否
+- admin による status 変更は **今回未実装**（AD-10 / AD-11 実装時に一体設計）
+- `paused` / `family_decided` / `closed` への遷移も将来対応
+- 関数は `SECURITY INVOKER`、`search_path = public`
+
+Migration: `20260807130000_enforce_pets_status_transition.sql`（作成済み・未適用）
+
+### 公開後フロー
 
 `published` からは以下へ遷移可能:
 
@@ -119,8 +158,10 @@ draft
 ```mermaid
 stateDiagram-v2
   [*] --> draft
-  draft --> under_review
-  under_review --> published
+  draft --> under_review: 公開申請
+  under_review --> published: 管理者承認
+  under_review --> draft: 管理者差戻し
+  draft --> under_review: 再申請
   published --> paused
   published --> family_decided
   published --> closed
@@ -134,12 +175,15 @@ stateDiagram-v2
 | ファイル | 内容 |
 |---------|------|
 | `20260804132200_update_pets_v1_1.sql` | Version 1.0 → 1.1（`name` リネーム、カラム追加、制約、トリガー） |
+| `20260807120000_harden_pets_rls.sql` | RLS 本番化（Decision No.103、作成済み・未適用） |
+| `20260807130000_enforce_pets_status_transition.sql` | status 遷移トリガー（作成済み・未適用。RLS 本番化の後に適用） |
 
 既存データを保持する。`DROP TABLE` / `TRUNCATE` / `DELETE` は使用しない。
 
 ## 関連テーブル
 
 - [pet_photos](./pet_photos.md) … 1 匹につき複数写真（`pet_id` → `pets.id`）
+- [pet_review_logs](./pet_review_logs.md) … 掲載審査履歴（`pet_id` → `pets.id`）
 
 ## 関連 Decision
 
@@ -153,9 +197,16 @@ stateDiagram-v2
 - [Decision No.38](../01_設計変更管理/DecisionLog.md#decision-no38) — display_order
 - [Decision No.39](../01_設計変更管理/DecisionLog.md#decision-no39) — created_by / updated_by
 - [Decision No.40](../01_設計変更管理/DecisionLog.md#decision-no40) — ai_generated_at
+- [Decision No.83](../01_設計変更管理/DecisionLog.md#decision-no83) — 新規登録は draft
+- [Decision No.84](../01_設計変更管理/DecisionLog.md#decision-no84) — breeder_id サーバー解決
+- [Decision No.96](../01_設計変更管理/DecisionLog.md#decision-no96) — 差戻しは under_review → draft
+- [Decision No.98](../01_設計変更管理/DecisionLog.md#decision-no98) — 申請日時は pet_review_logs
+- [Decision No.103](../01_設計変更管理/DecisionLog.md#decision-no103) — pets RLS 本番化
 
 ## 関連画面
 
 - [BR-07 犬猫管理一覧](../04_画面設計/BR-07_犬猫管理一覧.md)
-- [BR-08 犬猫新規登録](../04_画面設計/BR-08_犬猫新規登録.md)
-- [BR-09 犬猫編集](../04_画面設計/BR-09_犬猫編集.md)
+- [BR-10 犬猫登録](../04_画面設計/BR-10_犬猫登録.md)
+- [BR-11 犬猫編集](../04_画面設計/BR-11_犬猫編集.md)
+- [AD-10 犬猫掲載審査一覧](../04_画面設計/AD-10_犬猫掲載審査一覧.md)
+- [AD-11 犬猫掲載審査詳細](../04_画面設計/AD-11_犬猫掲載審査詳細.md)

@@ -42,6 +42,10 @@ npm run format:check
 - Migration 適用: `supabase db push` または Dashboard から `supabase/migrations/20260805140000_create_breeder_documents_storage.sql` を実行
 - 書類の公開 URL は発行しない。管理者閲覧は将来の管理画面で Signed URL を使用
 
+## セキュリティテスト
+
+- [pets status Trigger セキュリティテスト](./pets_status_trigger_セキュリティテスト.md) — ブリーダー認証セッションでの Trigger 検証手順
+
 ## 関連ドキュメント
 
 - [DEVELOPMENT.md](../DEVELOPMENT.md)

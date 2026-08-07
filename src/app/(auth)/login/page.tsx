@@ -11,6 +11,7 @@ import {
   ensureUserProfile,
   getPostLoginPath,
   InvalidUserRoleError,
+  isAdminUser,
 } from "@/features/auth";
 import { signInWithPassword } from "@/lib/supabase/sign-in";
 
@@ -63,6 +64,11 @@ export default function LoginPage() {
 
       if (!data.user) {
         setErrorMessage("ログインに失敗しました。");
+        return;
+      }
+
+      if (isAdminUser(data.user)) {
+        router.push("/admin");
         return;
       }
 

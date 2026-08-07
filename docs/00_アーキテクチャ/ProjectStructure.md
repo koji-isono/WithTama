@@ -159,7 +159,9 @@ Route Group `(名前)` は URL に含まれない。実際の URL はディレ�
 | `/` | `app/(public)/page.tsx` | 公開 | 実装済み |
 | `/login` | `app/(auth)/login/page.tsx` | 認証 | 実装済み |
 | `/signup` | `app/(auth)/signup/page.tsx` | 認証 | 実装済み |
-| `/admin` | `app/(admin)/admin/page.tsx` | 管理 | プレースホルダー |
+| `/admin` | `app/(admin)/admin/page.tsx` | 管理 | プレースホルダー（AD-00、ガード実装済み） |
+| `/admin/pets/reviews` | （未作成） | 管理 | 設計確定（AD-10） |
+| `/admin/pets/reviews/[petId]` | （未作成） | 管理 | 設計確定（AD-11） |
 | `/pets`, `/pets/[petId]` | `app/(public)/pets/` | 公開 | プレースホルダー |
 | `/breeders/[breederId]` | `app/(public)/breeders/` | 公開 | プレースホルダー |
 | `/api/health` | `app/api/health/route.ts` | API | 実装済み |

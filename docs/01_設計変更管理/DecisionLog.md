@@ -523,3 +523,300 @@
 - **影響範囲:** `breeders` テーブル、BR-10 所在地、`updateLocationProfile`
 - **決定日:** 2026-08-05
 - **参照:** [breeders テーブル](../05_データベース設計/breeders.md) / [BR-10 所在地](../04_画面設計/BR-10_所在地.md)
+
+---
+
+## Decision No.81
+
+**犬猫管理機能を開始する**
+
+- **決定内容:** Phase 7 としてブリーダー向け犬猫管理機能の実装を開始する。第1弾では `src/features/pets/` の Repository / Service / Validation 基盤と、`/breeder/pets`・`/breeder/pets/new` のプレースホルダー画面を整備する。
+- **理由:** プロフィール入力完了後の主要業務フロー（犬猫登録・一覧管理）へ着手するため。
+- **影響範囲:** `src/features/pets/`、`src/app/breeder/pets/*`、BR-07 / BR-08
+- **決定日:** 2026-08-06
+- **参照:** [BR-07 犬猫管理一覧](../04_画面設計/BR-07_犬猫管理一覧.md) / [src/features/pets/README.md](../../src/features/pets/README.md)
+
+---
+
+## Decision No.82
+
+**犬猫管理も Repository パターンを採用する**
+
+- **決定内容:** 犬猫管理機能もブリーダープロフィール（Decision No.69）と同様に、`features/pets/repository.ts`（Supabase 操作）→ `service.ts`（Server Actions・認証）→ `validation.ts`（入力チェック）の構成とする。
+- **理由:** データアクセスとユースケースの責務分離をプロジェクト全体で統一するため。
+- **影響範囲:** `src/features/pets/`、将来の BR-08 登録フォーム・BR-11 編集
+- **決定日:** 2026-08-06
+- **参照:** [Decision No.69](#decision-no69) / [src/features/pets/README.md](../../src/features/pets/README.md)
+
+---
+
+## Decision No.83
+
+**犬猫の新規登録は必ず draft で作成する**
+
+- **決定内容:** ブリーダーが犬猫を新規登録する際、`public.pets.status` は必ず `draft` で INSERT する。クライアントから `published` 等を直接指定できない。
+- **理由:** 公開前に管理者審査を経るフローを担保するため。
+- **影響範囲:** `createPet` / `createPetDraft`、`/breeder/pets/new`
+- **決定日:** 2026-08-06
+- **参照:** [BR-10 犬猫登録](../04_画面設計/BR-10_犬猫登録.md) / [pets テーブル](../05_データベース設計/pets.md)
+
+---
+
+## Decision No.84
+
+**breeder_id はログインユーザーからサーバー側で解決する**
+
+- **決定内容:** 犬猫登録時、`breeder_id` はクライアントから受け取らない。Server Action 内で `auth.getUser()` により取得した `user.id` から `public.breeders.user_id` を検索し、得られた `breeders.id` を保存する。
+- **理由:** 他ブリーダーのデータへ書き込むリスクを防ぐため。
+- **影響範囲:** `getBreederIdByUserId`、`createPetDraft`
+- **決定日:** 2026-08-06
+- **参照:** [BR-10 犬猫登録](../04_画面設計/BR-10_犬猫登録.md) / [src/features/pets/repository.ts](../../src/features/pets/repository.ts)
+
+---
+
+## Decision No.85
+
+**犬猫編集では、ブリーダー本人が所有する犬猫だけを取得・更新できる**
+
+- **決定内容:** `/breeder/pets/[petId]/edit` では、`getPetByIdForBreeder` / `updatePetDraft` により、ログインユーザーの `breeders.id` と一致する `pets.breeder_id` のレコードのみ取得・更新する。他ブリーダーの `petId` では `notFound()` とする。
+- **理由:** データ漏洩と不正更新を防ぐため。
+- **影響範囲:** `getPetByIdForBreeder`、`updatePetDraft`、`updatePetDraftAction`
+- **決定日:** 2026-08-06
+- **参照:** [BR-11 犬猫情報編集](../04_画面設計/BR-11_犬猫情報編集.md)
+
+---
+
+## Decision No.86
+
+**犬猫の掲載ステータス変更は基本情報編集と分離する**
+
+- **決定内容:** BR-11 犬猫情報編集画面では `status` を Badge 表示のみとし、フォームから更新しない。公開申請・ステータス変更は別操作で行う。
+- **理由:** 基本情報の修正と掲載ライフサイクル管理の責務を分離するため。
+- **影響範囲:** `/breeder/pets/[petId]/edit`、`updatePetDraft`
+- **決定日:** 2026-08-06
+- **参照:** [BR-11 犬猫情報編集](../04_画面設計/BR-11_犬猫情報編集.md)
+
+---
+
+## Decision No.87
+
+**犬猫写真は非公開 Storage へ保存し、画面表示には Signed URL を使用する**
+
+- **決定内容:** 犬猫写真は private バケット `pet-photos` に保存する。ブラウザ表示には `createSignedUrl`（有効期限 5 分以内）を使用し、公開 URL は発行しない。
+- **理由:** ブリーダー管理画面専用の非公開アセットとして扱い、一般公開は犬猫公開画面実装時に別途設計するため。
+- **影響範囲:** Storage Migration、`getPetPhotoSignedUrl`、`PetPhotoManager`
+- **決定日:** 2026-08-06
+- **参照:** [pet_photos テーブル](../05_データベース設計/pet_photos.md) / [BR-11](../04_画面設計/BR-11_犬猫情報編集.md)
+
+---
+
+## Decision No.88
+
+**犬猫写真は1匹あたり最大10枚とし、メイン写真は1枚だけ設定できる**
+
+- **決定内容:** アプリ側で 1 匹 10 枚上限を検証する。`is_main = true` は 1 件のみ。メイン変更時は PostgreSQL 関数 `set_main_pet_photo` で一括更新する。
+- **理由:** 第1期の運用上限と一覧表示の整合を保つため。
+- **影響範囲:** `validatePetPhotoUpload`、`setMainPetPhotoAction`、`set_main_pet_photo`
+- **決定日:** 2026-08-06
+- **参照:** [BR-11 犬猫情報編集](../04_画面設計/BR-11_犬猫情報編集.md)
+
+---
+
+## Decision No.89
+
+**第1期では写真の並び替え、動画、画像編集を実装しない**
+
+- **決定内容:** BR-11 写真セクションではアップロード・一覧・メイン設定・削除のみ。`display_order` の D&D 並び替え、動画、画像加工は将来対応とする。
+- **理由:** 第1期スコープを基本 CRUD に限定するため。
+- **影響範囲:** BR-11 写真 UI、`pet_photos.display_order`
+- **決定日:** 2026-08-06
+- **参照:** [BR-11 犬猫情報編集](../04_画面設計/BR-11_犬猫情報編集.md)
+
+---
+
+## Decision No.92
+
+**犬猫一覧では、登録情報・メイン写真・掲載状態を一覧で確認できるようにする**
+
+- **決定内容:** `/breeder/pets` で Card 形式の一覧を表示する。メイン写真（Signed URL）、公開表示名、管理名、基本属性、価格、status Badge、更新日時を確認できる。
+- **理由:** ブリーダーが日常業務で登録犬猫を把握・管理するため。
+- **影響範囲:** `loadBreederPets`、`BreederPetsList`、`listPetsWithMainPhotoByBreederUserId`
+- **決定日:** 2026-08-07
+- **参照:** [BR-10 犬猫一覧](../04_画面設計/BR-10_犬猫一覧.md)
+
+---
+
+## Decision No.93
+
+**一覧画面から掲載ステータスを直接変更せず、公開申請等の業務操作は専用処理として分離する**
+
+- **決定内容:** 犬猫一覧（BR-10）では status を Badge 表示とし、汎用的な status 変更 UI は設けない。公開申請は `submitPetForReviewAction` として専用実装する（Decision No.94）。公開停止・掲載終了は別操作とする。
+- **理由:** 一覧表示と掲載ライフサイクル管理の責務を分離するため。
+- **影響範囲:** `/breeder/pets`
+- **決定日:** 2026-08-07
+- **参照:** [BR-10 犬猫一覧](../04_画面設計/BR-10_犬猫一覧.md)
+
+---
+
+## Decision No.94
+
+**犬猫公開申請は汎用 status 更新ではなく、draft → under_review の専用業務操作として実装する**
+
+- **決定内容:** `updatePetStatus(status)` のような汎用 API は作らず、`submitPetForReview` / `submitPetForReviewAction` として `draft` → `under_review` のみをサーバー側で実行する。UPDATE 条件に `status = draft` を含め二重送信を防ぐ。
+- **理由:** クライアントから status を自由指定させないため。掲載ライフサイクルを業務操作単位で管理するため。
+- **影響範囲:** `submitPetForReview`、`submitPetForReviewAction`、BR-10 犬猫一覧
+- **決定日:** 2026-08-07
+- **参照:** [BR-10 犬猫一覧](../04_画面設計/BR-10_犬猫一覧.md)
+
+---
+
+## Decision No.95
+
+**公開申請には最低1枚の犬猫写真を必須とする**
+
+- **決定内容:** 公開申請時、`pet_photos` に対象 `pet_id` のレコードが 1 件以上必要。0 件の場合は申請不可とし、「公開申請には写真を1枚以上登録してください。」を表示する。
+- **理由:** 掲載審査に必要な視覚情報を担保するため。
+- **影響範囲:** `submitPetForReviewAction`、`validatePetForReviewSubmit` フロー
+- **決定日:** 2026-08-07
+- **参照:** [BR-10 犬猫一覧](../04_画面設計/BR-10_犬猫一覧.md)
+
+---
+
+## Decision No.96
+
+**犬猫掲載審査の差戻し時は `under_review` → `draft` とする**
+
+- **決定内容:** 管理者が犬猫掲載審査を差戻す場合、`pets.status` を `under_review` から `draft` へ戻す。差戻し理由を `pet_review_logs.comment` に保存する。ブリーダーは修正後、再度公開申請（`draft` → `under_review`）できる。
+- **理由:** 差戻し後にブリーダーが内容を修正し再申請できるフローを明確にするため。
+- **影響範囲:** `pets.status` 遷移、管理者審査画面（AD-11）、`pet_review_logs`
+- **決定日:** 2026-08-07
+- **参照:** [pets テーブル](../05_データベース設計/pets.md) / [AD-11 犬猫掲載審査詳細](../04_画面設計/AD-11_犬猫掲載審査詳細.md)
+
+---
+
+## Decision No.97
+
+**犬猫掲載審査履歴は `public.pet_review_logs` で管理する**
+
+- **決定内容:** 公開申請・差戻し・承認を時系列で `pet_review_logs` に追記保存する。`pets` は現在状態、`pet_review_logs` は履歴として責務を分離する。
+- **理由:** 審査の監査性と再申請履歴を担保するため。
+- **影響範囲:** `pet_review_logs` テーブル（設計）、`submitPetForReview`、管理者承認・差戻し Server Actions
+- **決定日:** 2026-08-07
+- **参照:** [pet_review_logs テーブル](../05_データベース設計/pet_review_logs.md)
+
+---
+
+## Decision No.98
+
+**犬猫の申請日時・審査日時は `pet_review_logs.created_at` で管理する**
+
+- **決定内容:** `pets` に `submitted_at` 等の専用カラムは追加しない。申請日時・承認日時・差戻し日時は、対応する `pet_review_logs` 行の `created_at` から取得する。
+- **理由:** 現在状態（`pets`）と履歴（`pet_review_logs`）の責務分離を徹底するため。
+- **影響範囲:** `pets` テーブル、AD-10 一覧の申請日時表示、Repository クエリ
+- **決定日:** 2026-08-07
+- **参照:** [pet_review_logs テーブル](../05_データベース設計/pet_review_logs.md) / [AD-10 犬猫掲載審査一覧](../04_画面設計/AD-10_犬猫掲載審査一覧.md)
+
+---
+
+## Decision No.99
+
+**管理者画面は AD-* で採番する**
+
+- **決定内容:** 管理者画面 ID を `AD-{連番}` 形式とする。第1期の犬猫掲載審査画面は AD-00（ダッシュボード）、AD-10（審査一覧）、AD-11（審査詳細）とする。
+- **理由:** ブリーダー（BR-*）・購入希望者（BY-*）と同様に画面 ID を統一するため。
+- **影響範囲:** `docs/04_画面設計/`、`src/app/(admin)/`
+- **決定日:** 2026-08-07
+- **参照:** [画面設計 README](../04_画面設計/README.md)
+
+| 画面 ID | URL | 画面名 |
+|---------|-----|--------|
+| AD-00 | `/admin` | 管理者ダッシュボード |
+| AD-10 | `/admin/pets/reviews` | 犬猫掲載審査一覧 |
+| AD-11 | `/admin/pets/reviews/[petId]` | 犬猫掲載審査詳細 |
+
+---
+
+## Decision No.100
+
+**AD-11 の審査対象から本人確認書類・登録証画像を除外する**
+
+- **決定内容:** AD-11（犬猫掲載審査詳細）では、犬猫基本情報・価格・性格・写真・ブリーダー情報・飼育方針・繁殖方針・健康管理方針・第一種動物取扱業登録情報・ブリーダー審査状態を審査対象とする。本人確認書類および登録証の画像そのものは犬猫審査画面では表示しない。原本確認はブリーダー審査側で扱う。
+- **理由:** 犬猫掲載審査とブリーダー本人確認審査の責務を分離するため。
+- **影響範囲:** AD-11 UI、Storage Signed URL 発行範囲
+- **決定日:** 2026-08-07
+- **参照:** [AD-11 犬猫掲載審査詳細](../04_画面設計/AD-11_犬猫掲載審査詳細.md)
+
+---
+
+## Decision No.101
+
+**犬猫公開承認はブリーダー承認済みかつ登録有効時のみ許可する**
+
+- **決定内容:** 犬猫を `published` に変更できるのは、当該ブリーダーが管理者審査で承認済みであり、公開に必要な第一種動物取扱業登録が有効な場合に限る。公開承認時にサーバー側で再検証する。`review_status` の承認済みを表す実値、登録有効性判定の具体条件は実 DB 定義を確認してから実装する（推測しない）。
+- **理由:** 未承認ブリーダーや登録無効の犬猫が公開されないよう、承認操作時に前提条件を再確認するため。
+- **影響範囲:** 管理者承認 Server Action、`breeders.review_status`、`breeders.registration_expires_at` 等
+- **決定日:** 2026-08-07
+- **参照:** [AD-11 犬猫掲載審査詳細](../04_画面設計/AD-11_犬猫掲載審査詳細.md) / [breeders テーブル](../05_データベース設計/breeders.md)
+
+---
+
+## Decision No.102
+
+**管理者権限の正本は Supabase Auth `app_metadata.role = "admin"` とする**
+
+- **決定内容:** 管理者権限判定の正本は `app_metadata.role = "admin"` とする。`user_metadata.role` を管理者権限判定には使用しない。管理者アカウントは一般会員登録（`/signup`）から作成できず、運営側で発行・権限付与する。
+- **理由:** クライアント改ざん可能な `user_metadata` を権限根拠にしないため。RLS の `public.is_admin()` と整合させるため。
+- **影響範囲:** 認証フロー、`/admin/*` ルートガード、RLS、`src/features/auth/`
+- **決定日:** 2026-08-07
+- **参照:** [権限設計](../07_権限設計/README.md)
+
+---
+
+## Decision No.103
+
+**`public.pets` の開発用 RLS を本番用へ移行する**
+
+- **決定内容:** `pets_allow_all_for_development` を将来撤去し、本番用 RLS へ移行する。ブリーダーは本人所有の犬猫のみ操作可能。管理者は審査・運用に必要な範囲のみ操作可能。購入希望者向け閲覧は `published` 公開機能実装時に別途定義する。`status` 変更は汎用 UPDATE ではなく、専用業務操作として実装する（Decision No.94 準拠）。
+- **理由:** 開発用全許可ポリシーを本番環境で使用しないため。掲載ライフサイクルを業務操作単位で制御するため。
+- **影響範囲:** `supabase/migrations/`（将来）、`public.pets` RLS、管理者・ブリーダー Server Actions
+- **決定日:** 2026-08-07
+- **参照:** [権限設計](../07_権限設計/README.md) / [pets テーブル](../05_データベース設計/pets.md)
+
+---
+
+## Decision No.104
+
+**管理者は `pet_photos` / Storage `pet-photos` の SELECT のみ許可する**
+
+- **決定内容:** 管理者に `public.pet_photos` および Storage バケット `pet-photos` の SELECT 権限のみ付与する。管理者による犬猫写真の INSERT / UPDATE / DELETE は許可しない。写真表示は Server 側で管理者権限確認後、Signed URL を発行する。
+- **理由:** 審査に必要な閲覧のみを許可し、管理者による写真改ざんを防ぐため。
+- **影響範囲:** `pet_photos` RLS、Storage RLS、AD-10 / AD-11
+- **決定日:** 2026-08-07
+- **参照:** [権限設計](../07_権限設計/README.md) / [pet_photos テーブル](../05_データベース設計/pet_photos.md)
+
+---
+
+## Decision No.105
+
+**`public.pet_review_logs` の第1期設計を確定する**
+
+- **決定内容:** 第1期の `pet_review_logs` カラム・action 許可値・運用ルールを以下とする。
+
+| カラム | 型 | 制約 |
+|--------|-----|------|
+| `id` | uuid | PRIMARY KEY |
+| `pet_id` | uuid | NOT NULL |
+| `action` | text | NOT NULL。`submitted` / `returned` / `approved` |
+| `comment` | text | NULL 可（`returned` 時は必須） |
+| `actor_user_id` | uuid | NOT NULL |
+| `created_at` | timestamptz | NOT NULL, DEFAULT `now()` |
+
+- `submitted` / `approved` は `comment` NULL 可。`returned` は `comment` 必須。
+- `actor_user_id` は `auth.getUser()` から取得し、クライアント指定値を信用しない。
+- 審査履歴は追記のみ。通常の UPDATE / DELETE は禁止。
+- 現在の `submitPetForReview()` は将来、`pets.status` を `draft` → `under_review` に更新すると同時に `pet_review_logs` へ `action = submitted` を記録する業務処理へ変更する。
+
+- **理由:** 審査履歴の不変性と、公開申請・承認・差戻しの監査証跡を担保するため。
+- **影響範囲:** `pet_review_logs` テーブル（設計・将来 Migration）、`submitPetForReview`、管理者 Server Actions
+- **決定日:** 2026-08-07
+- **参照:** [pet_review_logs テーブル](../05_データベース設計/pet_review_logs.md)

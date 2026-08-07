@@ -19,6 +19,7 @@ WithTama 第1期の主要テーブルとリレーションを示す。設計が�
 - `public.buyers`
 - `public.pets`
 - `public.pet_photos`
+- `public.pet_review_logs`（Migration 作成済み・未適用）
 - `public.favorites`
 - `public.inquiries`
 - `public.inquiry_messages`
@@ -36,6 +37,7 @@ erDiagram
     AUTH_USERS ||--o| BUYERS : "1対0または1"
     BREEDERS ||--o{ PETS : "1対多"
     PETS ||--o{ PET_PHOTOS : "1対多"
+    PETS ||--o{ PET_REVIEW_LOGS : "1対多"
     BUYERS ||--o{ FAVORITES : "1対多"
     PETS ||--o{ FAVORITES : "1対多"
 
@@ -114,6 +116,15 @@ erDiagram
         boolean is_main
         timestamptz created_at
         timestamptz updated_at
+    }
+
+    PET_REVIEW_LOGS {
+        uuid id PK
+        uuid pet_id FK
+        text action
+        text comment
+        uuid actor_user_id FK
+        timestamptz created_at
     }
 
     FAVORITES {

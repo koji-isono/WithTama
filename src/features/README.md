@@ -30,12 +30,12 @@ src/features/{機能名}/
 |-----------|------|---------|
 | [auth](./auth/README.md) | 認証、初回プロフィール作成、入口リダイレクト | `/login`, `/signup`, `/breeder`, `/buyer` |
 | [breeder-profile](./breeder-profile/README.md) | ブリーダープロフィール Step 保存 | `/breeder/profile/*` |
+| [pets](./pets/README.md) | 犬猫管理（Phase 7 基盤） | `/breeder/pets/*` |
 
 ## 今後追加予定
 
 | モジュール | 関連画面 | 関連テーブル |
 |-----------|---------|-------------|
-| `breeder-pets` | `/breeder/pets/*` | `pets`, `pet_photos` |
 | `breeder-inquiries` | `/breeder/inquiries/*` | `inquiries`, `inquiry_messages` |
 | `breeder-settings` | `/breeder/settings/*` | `breeders`（通知・課金設定等） |
 

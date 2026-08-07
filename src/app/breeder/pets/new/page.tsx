@@ -1,7 +1,7 @@
-import { PetRegistrationForm } from "./pet-registration-form";
+import { PetRegistrationForm } from "@/features/pets";
 
 export const metadata = {
-  title: "犬猫新規登録",
+  title: "犬猫登録",
 };
 
 export default function BreederPetNewPage() {

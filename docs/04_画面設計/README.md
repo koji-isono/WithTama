@@ -12,6 +12,7 @@ WithTama の画面設計書一覧です。画面 ID は `{ロール略称}-{連�
 | [No.71](../01_設計変更管理/DecisionLog.md#decision-no71) | ダッシュボードは表示専用。編集 UI を持たない |
 | [No.72](../01_設計変更管理/DecisionLog.md#decision-no72) | 編集画面は URL 単位で管理する（プロフィール・犬猫・問い合わせ・設定） |
 | [No.73](../01_設計変更管理/DecisionLog.md#decision-no73) | `src/features/` を機能単位に整理する |
+| [No.99](../01_設計変更管理/DecisionLog.md#decision-no99) | 管理者画面は AD-* で採番する |
 
 ### 表示と編集の分離（Decision No.71 / No.72）
 
@@ -80,9 +81,9 @@ flowchart TB
 |------|-----|---------|--------|------|
 | 入口 | `/breeder` | — | ブリーダー入口 | リダイレクト |
 | 表示 | `/breeder/dashboard` | BR-06 | ブリーダーダッシュボード | **実装済み** |
-| 表示 | `/breeder/pets` | BR-07 | 犬猫管理一覧 | **実装済み** |
-| 編集 | `/breeder/pets/new` | BR-08 | 犬猫新規登録 | 一部実装 |
-| 編集 | `/breeder/pets/[petId]/edit` | BR-11 | 犬猫編集 | 未実装 |
+| 表示 | `/breeder/pets` | BR-07 | 犬猫管理一覧 | Phase 7 基盤 |
+| 編集 | `/breeder/pets/new` | BR-10 | 犬猫登録 | 基本情報実装済み |
+| 編集 | `/breeder/pets/[petId]/edit` | BR-11 | 犬猫情報編集 | 基本情報実装済み |
 | 表示 | `/breeder/visits` | BR-11 | 見学管理 | 未実装 |
 | 表示 | `/breeder/inquiries` | BR-12 | 問い合わせ一覧 | 未実装 |
 | 編集 | `/breeder/inquiries/[inquiryId]` | BR-12 | 問い合わせ詳細・返信 | 未実装 |
@@ -164,7 +165,7 @@ src/app/breeder/
 |------|-------------------|---------------|
 | 認証・初回プロフィール作成 | `src/features/auth/` | `/login`, `/signup`, 入口リダイレクト |
 | ブリーダープロフィール編集 | `src/features/breeder-profile/` | `/breeder/profile/*` |
-| 犬猫管理 | `src/lib/supabase/pets.ts`（将来 `features/breeder-pets/`） | `/breeder/pets/*` |
+| 犬猫管理 | `src/features/pets/` | `/breeder/pets/*` |
 | 問い合わせ | 未実装（将来 `features/breeder-inquiries/`） | `/breeder/inquiries/*` |
 | 設定 | 未実装（将来 `features/breeder-settings/`） | `/breeder/settings/*` |
 
@@ -188,6 +189,28 @@ src/app/breeder/
 | — | 購入希望者入口 | `/buyer` | リダイレクト |
 | BY-01 | プロフィール登録 | `/buyer/profile` | プレースホルダー |
 | BY-02 | 購入希望者ダッシュボード | `/buyer/dashboard` | プレースホルダー |
+
+## 管理者画面（Decision No.99）
+
+| 画面 ID | 画面名 | URL | 状態 |
+|---------|--------|-----|------|
+| AD-00 | 管理者ダッシュボード | `/admin` | プレースホルダー（admin ガード実装済み） |
+| AD-10 | 犬猫掲載審査一覧 | `/admin/pets/reviews` | 設計確定（未実装） |
+| AD-11 | 犬猫掲載審査詳細 | `/admin/pets/reviews/[petId]` | 設計確定（未実装） |
+
+### 管理者画面遷移
+
+```mermaid
+flowchart LR
+  adminRoot["/admin (AD-00)"] --> reviewList["/admin/pets/reviews (AD-10)"]
+  reviewList --> reviewDetail["/admin/pets/reviews/[petId] (AD-11)"]
+```
+
+| 画面 ID | 設計書 |
+|---------|--------|
+| AD-00 | [AD-00_管理者ダッシュボード](./AD-00_管理者ダッシュボード.md) |
+| AD-10 | [AD-10_犬猫掲載審査一覧](./AD-10_犬猫掲載審査一覧.md) |
+| AD-11 | [AD-11_犬猫掲載審査詳細](./AD-11_犬猫掲載審査詳細.md) |
 
 ## 公開画面
 

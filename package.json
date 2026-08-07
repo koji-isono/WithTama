@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:pets-status-trigger": "node --env-file=.env.local --experimental-strip-types scripts/test-pets-status-trigger.mts"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.7",
