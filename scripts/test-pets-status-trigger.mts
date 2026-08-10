@@ -1,19 +1,33 @@
 /**
- * pets status Trigger / RLS security test (phases 1–3).
+ * pets status Trigger / RLS security test (phases 1–4).
  *
- * Authenticates as test breeder A via publishable key + signInWithPassword,
+ * Authenticates via publishable key + signInWithPassword,
  * then issues direct PostgREST queries (bypassing Server Actions).
  *
- * Requires:
+ * Requires (phases 1–3 — breeder A):
  *   NEXT_PUBLIC_SUPABASE_URL
  *   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
  *   SEC_TEST_BREEDER_EMAIL
  *   SEC_TEST_BREEDER_PASSWORD
  *   SEC_TEST_OTHER_PET_ID (phase 3 only — breeder B's [SEC-TEST-B] pet)
  *
+ * Requires (phase 4 — admin):
+ *   SEC_TEST_ADMIN_EMAIL
+ *   SEC_TEST_ADMIN_PASSWORD
+ *   SEC_TEST_ADMIN_REVIEW_PET_ID ([SEC-TEST] pet, status = under_review)
+ *   SEC_TEST_ADMIN_RETURN_PET_ID ([SEC-TEST] pet, status = under_review)
+ *   SEC_TEST_ADMIN_DRAFT_PET_ID ([SEC-TEST] pet, status = draft)
+ *
+ * Phase 5 (admin review RPCs): scripts/test-pet-review-rpcs.mts
+ *   SEC_TEST_ADMIN_APPROVE_PET_ID / SEC_TEST_ADMIN_RETURN_PET_ID
+ *
+ * Phase 5 prep (before test:pet-review-rpcs if breeder is still submitted):
+ *   scripts/prepare-sec-test-review-breeder.mts — SEC_TEST_REVIEW_BREEDER_ID
+ *
  * Usage:
  *   npx tsx scripts/test-pets-status-trigger.mts           # phases 1–3
  *   npx tsx scripts/test-pets-status-trigger.mts --phase3  # phase 3 only
+ *   npx tsx scripts/test-pets-status-trigger.mts --phase4  # phase 4 only
  *
  * Does NOT use SUPABASE_SERVICE_ROLE_KEY.
  */
@@ -41,8 +55,16 @@ type TestPet = {
   status: string;
 };
 
-function parseRunPhase(argv: string[]): "all" | "phase3" {
-  return argv.includes("--phase3") ? "phase3" : "all";
+type RunPhase = "all" | "phase3" | "phase4";
+
+function parseRunPhase(argv: string[]): RunPhase {
+  if (argv.includes("--phase4")) {
+    return "phase4";
+  }
+  if (argv.includes("--phase3")) {
+    return "phase3";
+  }
+  return "all";
 }
 
 function requireEnv(name: string): string {
@@ -96,6 +118,13 @@ async function findSecTestDraftPet(
 
 function isTriggerRejection(error: { message: string } | null): boolean {
   return error != null && error.message.includes("invalid status transition");
+}
+
+function isRlsUpdateBlocked(
+  error: { message: string } | null,
+  rows: unknown[] | null | undefined,
+): boolean {
+  return error == null && (rows?.length ?? 0) === 0;
 }
 
 async function selectPetStatus(
@@ -175,12 +204,7 @@ async function authenticateBreederA(checks: Check[]): Promise<{
     error: userError,
   } = await supabase.auth.getUser();
 
-  record(
-    checks,
-    "user lookup",
-    userError == null && user != null,
-    userError?.message,
-  );
+  record(checks, "user lookup", userError == null && user != null, userError?.message);
 
   if (userError || !user) {
     return null;
@@ -192,6 +216,268 @@ async function authenticateBreederA(checks: Check[]): Promise<{
   }
 
   return { supabase, user, breederId };
+}
+
+function isAdminRole(user: User): boolean {
+  const role = user.app_metadata?.role;
+  return role === "admin";
+}
+
+async function authenticateAdmin(checks: Check[]): Promise<{
+  supabase: SupabaseClient;
+  user: User;
+} | null> {
+  let supabaseUrl: string;
+  let publishableKey: string;
+  let email: string;
+  let password: string;
+
+  try {
+    supabaseUrl = requireEnv("NEXT_PUBLIC_SUPABASE_URL");
+    publishableKey = requireEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+    email = requireEnv("SEC_TEST_ADMIN_EMAIL");
+    password = requireEnv("SEC_TEST_ADMIN_PASSWORD");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Invalid environment";
+    console.log(`FAIL environment (${message})`);
+    return null;
+  }
+
+  const supabase = createClient(supabaseUrl, publishableKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  record(checks, "authentication", signInError == null, signInError?.message);
+
+  if (signInError) {
+    return null;
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  record(
+    checks,
+    "admin role",
+    userError == null && user != null && isAdminRole(user),
+    userError?.message ??
+      (user && !isAdminRole(user) ? "app_metadata.role is not admin" : undefined),
+  );
+
+  if (userError || !user || !isAdminRole(user)) {
+    return null;
+  }
+
+  return { supabase, user };
+}
+
+async function loadSecTestPetById(
+  supabase: SupabaseClient,
+  petId: string,
+  expectedStatus: string,
+  checks: Check[],
+  lookupName: string,
+): Promise<TestPet | null> {
+  const { data, error } = await supabase
+    .from("pets")
+    .select("id, management_name, status")
+    .eq("id", petId)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (error || !data) {
+    record(checks, lookupName, false, error?.message ?? "pet not found or not visible");
+    return null;
+  }
+
+  if (!data.management_name.startsWith(SEC_TEST_PREFIX)) {
+    record(
+      checks,
+      lookupName,
+      false,
+      "management_name is not [SEC-TEST] — aborting to protect non-test data",
+    );
+    return null;
+  }
+
+  if (data.status !== expectedStatus) {
+    record(checks, lookupName, false, `expected status ${expectedStatus}, got ${data.status}`);
+    return null;
+  }
+
+  record(checks, lookupName, true);
+  return data;
+}
+
+async function runPhase4(supabase: SupabaseClient, checks: Check[]): Promise<void> {
+  let reviewPetId: string;
+  let returnPetId: string;
+  let draftPetId: string;
+
+  try {
+    reviewPetId = requireEnv("SEC_TEST_ADMIN_REVIEW_PET_ID");
+    returnPetId = requireEnv("SEC_TEST_ADMIN_RETURN_PET_ID");
+    draftPetId = requireEnv("SEC_TEST_ADMIN_DRAFT_PET_ID");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "missing admin test pet id";
+    record(checks, "review pet lookup", false, message);
+    console.log("");
+    console.log("Aborting phase 4 (missing SEC_TEST_ADMIN_* pet id environment variables).");
+    return;
+  }
+
+  const reviewPet = await loadSecTestPetById(
+    supabase,
+    reviewPetId,
+    "under_review",
+    checks,
+    "review pet lookup",
+  );
+  if (!reviewPet) {
+    console.log("");
+    console.log("Aborting phase 4 UPDATE tests (review pet unavailable).");
+    return;
+  }
+
+  const { data: publishRows, error: publishError } = await supabase
+    .from("pets")
+    .update({ status: "published" })
+    .eq("id", reviewPet.id)
+    .eq("status", "under_review")
+    .select("id, status");
+
+  if (isRlsUpdateBlocked(publishError, publishRows)) {
+    record(
+      checks,
+      "admin under_review -> published",
+      false,
+      "RLS blocked UPDATE (0 rows) — admin pets UPDATE policy or review RPC required before trigger can be tested",
+    );
+    record(checks, "status became published", false, "skipped");
+  } else {
+    const publishOk = publishError == null && (publishRows?.length ?? 0) === 1;
+    record(
+      checks,
+      "admin under_review -> published",
+      publishOk,
+      publishError?.message ?? (publishOk ? undefined : "expected 1 updated row"),
+    );
+
+    const afterPublish = await selectPetStatus(supabase, reviewPet.id);
+    const becamePublished = afterPublish.status === "published";
+    record(
+      checks,
+      "status became published",
+      becamePublished,
+      afterPublish.errorMessage ??
+        (becamePublished ? undefined : `status is ${afterPublish.status ?? "unknown"}`),
+    );
+  }
+
+  const returnPet = await loadSecTestPetById(
+    supabase,
+    returnPetId,
+    "under_review",
+    checks,
+    "return pet lookup",
+  );
+  if (!returnPet) {
+    console.log("");
+    console.log("Aborting phase 4 return tests (return pet unavailable).");
+    return;
+  }
+
+  const { data: returnRows, error: returnError } = await supabase
+    .from("pets")
+    .update({ status: "draft" })
+    .eq("id", returnPet.id)
+    .eq("status", "under_review")
+    .select("id, status");
+
+  if (isRlsUpdateBlocked(returnError, returnRows)) {
+    record(
+      checks,
+      "admin under_review -> draft",
+      false,
+      "RLS blocked UPDATE (0 rows) — admin pets UPDATE policy or review RPC required before trigger can be tested",
+    );
+    record(checks, "status became draft", false, "skipped");
+  } else {
+    const returnOk = returnError == null && (returnRows?.length ?? 0) === 1;
+    record(
+      checks,
+      "admin under_review -> draft",
+      returnOk,
+      returnError?.message ?? (returnOk ? undefined : "expected 1 updated row"),
+    );
+
+    const afterReturn = await selectPetStatus(supabase, returnPet.id);
+    const becameDraft = afterReturn.status === "draft";
+    record(
+      checks,
+      "status became draft",
+      becameDraft,
+      afterReturn.errorMessage ??
+        (becameDraft ? undefined : `status is ${afterReturn.status ?? "unknown"}`),
+    );
+  }
+
+  const draftPet = await loadSecTestPetById(
+    supabase,
+    draftPetId,
+    "draft",
+    checks,
+    "draft pet lookup",
+  );
+  if (!draftPet) {
+    console.log("");
+    console.log("Aborting phase 4 reject tests (draft pet unavailable).");
+    return;
+  }
+
+  const { data: rejectRows, error: rejectError } = await supabase
+    .from("pets")
+    .update({ status: "published" })
+    .eq("id", draftPet.id)
+    .eq("status", "draft")
+    .select("id, status");
+
+  if (isRlsUpdateBlocked(rejectError, rejectRows)) {
+    record(
+      checks,
+      "admin draft -> published rejected by trigger",
+      false,
+      "RLS blocked UPDATE (0 rows) — cannot reach trigger; admin pets UPDATE policy required",
+    );
+    record(checks, "status remained draft", false, "skipped");
+    return;
+  }
+
+  record(
+    checks,
+    "admin draft -> published rejected by trigger",
+    isTriggerRejection(rejectError),
+    rejectError?.message,
+  );
+
+  const afterReject = await selectPetStatus(supabase, draftPet.id);
+  const remainedDraft = afterReject.status === "draft";
+  record(
+    checks,
+    "status remained draft",
+    remainedDraft,
+    afterReject.errorMessage ??
+      (remainedDraft ? undefined : `status is ${afterReject.status ?? "unknown"}`),
+  );
 }
 
 async function runPhase12(
@@ -260,7 +546,8 @@ async function runPhase12(
     checks,
     "status remained draft",
     statusUnchanged,
-    recheckError?.message ?? (statusUnchanged ? undefined : `status is ${recheckRow?.status ?? "unknown"}`),
+    recheckError?.message ??
+      (statusUnchanged ? undefined : `status is ${recheckRow?.status ?? "unknown"}`),
   );
 
   const { data: submitRows, error: submitError } = await supabase
@@ -384,8 +671,7 @@ async function runPhase3(supabase: SupabaseClient, checks: Check[]): Promise<voi
     .like("management_name", `${SEC_TEST_B_PREFIX}%`)
     .is("deleted_at", null);
 
-  const stillHiddenOk =
-    stillHiddenError == null && (stillHiddenPets?.length ?? 0) === 0;
+  const stillHiddenOk = stillHiddenError == null && (stillHiddenPets?.length ?? 0) === 0;
   record(
     checks,
     "other breeder pet still hidden after update attempt",
@@ -398,6 +684,15 @@ async function runPhase3(supabase: SupabaseClient, checks: Check[]): Promise<voi
 async function main(): Promise<void> {
   const checks: Check[] = [];
   const runPhase = parseRunPhase(process.argv.slice(2));
+
+  if (runPhase === "phase4") {
+    const adminSession = await authenticateAdmin(checks);
+    if (adminSession) {
+      await runPhase4(adminSession.supabase, checks);
+    }
+    finish(checks);
+    return;
+  }
 
   const session = await authenticateBreederA(checks);
   if (!session) {

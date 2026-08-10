@@ -720,19 +720,19 @@
 
 ## Decision No.99
 
-**管理者画面は AD-* で採番する**
+_*管理者画面は AD-* で採番する_*
 
 - **決定内容:** 管理者画面 ID を `AD-{連番}` 形式とする。第1期の犬猫掲載審査画面は AD-00（ダッシュボード）、AD-10（審査一覧）、AD-11（審査詳細）とする。
-- **理由:** ブリーダー（BR-*）・購入希望者（BY-*）と同様に画面 ID を統一するため。
+- **理由:** ブリーダー（BR-_）・購入希望者（BY-_）と同様に画面 ID を統一するため。
 - **影響範囲:** `docs/04_画面設計/`、`src/app/(admin)/`
 - **決定日:** 2026-08-07
 - **参照:** [画面設計 README](../04_画面設計/README.md)
 
-| 画面 ID | URL | 画面名 |
-|---------|-----|--------|
-| AD-00 | `/admin` | 管理者ダッシュボード |
-| AD-10 | `/admin/pets/reviews` | 犬猫掲載審査一覧 |
-| AD-11 | `/admin/pets/reviews/[petId]` | 犬猫掲載審査詳細 |
+| 画面 ID | URL                           | 画面名               |
+| ------- | ----------------------------- | -------------------- |
+| AD-00   | `/admin`                      | 管理者ダッシュボード |
+| AD-10   | `/admin/pets/reviews`         | 犬猫掲載審査一覧     |
+| AD-11   | `/admin/pets/reviews/[petId]` | 犬猫掲載審査詳細     |
 
 ---
 
@@ -802,14 +802,14 @@
 
 - **決定内容:** 第1期の `pet_review_logs` カラム・action 許可値・運用ルールを以下とする。
 
-| カラム | 型 | 制約 |
-|--------|-----|------|
-| `id` | uuid | PRIMARY KEY |
-| `pet_id` | uuid | NOT NULL |
-| `action` | text | NOT NULL。`submitted` / `returned` / `approved` |
-| `comment` | text | NULL 可（`returned` 時は必須） |
-| `actor_user_id` | uuid | NOT NULL |
-| `created_at` | timestamptz | NOT NULL, DEFAULT `now()` |
+| カラム          | 型          | 制約                                            |
+| --------------- | ----------- | ----------------------------------------------- |
+| `id`            | uuid        | PRIMARY KEY                                     |
+| `pet_id`        | uuid        | NOT NULL                                        |
+| `action`        | text        | NOT NULL。`submitted` / `returned` / `approved` |
+| `comment`       | text        | NULL 可（`returned` 時は必須）                  |
+| `actor_user_id` | uuid        | NOT NULL                                        |
+| `created_at`    | timestamptz | NOT NULL, DEFAULT `now()`                       |
 
 - `submitted` / `approved` は `comment` NULL 可。`returned` は `comment` 必須。
 - `actor_user_id` は `auth.getUser()` から取得し、クライアント指定値を信用しない。
@@ -820,3 +820,38 @@
 - **影響範囲:** `pet_review_logs` テーブル（設計・将来 Migration）、`submitPetForReview`、管理者 Server Actions
 - **決定日:** 2026-08-07
 - **参照:** [pet_review_logs テーブル](../05_データベース設計/pet_review_logs.md)
+
+---
+
+## Decision No.106
+
+**AD-10 犬猫掲載審査一覧の表示順は申請日時が古い順とする**
+
+- **決定内容:** AD-10（犬猫掲載審査一覧）の表示順は「申請日時が古い順」とする。対象は `pets.status = 'under_review'` かつ `pets.deleted_at IS NULL` の犬猫。申請日時は `pet_review_logs` の `action = 'submitted'` の最新 `created_at` を使用し、並び順は `submitted_at ASC`（申請日時昇順）とする。
+- **理由:** 審査待ち時間が長い申請から順番に処理し、管理者の審査運用をシンプルにするため。
+- **影響範囲:** AD-10 一覧取得クエリ、Repository / Service
+- **決定日:** 2026-08-10
+- **参照:** [AD-10 犬猫掲載審査一覧](../04_画面設計/AD-10_犬猫掲載審査一覧.md) / [Decision No.98](#decision-no98)
+
+---
+
+## Decision No.107
+
+**犬猫公開承認の前提条件を具体値で確定する**
+
+- **決定内容:** 管理者が `under_review` → `published` を許可できるのは、以下の **すべて** を満たす場合に限る。サーバー側（および Trigger / RPC 等）で再検証する。
+
+| 条件           | 判定                                                 |
+| -------------- | ---------------------------------------------------- |
+| 掲載状態       | `pets.status = 'under_review'`                       |
+| ブリーダー審査 | `breeders.review_status = 'approved'`                |
+| 本人確認       | `breeders.identity_verification_status = 'verified'` |
+| 登録証確認     | `breeders.business_verification_status = 'verified'` |
+| 登録有効期限   | `breeders.registration_expires_at IS NOT NULL`       |
+| 登録期限内     | `breeders.registration_expires_at >= CURRENT_DATE`   |
+
+- `registration_expires_at` が NULL の場合は公開不可とする。
+- **理由:** Decision No.101 の抽象条件を実装可能な具体値に確定し、未承認・未確認・登録無効の犬猫が公開されないよう担保するため。
+- **影響範囲:** AD-11 承認操作、管理者承認 Server Action / RPC、`breeders` 参照、`enforce_pets_status_transition`（将来拡張）
+- **決定日:** 2026-08-10
+- **参照:** [AD-11 犬猫掲載審査詳細](../04_画面設計/AD-11_犬猫掲載審査詳細.md) / [Decision No.101](#decision-no101) / [breeders テーブル](../05_データベース設計/breeders.md)
