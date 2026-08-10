@@ -14,7 +14,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "test:pets-status-trigger": "node --env-file=.env.local --experimental-strip-types scripts/test-pets-status-trigger.mts"
+    "test:pets-status-trigger": "node --env-file=.env.local --experimental-strip-types scripts/test-pets-status-trigger.mts",
+    "test:pet-review-rpcs": "node --env-file=.env.local --experimental-strip-types scripts/test-pet-review-rpcs.mts",
+    "prepare:sec-test-review-breeder": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-review-breeder.mts",
+    "prepare:sec-test-review-pets": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-review-pets.mts"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.7",

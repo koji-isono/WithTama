@@ -4,8 +4,8 @@
 |------|------|
 | 作成日 | 2026-08-07 |
 | 対象 | `public.enforce_pets_status_transition()` / `pets_enforce_status_transition` |
-| Migration | `20260807130000_enforce_pets_status_transition.sql` |
-| 状態 | **第1〜第3段階 実施済み（2026-08-07 最終合格）** |
+| Migration | `20260807130000_enforce_pets_status_transition.sql`（Phase 1） / `20260810110000_extend_pets_status_trigger_for_admin.sql`（Phase 2・admin 遷移） |
+| 状態 | **第1〜第3段階 実施済み（2026-08-07 最終合格）** / **第4段階 スクリプト追加済み・未実行** / **第5段階 実施済み（29 passed / 0 failed）** |
 
 ## 目的
 
@@ -13,17 +13,30 @@
 
 ## 現在の Trigger 仕様
 
+Migration `20260810110000_extend_pets_status_trigger_for_admin.sql` 適用後:
+
 ### 許可
 
 | 主体 | 遷移 | 条件 |
 |------|------|------|
-| breeder（本人） | `draft` → `under_review` | `pets.breeder_id` がログインユーザーの `breeders.id` |
+| breeder（本人・**非 admin**） | `draft` → `under_review` | `pets.breeder_id` がログインユーザーの `breeders.id` |
+| admin | `under_review` → `published` | `public.is_admin()` |
+| admin | `under_review` → `draft` | `public.is_admin()` |
+
+**admin 兼 breeder** は admin 許可表を優先。admin による `draft → under_review` は不可。
+
+Phase 1 のみ（`20260807130000` 適用時）:
+
+| 主体 | 遷移 | 条件 |
+|------|------|------|
+| breeder（本人） | `draft` → `under_review` | 本人所有 |
 
 ### 拒否
 
-- `draft` → `published`
-- `under_review` → `published`
-- `under_review` → `draft`
+- `draft` → `published`（admin 含む）
+- breeder による `under_review` → `published` / `under_review` → `draft`
+- admin による `draft → under_review`（admin 優先判定）
+- `published` → `draft` / `published` → `under_review`
 - その他、未許可の status 変更すべて
 
 ### status 変更なし
@@ -143,6 +156,9 @@ npm run test:pets-status-trigger
 
 # 第3段階のみ（ブリーダーAの [SEC-TEST] pet が under_review でも実行可）
 npx tsx scripts/test-pets-status-trigger.mts --phase3
+
+# 第4段階のみ（admin status 遷移・Trigger Phase 2）
+npx tsx scripts/test-pets-status-trigger.mts --phase4
 ```
 
 Node.js 22.6 以降を推奨（`--experimental-strip-types` 使用）。Node 20 の場合:
@@ -184,7 +200,10 @@ node --env-file=.env.local node_modules/tsx/dist/cli.mjs scripts/test-pets-statu
 | `src/app/breeder/pets/new/page.tsx` + `pet-registration-form.tsx` | テスト用 draft 作成 |
 | `src/app/breeder/pets/[petId]/edit/page.tsx` | 通常 UPDATE（status なし）確認 |
 | `src/app/breeder/pets/page.tsx` | 公開申請 UI（`draft → under_review` 正常系） |
-| `scripts/test-pets-status-trigger.mts` | 第1〜第3段階自動テスト（authenticated 直接 UPDATE / SELECT） |
+| `scripts/test-pets-status-trigger.mts` | 第1〜第4段階自動テスト（Trigger / RLS） |
+| `scripts/test-pet-review-rpcs.mts` | 第5段階自動テスト（審査 RPC） |
+| `scripts/prepare-sec-test-review-breeder.mts` | 第5段階前 SEC-TEST ブリーダー準備（**本番禁止**） |
+| `scripts/prepare-sec-test-review-pets.mts` | 第5段階前 SEC-TEST Pet A/B 準備（**本番禁止**） |
 | `.env.local` | Supabase URL / publishable key / テスト用ブリーダー認証情報 |
 | `supabase/migrations/20260807130000_enforce_pets_status_transition.sql` | 期待エラーメッセージの参照 |
 
@@ -361,6 +380,324 @@ PASS other breeder pet still hidden after update attempt
 
 ---
 
+## 6. 自動テストスクリプト（第4段階 — admin status 遷移）
+
+| 項目 | 内容 |
+|------|------|
+| 目的 | Migration `20260810110000` で追加した **admin Trigger 遷移** を authenticated admin JWT で確認 |
+| ログイン | **admin 専用**アカウント（`SEC_TEST_ADMIN_*`） |
+| 対象 pet | `[SEC-TEST]` プレフィックス付き **3 件**（環境変数で ID 指定） |
+| 実行方法 | `--phase4` のみ（第1〜3段階とは独立） |
+| **状態** | **スクリプト追加済み・未実行** |
+
+### 第4段階で検証しないもの
+
+- `published_at` 設定
+- `pet_review_logs` INSERT
+- 審査専用 RPC（次工程）
+
+### 前提 Migration
+
+1. `20260807130000_enforce_pets_status_transition.sql`（Phase 1）
+2. `20260810110000_extend_pets_status_trigger_for_admin.sql`（Phase 2・admin 遷移）
+
+### admin UPDATE 経路について
+
+現状 `pets_update_admin` RLS は **未実装**。admin JWT から PostgREST で `pets.status` を UPDATE するには、以下のいずれかが必要:
+
+| 経路 | 第4段階での扱い |
+|------|----------------|
+| `pets_update_admin` RLS を一時適用 | Trigger 単体テスト可能 |
+| 審査専用 RPC（SECURITY DEFINER） | 第5段階で RPC 経由テストを推奨 |
+| admin 兼 breeder が **本人所有** pet を UPDATE | `pets_update_breeder_own` 経由で Trigger 到達可能（テスト pet の `breeder_id` を admin ブリーダーに合わせる） |
+
+RLS で 0 行更新の場合、スクリプトは **FAIL** とし「RLS blocked UPDATE」と表示する（Trigger 未到達）。
+
+### 必要な環境変数（`.env.local`）
+
+| 変数 | 用途 |
+|------|------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase プロジェクト URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | publishable key |
+| `SEC_TEST_ADMIN_EMAIL` | テスト用 **admin** の email（`app_metadata.role = admin`） |
+| `SEC_TEST_ADMIN_PASSWORD` | テスト用 admin の password |
+| `SEC_TEST_ADMIN_REVIEW_PET_ID` | `[SEC-TEST]` pet UUID、`status = under_review`（承認テスト用） |
+| `SEC_TEST_ADMIN_RETURN_PET_ID` | `[SEC-TEST]` pet UUID、`status = under_review`（差戻しテスト用・**別 pet**） |
+| `SEC_TEST_ADMIN_DRAFT_PET_ID` | `[SEC-TEST]` pet UUID、`status = draft`（不正遷移拒否テスト用） |
+
+**使用しない:** `SUPABASE_SERVICE_ROLE_KEY`
+
+**ログ出力禁止:** admin email / password / JWT / pet UUID の羅列（チェック名のみ）
+
+### テスト用 Pet の準備
+
+| Pet | 初期 status | テスト後 status | 備考 |
+|-----|-------------|-----------------|------|
+| 承認用（`SEC_TEST_ADMIN_REVIEW_PET_ID`） | `under_review` | **`published` のまま** | `published → under_review` は Trigger 未許可のため **元に戻さない** |
+| 差戻し用（`SEC_TEST_ADMIN_RETURN_PET_ID`） | `under_review` | `draft` | 承認用とは **別 UUID** |
+| 拒否用（`SEC_TEST_ADMIN_DRAFT_PET_ID`） | `draft` | `draft` | `draft → published` が Trigger で拒否されること |
+
+命名例: `management_name = '[SEC-TEST] Admin Review Pet'` 等。
+
+`management_name` が `[SEC-TEST]` で始まらない pet は **テスト中止**。
+
+### 第4段階で自動実行するチェック
+
+| # | チェック名 | 合格条件 |
+|---|-----------|---------|
+| 1 | authentication | admin で `signInWithPassword` 成功 |
+| 2 | admin role | `app_metadata.role === 'admin'` |
+| 3 | review pet lookup | 承認用 pet が SELECT 可、`status = under_review`、`[SEC-TEST]` |
+| 4 | admin under_review -> published | UPDATE 成功（1 件） |
+| 5 | status became published | 再 SELECT で `status === 'published'` |
+| 6 | return pet lookup | 差戻し用 pet が SELECT 可、`status = under_review`、`[SEC-TEST]` |
+| 7 | admin under_review -> draft | UPDATE 成功（1 件） |
+| 8 | status became draft | 再 SELECT で `status === 'draft'` |
+| 9 | draft pet lookup | 拒否用 pet が SELECT 可、`status = draft`、`[SEC-TEST]` |
+| 10 | admin draft -> published rejected by trigger | `error.message` に `invalid status transition` |
+| 11 | status remained draft | 再 SELECT で `status === 'draft'` |
+
+### 出力例（第4段階のみ）
+
+```bash
+npx tsx scripts/test-pets-status-trigger.mts --phase4
+```
+
+```text
+PASS authentication
+PASS admin role
+PASS review pet lookup
+PASS admin under_review -> published
+PASS status became published
+PASS return pet lookup
+PASS admin under_review -> draft
+PASS status became draft
+PASS draft pet lookup
+PASS admin draft -> published rejected by trigger
+PASS status remained draft
+
+11 passed / 0 failed
+```
+
+### 安全条件
+
+| ルール | 理由 |
+|--------|------|
+| `[SEC-TEST]` プレフィックス必須 | 本番 pet 保護 |
+| DELETE しない | テストデータ破壊防止 |
+| Service Role 不使用 | 本番と同じ authenticated 経路 |
+| 承認後 pet を `under_review` に戻さない | Trigger が `published → under_review` を拒否 |
+
+---
+
+## 7. 自動テストスクリプト（第5段階 — 審査 RPC 実動）
+
+| 項目 | 内容 |
+|------|------|
+| 目的 | `approve_pet_for_publish` / `return_pet_review` RPC の認可・原子性・ログ整合を authenticated JWT で確認 |
+| ファイル | `scripts/test-pet-review-rpcs.mts`（第1〜4段階とは **別スクリプト**） |
+| npm script | `npm run test:pet-review-rpcs` |
+| **状態** | **実施済み（29 passed / 0 failed）** |
+
+### 前提 Migration
+
+1. `20260810110000_extend_pets_status_trigger_for_admin.sql`（admin Trigger 遷移）
+2. `20260810120000_create_pet_review_admin_rpcs.sql`（審査 RPC）
+
+### 必要な環境変数（`.env.local`）
+
+| 変数 | 用途 |
+|------|------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase プロジェクト URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | publishable key |
+| `SEC_TEST_ADMIN_EMAIL` | admin テストアカウント（`app_metadata.role = admin`） |
+| `SEC_TEST_ADMIN_PASSWORD` | admin password |
+| `SEC_TEST_BREEDER_EMAIL` | **非 admin** ブリーダー（RPC 拒否テスト用） |
+| `SEC_TEST_BREEDER_PASSWORD` | ブリーダー password |
+| `SEC_TEST_ADMIN_APPROVE_PET_ID` | 承認用 `[SEC-TEST]` pet（`status = under_review`） |
+| `SEC_TEST_ADMIN_RETURN_PET_ID` | 差戻し用 `[SEC-TEST]` pet（`status = under_review`・承認用と **別 UUID**） |
+
+**使用しない:** `SUPABASE_SERVICE_ROLE_KEY`
+
+### 安全装置
+
+| ルール | 内容 |
+|--------|------|
+| `[SEC-TEST]` 必須 | `management_name` に `[SEC-TEST]` を含まない pet は **即中止** |
+| status 事前確認 | 承認用・差戻し用とも `under_review` でなければ中止 |
+| ブリーダー公開条件 | 承認用 pet の breeder が No.107 を満たさない場合は **データ変更せず中止** |
+| DELETE 禁止 | pet / log を削除・自動復元しない |
+| 終了時 status | 承認用 pet → `published`、差戻し用 pet → `draft` のまま |
+
+### 承認用 breeder 事前条件（No.107）
+
+- `review_status = 'approved'`
+- `identity_verification_status = 'verified'`
+- `business_verification_status = 'verified'`
+- `registration_expires_at IS NOT NULL`
+- `registration_expires_at >= CURRENT_DATE`
+
+### SEC-TEST ブリーダー準備（第5段階実行前・テスト専用）
+
+| 項目 | 内容 |
+|------|------|
+| スクリプト | `scripts/prepare-sec-test-review-breeder.mts` |
+| npm script | `npm run prepare:sec-test-review-breeder` |
+| 目的 | 第5段階 `approve_pet_for_publish` の No.107 前提を満たす **SEC-TEST ブリーダー** を準備 |
+| **本番運用** | **使用禁止** — 正式な管理者ブリーダー審査機能ではない |
+
+正式なブリーダー審査画面（AD-00「今後追加予定」）完成前の **一時的なテストデータ準備** である。アプリケーションコードから呼び出さない。
+
+#### 必要な環境変数
+
+| 変数 | 用途 |
+|------|------|
+| `SEC_TEST_REVIEW_BREEDER_ID` | 準備対象 breeder UUID（ソースにハードコードしない） |
+| `SEC_TEST_BREEDER_EMAIL` | 対象 breeder 本人（ownership 確認用・**非 admin**） |
+| `SEC_TEST_BREEDER_PASSWORD` | ブリーダー password |
+| `SEC_TEST_ADMIN_EMAIL` | admin UPDATE 用 |
+| `SEC_TEST_ADMIN_PASSWORD` | admin password |
+
+#### 安全装置
+
+| ルール | 内容 |
+|--------|------|
+| breeder 認証 | `SEC_TEST_BREEDER_*` で本人ログイン（**UPDATE しない**） |
+| breeder 非 admin | admin 兼 breeder は中止 |
+| **breeder ownership** | `SEC_TEST_REVIEW_BREEDER_ID` の `user_id` = ログイン breeder の `auth.uid()` |
+| admin 認証 | 別 client で admin ログイン後にのみ UPDATE |
+| 更新前状態 | `submitted` / `submitted` / `submitted` + 有効な `registration_expires_at` のみ更新 |
+| 更新カラム | `review_status` / `identity_verification_status` / `business_verification_status` の **3 列のみ** |
+| `registration_expires_at` | **変更しない**（更新後も有効期限内であることを確認） |
+| pets | **触らない**（`[SEC-TEST] Trigger Test Pet` 含む） |
+| RLS 拒否時 | Migration / Service Role に切り替えず **FAIL 終了** |
+
+#### admin breeders UPDATE 経路
+
+Migration `20260804135800_create_breeders.sql` の `breeders_update_own` が `public.is_admin()` により admin UPDATE を許可。本スクリプトは admin JWT + `.update()` を使用。
+
+#### 実行順（推奨）
+
+1. SEC-TEST 用 **非 admin** breeder を `SEC_TEST_REVIEW_BREEDER_ID` に指定
+2. `npm run prepare:sec-test-review-breeder`
+3. `npm run prepare:sec-test-review-pets`
+4. 出力された Pet UUID を `.env.local` へ追記（`SEC_TEST_ADMIN_APPROVE_PET_ID` / `SEC_TEST_ADMIN_RETURN_PET_ID`）
+5. `npm run test:pet-review-rpcs`
+
+```bash
+npm run prepare:sec-test-review-breeder
+npm run prepare:sec-test-review-pets
+npm run test:pet-review-rpcs
+```
+
+#### 注意事項
+
+- Service Role を使用しない
+- SQL Editor でテストデータを直接 UPDATE しない
+- Trigger を無効化しない
+- 既存 `[SEC-TEST] Trigger Test Pet` を変更しない
+- テスト用 password / JWT / key をログ出力しない
+- 本番データを対象にしない
+
+### SEC-TEST Pet 準備（第5段階実行前・テスト専用）
+
+| 項目 | 内容 |
+|------|------|
+| スクリプト | `scripts/prepare-sec-test-review-pets.mts` |
+| npm script | `npm run prepare:sec-test-review-pets` |
+| 目的 | Pet A / B（`under_review`）を `SEC_TEST_REVIEW_BREEDER_ID` 所有で作成または再利用 |
+| **本番運用** | **使用禁止** |
+
+| Pet | `management_name` | 終了時 `status` |
+|-----|-------------------|-----------------|
+| A（承認用） | `[SEC-TEST] Review RPC Approve Pet` | `under_review` |
+| B（差戻し用） | `[SEC-TEST] Review RPC Return Pet` | `under_review` |
+
+- **`[SEC-TEST] Trigger Test Pet` は変更しない**（第1〜4段階用）
+- `draft` INSERT → breeder JWT で `draft → under_review`（Trigger 経由、`submitPetForReview` と同経路）
+- 成功時に `SEC_TEST_ADMIN_APPROVE_PET_ID` / `SEC_TEST_ADMIN_RETURN_PET_ID` を出力（`.env.local` へ追記）
+
+#### 追加環境変数
+
+| 変数 | 用途 |
+|------|------|
+| `SEC_TEST_BREEDER_EMAIL` | 対象 breeder のログイン（`user_id` が `SEC_TEST_REVIEW_BREEDER_ID` と一致必須） |
+| `SEC_TEST_BREEDER_PASSWORD` | ブリーダー password |
+| `SEC_TEST_REVIEW_BREEDER_ID` | 準備済み approved/verified breeder |
+
+**注意:** admin 兼 breeder アカウントでは `draft → under_review` が Trigger で拒否される。`SEC_TEST_BREEDER_*` は **非 admin** であること。
+
+### 第5段階で自動実行するチェック（29 件）
+
+| # | チェック名 | 合格条件 |
+|---|-----------|---------|
+| — | admin authentication / admin role | admin ログイン成功 |
+| — | approve pet lookup / return pet lookup | `[SEC-TEST]` + `under_review` |
+| — | approve pet breeder eligibility | No.107 満たす |
+| — | review log baseline | 開始時 log 件数取得 |
+| — | breeder authentication / breeder non-admin role | 非 admin ブリーダー |
+| 1 | non-admin approve rejected | `admin required` |
+| — | approve pet unchanged after non-admin approve | `under_review` + `published_at` 不変 |
+| — | no approved log after non-admin approve | approved 件数不変 |
+| 2 | non-admin return rejected | `admin required` |
+| — | return pet unchanged after non-admin return | `under_review` |
+| — | no returned log after non-admin return | returned 件数不変 |
+| 3 | empty return comment rejected | `return comment required` |
+| — | return pet unchanged after empty comment | `under_review` |
+| — | no returned log after empty comment | returned 件数不変 |
+| 4 | admin approve RPC | RPC 成功 |
+| — | approved status | `status = published` |
+| — | published_at set | `published_at IS NOT NULL` |
+| — | approved review log | approved 件数 +1 |
+| 5 | admin return RPC | RPC 成功 |
+| — | returned status | `status = draft` |
+| — | return pet published_at null | `published_at IS NULL` |
+| — | returned review log | returned 件数 +1 |
+| — | returned log actor and comment | `actor_user_id = admin`、`comment` 一致 |
+| 6 | duplicate approve rejected | `invalid pet status` |
+| — | approve pet still published after duplicate approve | `published` 維持 |
+| — | no extra approved log after duplicate approve | approved 件数不変 |
+
+### 実行コマンド
+
+```bash
+npm run prepare:sec-test-review-breeder
+npm run prepare:sec-test-review-pets
+npm run test:pet-review-rpcs
+# または
+npx tsx scripts/test-pet-review-rpcs.mts
+```
+
+### 実施結果（2026-08-10）
+
+| 項目 | 内容 |
+|------|------|
+| 準備 | `prepare:sec-test-review-breeder` → `prepare:sec-test-review-pets` → `.env.local` へ Pet ID 設定 |
+| テスト | `npm run test:pet-review-rpcs` |
+| 結果 | **29 passed / 0 failed** |
+
+確認できた主な項目:
+
+- admin 認証・admin role 確認
+- 承認用 Pet / 差戻し用 Pet lookup、ブリーダー公開資格（No.107）
+- 非 admin から `approve_pet_for_publish` / `return_pet_review` 実行拒否（失敗後 Pet 状態・review log 不変）
+- 空コメント差戻し拒否（失敗後 Pet 状態・review log 不変）
+- admin `approve_pet_for_publish` 成功（`published` / `published_at` / `approved` log）
+- admin `return_pet_review` 成功（`draft` / `published_at = NULL` / `returned` log・actor/comment）
+- 二重承認拒否（`published` 維持・余分な `approved` log なし）
+
+実施条件:
+
+- Service Role 未使用（publishable key + `signInWithPassword()` のみ）
+- テスト実施に伴う Migration / RLS / Trigger / RPC の追加変更なし
+
+### 第4段階との関係
+
+- 第4段階（`--phase4`）: Trigger 単体・直接 `pets.update()`
+- 第5段階: RPC 経由・`published_at` + `pet_review_logs` 整合
+
+---
+
 **DevTools 手動実行**で第1段階以外も含めた全項目をカバー可能。
 
 再現性のため、将来はスクリプトを拡張する。
@@ -524,3 +861,7 @@ console.log({ data, error });
 - [pets status セキュリティレビュー](../09_開発履歴/2026-08-07_pets_status_セキュリティレビュー.md)
 - [権限設計](../07_権限設計/README.md)
 - [pets テーブル](../05_データベース設計/pets.md)
+- [pets status Trigger admin 拡張 Migration](../../supabase/migrations/20260810110000_extend_pets_status_trigger_for_admin.sql)
+- [管理者犬猫審査 RPC Migration](../../supabase/migrations/20260810120000_create_pet_review_admin_rpcs.sql)
+- [管理者犬猫審査 RPC 設計比較](../09_開発履歴/2026-08-10_管理者犬猫審査_RPC設計比較.md)
+- [審査 RPC セキュリティテスト（第5段階）](../../scripts/test-pet-review-rpcs.mts)
