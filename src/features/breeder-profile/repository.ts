@@ -14,9 +14,7 @@ import type {
   VerificationProfileRow,
 } from "./types";
 import { BREEDER_DOCUMENTS_BUCKET } from "./document-constants";
-import {
-  isValidBreederDocumentStoragePath,
-} from "./document-utils";
+import { isValidBreederDocumentStoragePath } from "./document-utils";
 import { logBreederDocumentUploadFailure } from "./format-document-upload-error";
 
 const licenseProfileSelect =
@@ -94,9 +92,7 @@ export async function updateLocationProfile(
   }
 }
 
-export async function getLicenseProfileByUserId(
-  userId: string,
-): Promise<LicenseProfileRow | null> {
+export async function getLicenseProfileByUserId(userId: string): Promise<LicenseProfileRow | null> {
   const supabase = await createClient();
 
   const { data, error } = await supabase

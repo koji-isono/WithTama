@@ -1,12 +1,7 @@
 export type PetSpecies = "dog" | "cat";
 export type PetSex = "male" | "female";
 export type PetStatus =
-  | "draft"
-  | "under_review"
-  | "published"
-  | "paused"
-  | "family_decided"
-  | "closed";
+  "draft" | "under_review" | "published" | "paused" | "family_decided" | "closed";
 
 /** Supabase public.pets 行型（一覧・Repository 用） */
 export type PetRow = {
@@ -64,8 +59,7 @@ export type PetListWithMainPhotoRow = {
 };
 
 export type LoadBreederPetsResult =
-  | { success: true; pets: BreederPetListItem[] }
-  | { success: false; error: string };
+  { success: true; pets: BreederPetListItem[] } | { success: false; error: string };
 
 export type CreatePetDraftInput = {
   managementName: string;
@@ -183,14 +177,11 @@ export type PetEditPageData = {
 };
 
 export type UploadPetPhotoResult =
-  | { success: true; photoId: string }
-  | { success: false; error: string };
+  { success: true; photoId: string } | { success: false; error: string };
 
 export type PetPhotoActionResult = { success: true } | { success: false; error: string };
 
-export type SubmitPetForReviewResult =
-  | { success: true }
-  | { success: false; error: string };
+export type SubmitPetForReviewResult = { success: true } | { success: false; error: string };
 
 export type UpdatePetDraftData = {
   management_name: string;
@@ -207,8 +198,7 @@ export type UpdatePetDraftData = {
 };
 
 export type UpdatePetDraftResult =
-  | { success: true }
-  | { success: false; fieldErrors?: CreatePetDraftFieldErrors; error?: string };
+  { success: true } | { success: false; fieldErrors?: CreatePetDraftFieldErrors; error?: string };
 
 /** @deprecated Use CreatePetDraftInput */
 export type CreatePetInput = CreatePetDraftInput;
@@ -249,10 +239,7 @@ export function mapPetRowToListItem(row: PetRow): PetListItem {
   };
 }
 
-export function mapPetPhotoRowToListItem(
-  row: PetPhotoRow,
-  signedUrl: string,
-): PetPhotoListItem {
+export function mapPetPhotoRowToListItem(row: PetPhotoRow, signedUrl: string): PetPhotoListItem {
   return {
     id: row.id,
     storagePath: row.storage_path,

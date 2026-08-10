@@ -13,11 +13,7 @@ function isIntroductionFieldValid(value: string | null | undefined): boolean {
 export function getMissingProfileSteps(row: VerificationProfileRow): ProfileMissingStep[] {
   const missing: ProfileMissingStep[] = [];
 
-  if (
-    !isFilled(row.business_name) ||
-    !isFilled(row.representative_name) ||
-    !isFilled(row.phone)
-  ) {
+  if (!isFilled(row.business_name) || !isFilled(row.representative_name) || !isFilled(row.phone)) {
     missing.push({
       step: 1,
       label: "基本情報",
@@ -83,7 +79,9 @@ export function getMissingProfileSteps(row: VerificationProfileRow): ProfileMiss
   return missing;
 }
 
-export function validateProfileCompletion(row: VerificationProfileRow | null): ProfileMissingStep[] {
+export function validateProfileCompletion(
+  row: VerificationProfileRow | null,
+): ProfileMissingStep[] {
   if (!row) {
     return [
       {

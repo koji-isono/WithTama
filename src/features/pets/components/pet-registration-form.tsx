@@ -25,10 +25,7 @@ export function PetRegistrationForm() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function updateField<K extends keyof CreatePetDraftInput>(
-    key: K,
-    value: CreatePetDraftInput[K],
-  ) {
+  function updateField<K extends keyof CreatePetDraftInput>(key: K, value: CreatePetDraftInput[K]) {
     setForm((current) => ({ ...current, [key]: value }));
     setFieldErrors((current) => {
       if (!current[key]) {

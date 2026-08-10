@@ -167,12 +167,7 @@ async function loadSecTestPet(
   }
 
   if (data.status !== expectedStatus) {
-    record(
-      checks,
-      lookupName,
-      false,
-      `expected status ${expectedStatus}, got ${data.status}`,
-    );
+    record(checks, lookupName, false, `expected status ${expectedStatus}, got ${data.status}`);
     return null;
   }
 
@@ -327,7 +322,12 @@ async function main(): Promise<void> {
   record(checks, "admin authentication", adminUser != null);
 
   if (!adminUser || !isAdminRole(adminUser)) {
-    record(checks, "admin role", false, adminUser ? "app_metadata.role is not admin" : "sign-in failed");
+    record(
+      checks,
+      "admin role",
+      false,
+      adminUser ? "app_metadata.role is not admin" : "sign-in failed",
+    );
     finish(checks);
     return;
   }
@@ -444,11 +444,7 @@ async function main(): Promise<void> {
         : `status=${afterNonAdminApprove.status ?? "unknown"}`),
   );
 
-  const approvedCountAfterNonAdmin = await countReviewLogs(
-    adminClient,
-    approvePet.id,
-    "approved",
-  );
+  const approvedCountAfterNonAdmin = await countReviewLogs(adminClient, approvePet.id, "approved");
   record(
     checks,
     "no approved log after non-admin approve",
@@ -480,11 +476,7 @@ async function main(): Promise<void> {
         : `status=${afterNonAdminReturn.status ?? "unknown"}`),
   );
 
-  const returnedCountAfterNonAdmin = await countReviewLogs(
-    adminClient,
-    returnPet.id,
-    "returned",
-  );
+  const returnedCountAfterNonAdmin = await countReviewLogs(adminClient, returnPet.id, "returned");
   record(
     checks,
     "no returned log after non-admin return",
@@ -557,8 +549,7 @@ async function main(): Promise<void> {
   );
 
   const approvedCountAfterApprove = await countReviewLogs(adminClient, approvePet.id, "approved");
-  const approvedLogAdded =
-    approvedCountAfterApprove.count === approvedCountBefore.count + 1;
+  const approvedLogAdded = approvedCountAfterApprove.count === approvedCountBefore.count + 1;
   record(
     checks,
     "approved review log",
@@ -602,8 +593,7 @@ async function main(): Promise<void> {
   );
 
   const returnedCountAfterReturn = await countReviewLogs(adminClient, returnPet.id, "returned");
-  const returnedLogAdded =
-    returnedCountAfterReturn.count === returnedCountBefore.count + 1;
+  const returnedLogAdded = returnedCountAfterReturn.count === returnedCountBefore.count + 1;
   record(
     checks,
     "returned review log",
@@ -655,11 +645,7 @@ async function main(): Promise<void> {
     afterDuplicateApprove.errorMessage,
   );
 
-  const approvedCountAfterDuplicate = await countReviewLogs(
-    adminClient,
-    approvePet.id,
-    "approved",
-  );
+  const approvedCountAfterDuplicate = await countReviewLogs(adminClient, approvePet.id, "approved");
   record(
     checks,
     "no extra approved log after duplicate approve",

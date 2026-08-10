@@ -128,14 +128,9 @@ export default function LoginPage() {
         </div>
 
         {errorMessage ? (
-          <Alert
-            variant="destructive"
-            className="border-red-200 bg-red-50 text-red-800"
-          >
+          <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
             <AlertCircle className="size-4 text-red-600" />
-            <AlertDescription className="whitespace-pre-wrap">
-              {errorMessage}
-            </AlertDescription>
+            <AlertDescription className="whitespace-pre-wrap">{errorMessage}</AlertDescription>
           </Alert>
         ) : null}
 

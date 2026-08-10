@@ -12,7 +12,10 @@ export function BreederSidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-[var(--border)] bg-white md:flex">
       <div className="border-b border-[var(--border)] px-5 py-5">
-        <Link href="/breeder/dashboard" className="text-lg font-bold text-[var(--foreground)] no-underline">
+        <Link
+          href="/breeder/dashboard"
+          className="text-lg font-bold text-[var(--foreground)] no-underline"
+        >
           WithTama
         </Link>
         <p className="mt-1 text-xs text-neutral-500">ブリーダー管理</p>

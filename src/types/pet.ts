@@ -1,12 +1,7 @@
 export type PetSpecies = "dog" | "cat";
 export type PetSex = "male" | "female";
 export type PetStatus =
-  | "draft"
-  | "under_review"
-  | "published"
-  | "paused"
-  | "family_decided"
-  | "closed";
+  "draft" | "under_review" | "published" | "paused" | "family_decided" | "closed";
 
 /** Supabase public.pets 行型（Version 1.1） */
 export type PetRow = {
@@ -53,8 +48,7 @@ export type BreederPetListItem = {
 };
 
 export type FetchPetsResult =
-  | { ok: true; pets: BreederPetListItem[] }
-  | { ok: false; error: string };
+  { ok: true; pets: BreederPetListItem[] } | { ok: false; error: string };
 
 export type CreatePetInput = {
   managementName: string;
@@ -98,8 +92,7 @@ export function formatPetAge(birthday: string | null): string {
 
   if (Number.isNaN(birth.getTime())) return "—";
 
-  let months =
-    (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
+  let months = (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
 
   if (now.getDate() < birth.getDate()) {
     months -= 1;

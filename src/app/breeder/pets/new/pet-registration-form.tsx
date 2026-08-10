@@ -122,7 +122,13 @@ export function PetRegistrationForm() {
             </div>
 
             <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-              <Button type="button" variant="outline" className="rounded-full" asChild disabled={isPending}>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-full"
+                asChild
+                disabled={isPending}
+              >
                 <Link href="/breeder/pets">キャンセル</Link>
               </Button>
               <Button

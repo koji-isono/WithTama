@@ -2,12 +2,7 @@ export const BREEDER_DOCUMENTS_BUCKET = "breeder-documents";
 
 export const BREEDER_DOCUMENT_MAX_BYTES = 10 * 1024 * 1024;
 
-export const BREEDER_DOCUMENT_ALLOWED_EXTENSIONS = [
-  "jpg",
-  "jpeg",
-  "png",
-  "pdf",
-] as const;
+export const BREEDER_DOCUMENT_ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "pdf"] as const;
 
 export const BREEDER_DOCUMENT_ALLOWED_MIME_TYPES = [
   "image/jpeg",
@@ -15,11 +10,9 @@ export const BREEDER_DOCUMENT_ALLOWED_MIME_TYPES = [
   "application/pdf",
 ] as const;
 
-export type BreederDocumentAllowedExtension =
-  (typeof BREEDER_DOCUMENT_ALLOWED_EXTENSIONS)[number];
+export type BreederDocumentAllowedExtension = (typeof BREEDER_DOCUMENT_ALLOWED_EXTENSIONS)[number];
 
-export type BreederDocumentAllowedMimeType =
-  (typeof BREEDER_DOCUMENT_ALLOWED_MIME_TYPES)[number];
+export type BreederDocumentAllowedMimeType = (typeof BREEDER_DOCUMENT_ALLOWED_MIME_TYPES)[number];
 
 export const BREEDER_DOCUMENT_TYPE_LABELS = {
   identity: "本人確認書類",

@@ -23,11 +23,7 @@ export {
   IDENTITY_DOCUMENT_DESCRIPTION,
   VERIFICATION_PRIVACY_NOTICE,
 } from "./document-constants";
-export {
-  loadIntroductionProfile,
-  loadLicenseProfile,
-  loadVerificationStepState,
-} from "./loaders";
+export { loadIntroductionProfile, loadLicenseProfile, loadVerificationStepState } from "./loaders";
 export {
   getIntroductionProfileByUserId,
   getLicenseProfileByUserId,
@@ -51,10 +47,7 @@ export {
 export { INTRODUCTION_FIELDS } from "./introduction-fields";
 export { getMissingProfileSteps, validateProfileCompletion } from "./profile-completion";
 export { JAPAN_PREFECTURES } from "./prefectures";
-export {
-  BUSINESS_REGISTRATION_TYPES,
-  REGISTRATION_TYPE_GUIDANCE,
-} from "./registration-types";
+export { BUSINESS_REGISTRATION_TYPES, REGISTRATION_TYPE_GUIDANCE } from "./registration-types";
 export type { JapanPrefecture } from "./prefectures";
 export type { BusinessRegistrationType } from "./registration-types";
 export type { BreederProfileStepSlug } from "./constants";
@@ -91,10 +84,7 @@ export type {
   VerificationProfileRow,
   VerificationStepInitialState,
 } from "./types";
-export {
-  INTRODUCTION_PROFILE_MAX_LENGTH,
-  INTRODUCTION_PROFILE_MIN_LENGTH,
-} from "./types";
+export { INTRODUCTION_PROFILE_MAX_LENGTH, INTRODUCTION_PROFILE_MIN_LENGTH } from "./types";
 export {
   hasValidationErrors,
   normalizeIntroductionProfileInput,

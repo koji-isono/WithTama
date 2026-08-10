@@ -85,7 +85,9 @@ export default function BreederDashboardPage() {
         {KPI_ITEMS.map((item) => (
           <Card key={item.label} className="border-[var(--border)] bg-white shadow-sm">
             <CardContent className="p-4 sm:p-5">
-              <p className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${item.accent}`}>
+              <p
+                className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${item.accent}`}
+              >
                 {item.label}
               </p>
               <p className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{item.value}</p>
@@ -146,7 +148,9 @@ export default function BreederDashboardPage() {
                 <Badge
                   variant={petBadgeVariant(pet.status)}
                   className={
-                    pet.status === "掲載中" ? "shrink-0 border-transparent bg-[var(--primary)]" : "shrink-0"
+                    pet.status === "掲載中"
+                      ? "shrink-0 border-transparent bg-[var(--primary)]"
+                      : "shrink-0"
                   }
                 >
                   {pet.status}

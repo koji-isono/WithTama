@@ -6,18 +6,10 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import {
-  signUpWithRole,
-  type SignupRole,
-} from "@/lib/supabase/sign-up";
+import { signUpWithRole, type SignupRole } from "@/lib/supabase/sign-up";
 
 const roleOptions: {
   role: SignupRole;
@@ -73,9 +65,7 @@ export default function SignupPage() {
       return;
     }
 
-    setSuccessMessage(
-      "確認メールを送信しました。メール内のリンクから登録を完了してください。",
-    );
+    setSuccessMessage("確認メールを送信しました。メール内のリンクから登録を完了してください。");
   }
 
   return (
@@ -83,9 +73,7 @@ export default function SignupPage() {
       <h1 className="text-2xl font-bold sm:text-3xl">無料会員登録</h1>
 
       <section className="mt-8">
-        <h2 className="text-lg font-semibold sm:text-xl">
-          あなたはどちらですか？
-        </h2>
+        <h2 className="text-lg font-semibold sm:text-xl">あなたはどちらですか？</h2>
         <div className="mt-4 grid gap-4">
           {roleOptions.map((option) => {
             const isSelected = role === option.role;
@@ -98,8 +86,7 @@ export default function SignupPage() {
                 aria-pressed={isSelected}
                 className={cn(
                   "cursor-pointer transition-colors hover:border-primary/50 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                  isSelected &&
-                    "border-primary bg-secondary/60 ring-2 ring-primary/20"
+                  isSelected && "border-primary bg-secondary/60 ring-2 ring-primary/20",
                 )}
                 onClick={() => {
                   setRole(option.role);
@@ -181,10 +168,7 @@ export default function SignupPage() {
             </div>
 
             {errorMessage ? (
-              <Alert
-                variant="destructive"
-                className="border-red-200 bg-red-50 text-red-800"
-              >
+              <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
                 <AlertCircle className="size-4 text-red-600" />
                 <AlertDescription>{errorMessage}</AlertDescription>
               </Alert>

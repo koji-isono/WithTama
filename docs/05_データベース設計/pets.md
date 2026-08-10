@@ -1,10 +1,10 @@
 # pets テーブル
 
-| 項目 | 内容 |
-|------|------|
+| 項目       | 内容          |
+| ---------- | ------------- |
 | テーブル名 | `public.pets` |
-| Version | 1.1 |
-| 状態 | 確定 |
+| Version    | 1.1           |
+| 状態       | 確定          |
 
 ## 目的
 
@@ -12,49 +12,49 @@
 
 ## カラム定義
 
-| カラム名 | 型 | NULL | 初期値 | 説明 |
-|---------|-----|------|--------|------|
-| `id` | uuid | NOT NULL | `gen_random_uuid()` | 犬猫ID、主キー |
-| `breeder_id` | uuid | NOT NULL | なし | ブリーダーID。`auth.users` または `breeders` への外部キー候補 |
-| `management_name` | text | NOT NULL | なし | ブリーダー内部用の管理名 |
-| `public_display_name` | text | NOT NULL | なし | 購入希望者へ表示する名前 |
-| `species` | text | NOT NULL | なし | `dog` または `cat` |
-| `breed` | text | NOT NULL | なし | 犬種・猫種。第1期は自由入力 |
-| `sex` | text | NOT NULL | なし | `male` または `female` |
-| `birthday` | date | NULL | `null` | 誕生日 |
-| `color` | text | NULL | `null` | 毛色 |
-| `temperament` | text | NULL | `null` | 性格・気質（紹介文 `description` とは別管理） |
-| `description` | text | NULL | `null` | ブリーダーが確認・修正した公開紹介文 |
-| `ai_description` | text | NULL | `null` | AI が作成した紹介文の下書き |
-| `ai_generated_at` | timestamptz | NULL | `null` | AI 紹介文を生成した日時 |
-| `price` | integer | NULL | `null` | 税込販売価格、円単位。0 以上 |
-| `price_comment` | text | NULL | `null` | ワクチン費用込み等の価格補足 |
-| `status` | text | NOT NULL | `draft` | 掲載状態 |
-| `published_at` | timestamptz | NULL | `null` | 初回公開日時 |
-| `display_order` | integer | NOT NULL | `0` | 一覧表示順（0 以上） |
-| `deleted_at` | timestamptz | NULL | `null` | 論理削除日時。NULL の行を通常表示対象とする |
-| `created_by` | uuid | NULL | `null` | 作成者ユーザーID |
-| `updated_by` | uuid | NULL | `null` | 最終更新者ユーザーID |
-| `created_at` | timestamptz | NOT NULL | `now()` | 作成日時 |
-| `updated_at` | timestamptz | NOT NULL | `now()` | 更新日時（UPDATE 時にトリガーで自動更新） |
+| カラム名              | 型          | NULL     | 初期値              | 説明                                                          |
+| --------------------- | ----------- | -------- | ------------------- | ------------------------------------------------------------- |
+| `id`                  | uuid        | NOT NULL | `gen_random_uuid()` | 犬猫ID、主キー                                                |
+| `breeder_id`          | uuid        | NOT NULL | なし                | ブリーダーID。`auth.users` または `breeders` への外部キー候補 |
+| `management_name`     | text        | NOT NULL | なし                | ブリーダー内部用の管理名                                      |
+| `public_display_name` | text        | NOT NULL | なし                | 購入希望者へ表示する名前                                      |
+| `species`             | text        | NOT NULL | なし                | `dog` または `cat`                                            |
+| `breed`               | text        | NOT NULL | なし                | 犬種・猫種。第1期は自由入力                                   |
+| `sex`                 | text        | NOT NULL | なし                | `male` または `female`                                        |
+| `birthday`            | date        | NULL     | `null`              | 誕生日                                                        |
+| `color`               | text        | NULL     | `null`              | 毛色                                                          |
+| `temperament`         | text        | NULL     | `null`              | 性格・気質（紹介文 `description` とは別管理）                 |
+| `description`         | text        | NULL     | `null`              | ブリーダーが確認・修正した公開紹介文                          |
+| `ai_description`      | text        | NULL     | `null`              | AI が作成した紹介文の下書き                                   |
+| `ai_generated_at`     | timestamptz | NULL     | `null`              | AI 紹介文を生成した日時                                       |
+| `price`               | integer     | NULL     | `null`              | 税込販売価格、円単位。0 以上                                  |
+| `price_comment`       | text        | NULL     | `null`              | ワクチン費用込み等の価格補足                                  |
+| `status`              | text        | NOT NULL | `draft`             | 掲載状態                                                      |
+| `published_at`        | timestamptz | NULL     | `null`              | 初回公開日時                                                  |
+| `display_order`       | integer     | NOT NULL | `0`                 | 一覧表示順（0 以上）                                          |
+| `deleted_at`          | timestamptz | NULL     | `null`              | 論理削除日時。NULL の行を通常表示対象とする                   |
+| `created_by`          | uuid        | NULL     | `null`              | 作成者ユーザーID                                              |
+| `updated_by`          | uuid        | NULL     | `null`              | 最終更新者ユーザーID                                          |
+| `created_at`          | timestamptz | NOT NULL | `now()`             | 作成日時                                                      |
+| `updated_at`          | timestamptz | NOT NULL | `now()`             | 更新日時（UPDATE 時にトリガーで自動更新）                     |
 
 ## TypeScript 対応（参考）
 
 | DB カラム（snake_case） | TypeScript（camelCase） |
-|------------------------|------------------------|
-| `management_name` | `managementName` |
-| `public_display_name` | `publicDisplayName` |
-| `breeder_id` | `breederId` |
-| `ai_description` | `aiDescription` |
-| `ai_generated_at` | `aiGeneratedAt` |
-| `price_comment` | `priceComment` |
-| `published_at` | `publishedAt` |
-| `display_order` | `displayOrder` |
-| `deleted_at` | `deletedAt` |
-| `created_by` | `createdBy` |
-| `updated_by` | `updatedBy` |
-| `created_at` | `createdAt` |
-| `updated_at` | `updatedAt` |
+| ----------------------- | ----------------------- |
+| `management_name`       | `managementName`        |
+| `public_display_name`   | `publicDisplayName`     |
+| `breeder_id`            | `breederId`             |
+| `ai_description`        | `aiDescription`         |
+| `ai_generated_at`       | `aiGeneratedAt`         |
+| `price_comment`         | `priceComment`          |
+| `published_at`          | `publishedAt`           |
+| `display_order`         | `displayOrder`          |
+| `deleted_at`            | `deletedAt`             |
+| `created_by`            | `createdBy`             |
+| `updated_by`            | `updatedBy`             |
+| `created_at`            | `createdAt`             |
+| `updated_at`            | `updatedAt`             |
 
 ## 制約
 
@@ -64,24 +64,24 @@
 
 ### CHECK 制約
 
-| カラム | 許可値 / 条件 |
-|--------|--------------|
-| `species` | `dog`, `cat` のみ |
-| `sex` | `male`, `female` のみ |
-| `price` | NULL または `0` 以上 |
-| `status` | 下記 6 種類のみ |
-| `display_order` | `0` 以上 |
+| カラム          | 許可値 / 条件         |
+| --------------- | --------------------- |
+| `species`       | `dog`, `cat` のみ     |
+| `sex`           | `male`, `female` のみ |
+| `price`         | NULL または `0` 以上  |
+| `status`        | 下記 6 種類のみ       |
+| `display_order` | `0` 以上              |
 
 ### status 許可値
 
-| 値 | 説明 |
-|----|------|
-| `draft` | 下書き |
-| `under_review` | 審査中 |
-| `published` | 掲載中 |
-| `paused` | 一時停止 |
+| 値               | 説明     |
+| ---------------- | -------- |
+| `draft`          | 下書き   |
+| `under_review`   | 審査中   |
+| `published`      | 掲載中   |
+| `paused`         | 一時停止 |
 | `family_decided` | 家族決定 |
-| `closed` | クローズ |
+| `closed`         | クローズ |
 
 ### ビジネスルール
 
@@ -124,15 +124,15 @@ under_review
 
 `status` 列が変わる UPDATE の直前に `BEFORE UPDATE OF status` トリガー `pets_enforce_status_transition` が発火し、`public.enforce_pets_status_transition()` で許可遷移のみを通す。
 
-| レイヤー | 役割 |
-|---------|------|
-| RLS | 操作可能な行 |
-| トリガー | status 遷移 |
+| レイヤー | 役割         |
+| -------- | ------------ |
+| RLS      | 操作可能な行 |
+| トリガー | status 遷移  |
 
 **第1期で許可する status 変更（1 件のみ）**
 
-| 主体 | 遷移 | 条件 |
-|------|------|------|
+| 主体            | 遷移                     | 条件                                                 |
+| --------------- | ------------------------ | ---------------------------------------------------- |
 | breeder（本人） | `draft` → `under_review` | `pets.breeder_id` がログインユーザーの `breeders.id` |
 
 - `OLD.status = NEW.status` の場合は許可（通常の犬猫情報編集）
@@ -172,11 +172,11 @@ stateDiagram-v2
 
 ## マイグレーション
 
-| ファイル | 内容 |
-|---------|------|
-| `20260804132200_update_pets_v1_1.sql` | Version 1.0 → 1.1（`name` リネーム、カラム追加、制約、トリガー） |
-| `20260807120000_harden_pets_rls.sql` | RLS 本番化（Decision No.103、作成済み・未適用） |
-| `20260807130000_enforce_pets_status_transition.sql` | status 遷移トリガー（作成済み・未適用。RLS 本番化の後に適用） |
+| ファイル                                            | 内容                                                             |
+| --------------------------------------------------- | ---------------------------------------------------------------- |
+| `20260804132200_update_pets_v1_1.sql`               | Version 1.0 → 1.1（`name` リネーム、カラム追加、制約、トリガー） |
+| `20260807120000_harden_pets_rls.sql`                | RLS 本番化（Decision No.103、作成済み・未適用）                  |
+| `20260807130000_enforce_pets_status_transition.sql` | status 遷移トリガー（作成済み・未適用。RLS 本番化の後に適用）    |
 
 既存データを保持する。`DROP TABLE` / `TRUNCATE` / `DELETE` は使用しない。
 

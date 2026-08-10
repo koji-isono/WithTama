@@ -39,9 +39,7 @@ import {
   validateLocationProfile,
 } from "./validation";
 
-export async function saveBasicProfile(
-  input: BasicProfileInput,
-): Promise<SaveBasicProfileResult> {
+export async function saveBasicProfile(input: BasicProfileInput): Promise<SaveBasicProfileResult> {
   const fieldErrors = validateBasicProfile(input);
 
   if (hasValidationErrors(fieldErrors)) {
@@ -231,8 +229,7 @@ export async function uploadBreederDocument(
   } catch (error) {
     return {
       success: false,
-      error:
-        error instanceof Error ? error.message : "ファイルを確認してください。",
+      error: error instanceof Error ? error.message : "ファイルを確認してください。",
     };
   }
 

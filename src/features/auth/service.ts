@@ -1,11 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 
-import {
-  createBreeder,
-  createBuyer,
-  getBreederByUserId,
-  getBuyerByUserId,
-} from "./repository";
+import { createBreeder, createBuyer, getBreederByUserId, getBuyerByUserId } from "./repository";
 import {
   InvalidUserRoleError,
   parseUserRole,
@@ -34,9 +29,7 @@ async function ensureBreederProfile(user: User): Promise<BreederRow> {
   return createBreeder(user);
 }
 
-export async function ensureUserProfile(
-  user: User,
-): Promise<EnsureUserProfileResult> {
+export async function ensureUserProfile(user: User): Promise<EnsureUserProfileResult> {
   const role = parseUserRole(user);
 
   if (!role) {

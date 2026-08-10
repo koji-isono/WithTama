@@ -30,10 +30,13 @@ export function ProfileFormField({
 
   const fieldControl =
     isValidElement(children) && describedBy
-      ? cloneElement(children as ReactElement<{ "aria-describedby"?: string; "aria-invalid"?: boolean }>, {
-          "aria-describedby": describedBy,
-          "aria-invalid": Boolean(error),
-        })
+      ? cloneElement(
+          children as ReactElement<{ "aria-describedby"?: string; "aria-invalid"?: boolean }>,
+          {
+            "aria-describedby": describedBy,
+            "aria-invalid": Boolean(error),
+          },
+        )
       : isValidElement(children)
         ? cloneElement(children as ReactElement<{ "aria-invalid"?: boolean }>, {
             "aria-invalid": Boolean(error),
@@ -58,9 +61,7 @@ export function ProfileFormField({
         </p>
       ) : null}
 
-      <div
-        className={cn(error && "[&_input]:border-red-400 [&_input]:focus-visible:ring-red-400")}
-      >
+      <div className={cn(error && "[&_input]:border-red-400 [&_input]:focus-visible:ring-red-400")}>
         {fieldControl}
       </div>
 

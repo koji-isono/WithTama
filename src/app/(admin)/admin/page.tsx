@@ -2,12 +2,7 @@ export const metadata = {
   title: "管理者ダッシュボード",
 };
 
-const FUTURE_SECTIONS = [
-  "犬猫掲載審査",
-  "ブリーダー審査",
-  "問い合わせ管理",
-  "会員管理",
-] as const;
+const FUTURE_SECTIONS = ["犬猫掲載審査", "ブリーダー審査", "問い合わせ管理", "会員管理"] as const;
 
 export default function AdminDashboardPage() {
   return (

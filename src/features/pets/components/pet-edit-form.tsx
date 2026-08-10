@@ -45,10 +45,7 @@ export function PetEditForm({ initialData }: PetEditFormProps) {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function updateField<K extends keyof CreatePetDraftInput>(
-    key: K,
-    value: CreatePetDraftInput[K],
-  ) {
+  function updateField<K extends keyof CreatePetDraftInput>(key: K, value: CreatePetDraftInput[K]) {
     setForm((current) => ({ ...current, [key]: value }));
     setFieldErrors((current) => {
       if (!current[key]) {

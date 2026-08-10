@@ -38,7 +38,11 @@ export function formatPetPhotoUploadError(error: unknown, storagePath?: string):
         ? (error as { message: string }).message
         : PRODUCTION_UPLOAD_MESSAGE;
 
-  return [PRODUCTION_UPLOAD_MESSAGE, `message: ${message}`, storagePath ? `path: ${storagePath}` : null]
+  return [
+    PRODUCTION_UPLOAD_MESSAGE,
+    `message: ${message}`,
+    storagePath ? `path: ${storagePath}` : null,
+  ]
     .filter((line): line is string => Boolean(line))
     .join("\n");
 }

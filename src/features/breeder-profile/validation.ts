@@ -10,10 +10,7 @@ import type {
   LocationProfileFieldErrors,
   LocationProfileInput,
 } from "./types";
-import {
-  INTRODUCTION_PROFILE_MAX_LENGTH,
-  INTRODUCTION_PROFILE_MIN_LENGTH,
-} from "./types";
+import { INTRODUCTION_PROFILE_MAX_LENGTH, INTRODUCTION_PROFILE_MIN_LENGTH } from "./types";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const POSTAL_CODE_PATTERN = /^\d{3}-\d{4}$/;
@@ -55,9 +52,7 @@ export function validateBasicProfile(input: BasicProfileInput): BasicProfileFiel
   return errors;
 }
 
-export function validateLocationProfile(
-  input: LocationProfileInput,
-): LocationProfileFieldErrors {
+export function validateLocationProfile(input: LocationProfileInput): LocationProfileFieldErrors {
   const errors: LocationProfileFieldErrors = {};
 
   const postalCode = input.postalCode.trim();
@@ -157,10 +152,7 @@ export function normalizeIntroductionProfileInput(
   };
 }
 
-function validateIntroductionField(
-  value: string,
-  label: string,
-): string | undefined {
+function validateIntroductionField(value: string, label: string): string | undefined {
   if (!value) {
     return `${label}を入力してください。`;
   }

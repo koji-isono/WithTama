@@ -6,57 +6,57 @@
 
 ## 実装構成
 
-| レイヤー | ファイル | 責務 |
-|---------|---------|------|
-| UI | `src/app/breeder/pets/new/page.tsx` | 犬猫登録フォーム |
-| UI | `src/app/breeder/pets/[petId]/edit/page.tsx` | 犬猫情報編集フォーム |
-| Service | `src/features/pets/service.ts` | バリデーション → Repository 呼び出し |
-| Repository | `src/features/pets/repository.ts` | Supabase INSERT / SELECT / UPDATE |
-| Validation | `src/features/pets/validation.ts` | 入力チェック |
+| レイヤー   | ファイル                                     | 責務                                 |
+| ---------- | -------------------------------------------- | ------------------------------------ |
+| UI         | `src/app/breeder/pets/new/page.tsx`          | 犬猫登録フォーム                     |
+| UI         | `src/app/breeder/pets/[petId]/edit/page.tsx` | 犬猫情報編集フォーム                 |
+| Service    | `src/features/pets/service.ts`               | バリデーション → Repository 呼び出し |
+| Repository | `src/features/pets/repository.ts`            | Supabase INSERT / SELECT / UPDATE    |
+| Validation | `src/features/pets/validation.ts`            | 入力チェック                         |
 
 ## createPetDraft
 
-| 項目 | 内容 |
-|------|------|
-| 種別 | Server Action |
-| 実装 | `src/features/pets/service.ts` |
+| 項目 | 内容                                         |
+| ---- | -------------------------------------------- |
+| 種別 | Server Action                                |
+| 実装 | `src/features/pets/service.ts`               |
 | 認証 | Supabase Auth セッション（`auth.getUser()`） |
 
 ### リクエスト（CreatePetDraftInput）
 
-| フィールド | 型 | 必須 |
-|-----------|-----|------|
-| `managementName` | string | はい |
-| `publicDisplayName` | string | はい |
-| `species` | `"dog"` \| `"cat"` | はい |
-| `breed` | string | はい |
-| `sex` | `"male"` \| `"female"` | はい |
-| `birthday` | string | いいえ（未来日不可） |
-| `color` | string | いいえ |
-| `temperament` | string | いいえ（500 文字以内） |
-| `price` | string | いいえ（0 以上の整数） |
-| `priceComment` | string | いいえ（500 文字以内） |
+| フィールド          | 型                     | 必須                   |
+| ------------------- | ---------------------- | ---------------------- |
+| `managementName`    | string                 | はい                   |
+| `publicDisplayName` | string                 | はい                   |
+| `species`           | `"dog"` \| `"cat"`     | はい                   |
+| `breed`             | string                 | はい                   |
+| `sex`               | `"male"` \| `"female"` | はい                   |
+| `birthday`          | string                 | いいえ（未来日不可）   |
+| `color`             | string                 | いいえ                 |
+| `temperament`       | string                 | いいえ（500 文字以内） |
+| `price`             | string                 | いいえ（0 以上の整数） |
+| `priceComment`      | string                 | いいえ（500 文字以内） |
 
 ### 更新対象テーブル
 
 `public.pets`
 
-| DB カラム | 内容 |
-|-----------|------|
-| `breeder_id` | サーバー側で `getBreederIdByUserId` により解決 |
-| `management_name` | 管理名 |
-| `public_display_name` | 公開表示名 |
-| `species` | 犬猫種別 |
-| `breed` | 犬種・猫種 |
-| `sex` | 性別 |
-| `birthday` | 誕生日 |
-| `color` | 毛色 |
-| `temperament` | 性格 |
-| `price` | 価格 |
-| `price_comment` | 価格補足 |
-| `status` | 常に `draft` |
-| `display_order` | `0` |
-| `created_by` / `updated_by` | `auth.users.id` |
+| DB カラム                   | 内容                                           |
+| --------------------------- | ---------------------------------------------- |
+| `breeder_id`                | サーバー側で `getBreederIdByUserId` により解決 |
+| `management_name`           | 管理名                                         |
+| `public_display_name`       | 公開表示名                                     |
+| `species`                   | 犬猫種別                                       |
+| `breed`                     | 犬種・猫種                                     |
+| `sex`                       | 性別                                           |
+| `birthday`                  | 誕生日                                         |
+| `color`                     | 毛色                                           |
+| `temperament`               | 性格                                           |
+| `price`                     | 価格                                           |
+| `price_comment`             | 価格補足                                       |
+| `status`                    | 常に `draft`                                   |
+| `display_order`             | `0`                                            |
+| `created_by` / `updated_by` | `auth.users.id`                                |
 
 ### 成功時の画面遷移
 
@@ -64,11 +64,11 @@
 
 ## getPetEditData / loadPetEditPageData
 
-| 項目 | 内容 |
-|------|------|
-| 種別 | Server 関数 / Loader |
+| 項目 | 内容                        |
+| ---- | --------------------------- |
+| 種別 | Server 関数 / Loader        |
 | 実装 | `service.ts` / `loaders.ts` |
-| 認証 | `auth.getUser()` |
+| 認証 | `auth.getUser()`            |
 
 ### 取得条件
 
@@ -80,10 +80,10 @@
 
 ## updatePetDraftAction
 
-| 項目 | 内容 |
-|------|------|
-| 種別 | Server Action |
-| 実装 | `src/features/pets/service.ts` |
+| 項目 | 内容                                         |
+| ---- | -------------------------------------------- |
+| 種別 | Server Action                                |
+| 実装 | `src/features/pets/service.ts`               |
 | 認証 | Supabase Auth セッション（`auth.getUser()`） |
 
 ### リクエスト
@@ -103,11 +103,11 @@
 
 ## uploadPetPhotoAction
 
-| 項目 | 内容 |
-|------|------|
-| 種別 | Server Action |
+| 項目 | 内容                           |
+| ---- | ------------------------------ |
+| 種別 | Server Action                  |
 | 実装 | `src/features/pets/service.ts` |
-| 認証 | `auth.getUser()` |
+| 認証 | `auth.getUser()`               |
 
 ### リクエスト
 
@@ -128,21 +128,21 @@
 
 ## setMainPetPhotoAction
 
-| 項目 | 内容 |
-|------|------|
-| 種別 | Server Action |
+| 項目 | 内容                           |
+| ---- | ------------------------------ |
+| 種別 | Server Action                  |
 | 実装 | `src/features/pets/service.ts` |
-| 認証 | `auth.getUser()` |
+| 認証 | `auth.getUser()`               |
 
 PostgreSQL 関数 `set_main_pet_photo` により、対象 pet の全写真を `is_main = false` にした後、指定写真のみ `is_main = true` にする。
 
 ## deletePetPhotoAction
 
-| 項目 | 内容 |
-|------|------|
-| 種別 | Server Action |
+| 項目 | 内容                           |
+| ---- | ------------------------------ |
+| 種別 | Server Action                  |
 | 実装 | `src/features/pets/service.ts` |
-| 認証 | `auth.getUser()` |
+| 認証 | `auth.getUser()`               |
 
 ### 削除順序
 
@@ -153,11 +153,11 @@ PostgreSQL 関数 `set_main_pet_photo` により、対象 pet の全写真を `i
 
 ## loadBreederPets
 
-| 項目 | 内容 |
-|------|------|
-| 種別 | Server 関数 |
+| 項目 | 内容                           |
+| ---- | ------------------------------ |
+| 種別 | Server 関数                    |
 | 実装 | `src/features/pets/service.ts` |
-| 認証 | `auth.getUser()` |
+| 認証 | `auth.getUser()`               |
 
 ### 取得条件
 
@@ -174,11 +174,11 @@ PostgreSQL 関数 `set_main_pet_photo` により、対象 pet の全写真を `i
 
 ## submitPetForReviewAction
 
-| 項目 | 内容 |
-|------|------|
-| 種別 | Server Action |
+| 項目 | 内容                           |
+| ---- | ------------------------------ |
+| 種別 | Server Action                  |
 | 実装 | `src/features/pets/service.ts` |
-| 認証 | `auth.getUser()` |
+| 認証 | `auth.getUser()`               |
 
 ### 状態遷移
 
@@ -201,10 +201,10 @@ PostgreSQL 関数 `set_main_pet_photo` により、対象 pet の全写真を `i
 
 ## 今後追加予定 — 管理者審査（Decision No.96〜105）
 
-| アクション | 状態遷移 | ログ |
-|-----------|---------|------|
-| `approvePetForPublishAction` | `under_review` → `published` | `action = approved` |
-| `returnPetReviewAction` | `under_review` → `draft` | `action = returned`（comment 必須） |
+| アクション                   | 状態遷移                     | ログ                                |
+| ---------------------------- | ---------------------------- | ----------------------------------- |
+| `approvePetForPublishAction` | `under_review` → `published` | `action = approved`                 |
+| `returnPetReviewAction`      | `under_review` → `draft`     | `action = returned`（comment 必須） |
 
 公開承認時はブリーダー承認済み・登録有効をサーバー側で再検証する（Decision No.101）。具体条件は実 DB 定義確認後に実装。
 

@@ -13,14 +13,14 @@
 
 ## ファイル構成
 
-| ファイル | 内容 |
-|---------|------|
-| `types.ts` | ロール型、`isAdminUser`, `parseMemberUserRole`, 行型 |
-| `admin-auth.ts` | `getCurrentAdmin`, `requireAdmin`（Server 専用） |
-| `repository.ts` | `buyers` / `breeders` の SELECT・INSERT |
-| `service.ts` | `ensureUserProfile` |
-| `entry-redirect.ts` | `getBreederEntryPath`, `getBuyerEntryPath` |
-| `index.ts` | 公開 export（Server 専用は `admin-auth.ts` から直接 import） |
+| ファイル            | 内容                                                         |
+| ------------------- | ------------------------------------------------------------ |
+| `types.ts`          | ロール型、`isAdminUser`, `parseMemberUserRole`, 行型         |
+| `admin-auth.ts`     | `getCurrentAdmin`, `requireAdmin`（Server 専用）             |
+| `repository.ts`     | `buyers` / `breeders` の SELECT・INSERT                      |
+| `service.ts`        | `ensureUserProfile`                                          |
+| `entry-redirect.ts` | `getBreederEntryPath`, `getBuyerEntryPath`                   |
+| `index.ts`          | 公開 export（Server 専用は `admin-auth.ts` から直接 import） |
 
 ## 関連画面
 

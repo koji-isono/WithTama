@@ -1,11 +1,11 @@
 # pets status 変更 セキュリティレビュー
 
-| 項目 | 内容 |
-|------|------|
-| 調査日 | 2026-08-07 |
-| 目的 | 公開申請（`draft → under_review`）の実行経路と status 変更のセキュリティ評価 |
-| 対象 Migration | `20260807120000_harden_pets_rls.sql`（**未適用**） |
-| 備考 | 調査のみ。コード・Migration 変更は行っていない |
+| 項目           | 内容                                                                         |
+| -------------- | ---------------------------------------------------------------------------- |
+| 調査日         | 2026-08-07                                                                   |
+| 目的           | 公開申請（`draft → under_review`）の実行経路と status 変更のセキュリティ評価 |
+| 対象 Migration | `20260807120000_harden_pets_rls.sql`（**未適用**）                           |
+| 備考           | 調査のみ。コード・Migration 変更は行っていない                               |
 
 ---
 
@@ -18,11 +18,11 @@
 
 ## 1. 公開申請を開始する UI ファイル
 
-| ファイル | 役割 |
-|---------|------|
-| `src/app/breeder/pets/page.tsx` | 犬猫一覧ページ（Server Component） |
+| ファイル                                                     | 役割                                                          |
+| ------------------------------------------------------------ | ------------------------------------------------------------- |
+| `src/app/breeder/pets/page.tsx`                              | 犬猫一覧ページ（Server Component）                            |
 | `src/features/pets/components/breeder-pets-list-content.tsx` | 一覧 Card UI。「公開申請」ボタン（`status === "draft"` のみ） |
-| `src/features/pets/components/pet-submit-review-dialog.tsx` | 確認ダイアログ（UI のみ、DB 操作なし） |
+| `src/features/pets/components/pet-submit-review-dialog.tsx`  | 確認ダイアログ（UI のみ、DB 操作なし）                        |
 
 公開申請ボタンは `PetListCard` 内（`breeder-pets-list-content.tsx`）。確認後 `handleConfirmSubmit()` → `submitPetForReviewAction(pet.id)` を呼び出す。
 
@@ -52,8 +52,8 @@ BreederPetsListContent (Client)
 
 ## 3. `pets.status` を `under_review` に UPDATE しているファイルと関数
 
-| 層 | ファイル | 関数 |
-|----|---------|------|
+| 層         | ファイル                          | 関数                       |
+| ---------- | --------------------------------- | -------------------------- |
 | Repository | `src/features/pets/repository.ts` | **`submitPetForReview()`** |
 
 ```typescript
@@ -103,11 +103,11 @@ Server Action 内で実行されるため、RLS は **その breeder の `auth.u
 
 ### Repository（PostgREST / Supabase JS）
 
-| 条件 | 値 |
-|------|-----|
-| `id` | `petId` |
+| 条件         | 値                                     |
+| ------------ | -------------------------------------- |
+| `id`         | `petId`                                |
 | `breeder_id` | ログインユーザーに紐づく `breeders.id` |
-| `status` | `'draft'` |
+| `status`     | `'draft'`                              |
 
 SET する列: `status = 'under_review'`, `updated_by`, `updated_at`
 
@@ -123,10 +123,10 @@ SET する列: `status = 'under_review'`, `updated_by`, `updated_at`
 
 ## 7. `draft → under_review` の二重送信防止
 
-| 層 | 机制 |
-|----|------|
-| UI | 申請中 `isSubmitting` でボタン無効化 |
-| Service | `pet.status !== "draft"` なら拒否 |
+| 層         | 机制                                                                       |
+| ---------- | -------------------------------------------------------------------------- |
+| UI         | 申請中 `isSubmitting` でボタン無効化                                       |
+| Service    | `pet.status !== "draft"` なら拒否                                          |
 | Repository | **`.eq("status", "draft")`** — 既に `under_review` なら 0 行更新 → `false` |
 
 同時二重リクエストでも、SQL の `status = draft` 条件により **1 件のみ成功**（楽観的ロック相当）。アプリ層チェックだけではレースあり得るが、Repository 条件で最終防御。
@@ -153,7 +153,7 @@ SET する列: `status = 'under_review'`, `updated_by`, `updated_at`
 直接呼び出し例（JWT 付き）:
 
 ```javascript
-supabase.from('pets').update({ status: 'published' }).eq('id', petId)
+supabase.from("pets").update({ status: "published" }).eq("id", petId);
 ```
 
 → 本人の犬猫なら RLS を通過しうる。他人の犬猫は **不可**（ownership チェック）。
@@ -164,15 +164,15 @@ supabase.from('pets').update({ status: 'published' }).eq('id', petId)
 
 **いいえ（hardened Migration 適用後も不可）。**
 
-| 遷移 | RLS で防止 |
-|------|-----------|
-| 他人の pets への UPDATE | ✅ 防止 |
-| 新規 INSERT が `draft` 以外 | ✅ 防止（INSERT Policy） |
-| 本人 pets の `draft → under_review` | ✅ 許可（意図どおり） |
-| 本人 pets の `draft → published`（API 迂回） | ❌ **防止不可** |
-| 本人 pets の `under_review → published` | ❌ **防止不可** |
-| 本人 pets の任意 status ジャンプ | ❌ **防止不可** |
-| admin の `under_review → published` | admin UPDATE Policy 未作成のため不可（意図どおり未実装） |
+| 遷移                                         | RLS で防止                                               |
+| -------------------------------------------- | -------------------------------------------------------- |
+| 他人の pets への UPDATE                      | ✅ 防止                                                  |
+| 新規 INSERT が `draft` 以外                  | ✅ 防止（INSERT Policy）                                 |
+| 本人 pets の `draft → under_review`          | ✅ 許可（意図どおり）                                    |
+| 本人 pets の `draft → published`（API 迂回） | ❌ **防止不可**                                          |
+| 本人 pets の `under_review → published`      | ❌ **防止不可**                                          |
+| 本人 pets の任意 status ジャンプ             | ❌ **防止不可**                                          |
+| admin の `under_review → published`          | admin UPDATE Policy 未作成のため不可（意図どおり未実装） |
 
 status 遷移の厳密制御は **アプリ層（Server Action）のみ**。RLS は **所有者スコープ** に留まる設計（Migration 内コメントも同旨）。
 
@@ -197,11 +197,11 @@ CREATE FUNCTION enforce_pets_status_transition() ...
 
 ### 案 B: SECURITY DEFINER RPC（Decision No.94 / No.105 と整合）
 
-| 関数 | 遷移 | 呼び出し元 |
-|------|------|-----------|
+| 関数                              | 遷移                                              | 呼び出し元                        |
+| --------------------------------- | ------------------------------------------------- | --------------------------------- |
 | `submit_pet_for_review(p_pet_id)` | `draft → under_review` + `pet_review_logs` INSERT | 既存 Repository から RPC 呼び出し |
-| `approve_pet_for_publish(...)` | `under_review → published` | 将来 admin Action |
-| `return_pet_review(...)` | `under_review → draft` | 将来 admin Action |
+| `approve_pet_for_publish(...)`    | `under_review → published`                        | 将来 admin Action                 |
+| `return_pet_review(...)`          | `under_review → draft`                            | 将来 admin Action                 |
 
 - 一般ユーザーへの `pets` 直接 UPDATE を REVOKE または RLS で status 変更不可に近づける
 - 変更範囲は Repository の呼び出し差し替え + Migration
@@ -216,11 +216,11 @@ PostgreSQL RLS の UPDATE `WITH CHECK` は **NEW 行のみ**参照可能で OLD.
 
 ## リスク整理
 
-| 状態 | リスク |
-|------|--------|
-| DB が開発用全許可 Policy のまま | **最高** — 越権・任意 status 変更が可能 |
-| hardened RLS 適用後 | **中** — 本人 pets への任意 status 変更は API 迂回で可能 |
-| アプリ経由の公開申請 | **低** — 多層チェック + SQL `status = draft` で妥当 |
+| 状態                            | リスク                                                   |
+| ------------------------------- | -------------------------------------------------------- |
+| DB が開発用全許可 Policy のまま | **最高** — 越権・任意 status 変更が可能                  |
+| hardened RLS 適用後             | **中** — 本人 pets への任意 status 変更は API 迂回で可能 |
+| アプリ経由の公開申請            | **低** — 多層チェック + SQL `status = draft` で妥当      |
 
 公開申請フロー自体の実装は、Server Action + ユーザー JWT + 所有者スコープ + `status = draft` 条件で **設計意図どおり**。弱点は **RLS が status 列を縛らない**点と、**未適用時の開発用 Policy** である。
 

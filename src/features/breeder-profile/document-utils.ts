@@ -8,20 +8,18 @@ import {
   type BreederDocumentType,
 } from "./document-constants";
 
-const EXTENSION_BY_MIME: Record<BreederDocumentAllowedMimeType, BreederDocumentAllowedExtension> =
-  {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "application/pdf": "pdf",
-  };
+const EXTENSION_BY_MIME: Record<BreederDocumentAllowedMimeType, BreederDocumentAllowedExtension> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "application/pdf": "pdf",
+};
 
-const MIME_BY_EXTENSION: Record<BreederDocumentAllowedExtension, BreederDocumentAllowedMimeType> =
-  {
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    pdf: "application/pdf",
-  };
+const MIME_BY_EXTENSION: Record<BreederDocumentAllowedExtension, BreederDocumentAllowedMimeType> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  pdf: "application/pdf",
+};
 
 export function formatDocumentFileSize(bytes: number): string {
   if (bytes < 1024) {
@@ -62,11 +60,7 @@ export function validateBreederDocumentFile(file: File): string | null {
     return "ファイルサイズは10MB以内にしてください。";
   }
 
-  if (
-    !BREEDER_DOCUMENT_ALLOWED_MIME_TYPES.includes(
-      file.type as BreederDocumentAllowedMimeType,
-    )
-  ) {
+  if (!BREEDER_DOCUMENT_ALLOWED_MIME_TYPES.includes(file.type as BreederDocumentAllowedMimeType)) {
     return "対応していないファイル形式です。jpg、jpeg、png、pdf のみアップロードできます。";
   }
 

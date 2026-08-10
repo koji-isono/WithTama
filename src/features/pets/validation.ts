@@ -61,9 +61,7 @@ export function normalizeCreatePetDraftInput(
   };
 }
 
-export function validateCreatePetDraftInput(
-  input: CreatePetDraftInput,
-): CreatePetDraftFieldErrors {
+export function validateCreatePetDraftInput(input: CreatePetDraftInput): CreatePetDraftFieldErrors {
   const normalized = normalizeCreatePetDraftInput(input);
   const errors: CreatePetDraftFieldErrors = {};
 
@@ -122,7 +120,10 @@ export function hasPetValidationErrors(errors: CreatePetDraftFieldErrors): boole
   return Object.keys(errors).length > 0;
 }
 
-export function validatePetPhotoUpload(file: File | null, currentPhotoCount: number): string | null {
+export function validatePetPhotoUpload(
+  file: File | null,
+  currentPhotoCount: number,
+): string | null {
   if (currentPhotoCount >= PET_PHOTO_MAX_COUNT) {
     return `写真は${PET_PHOTO_MAX_COUNT}枚まで登録できます。`;
   }
@@ -137,8 +138,7 @@ export function validatePetPhotoUpload(file: File | null, currentPhotoCount: num
 export const PET_REVIEW_SUBMIT_PHOTO_REQUIRED_MESSAGE =
   "公開申請には写真を1枚以上登録してください。";
 
-export const PET_REVIEW_SUBMIT_STATUS_INVALID_MESSAGE =
-  "この犬猫は現在、公開申請できません。";
+export const PET_REVIEW_SUBMIT_STATUS_INVALID_MESSAGE = "この犬猫は現在、公開申請できません。";
 
 export const PET_REVIEW_SUBMIT_GENERIC_ERROR_MESSAGE = "公開申請に失敗しました。";
 

@@ -18,10 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { getBreederProfileStepBySlug } from "../constants";
-import {
-  BUSINESS_REGISTRATION_TYPES,
-  REGISTRATION_TYPE_GUIDANCE,
-} from "../registration-types";
+import { BUSINESS_REGISTRATION_TYPES, REGISTRATION_TYPE_GUIDANCE } from "../registration-types";
 import { saveLicenseProfile } from "../service";
 import {
   INITIAL_LICENSE_PROFILE_INPUT,
@@ -49,10 +46,7 @@ export function LicenseStepForm({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function updateField<K extends keyof LicenseProfileInput>(
-    key: K,
-    value: LicenseProfileInput[K],
-  ) {
+  function updateField<K extends keyof LicenseProfileInput>(key: K, value: LicenseProfileInput[K]) {
     setForm((current) => ({ ...current, [key]: value }));
     setFieldErrors((current) => {
       if (!current[key]) {
@@ -160,9 +154,7 @@ export function LicenseStepForm({
               id="business_registration_number"
               name="business_registration_number"
               value={form.businessRegistrationNumber}
-              onChange={(event) =>
-                updateField("businessRegistrationNumber", event.target.value)
-              }
+              onChange={(event) => updateField("businessRegistrationNumber", event.target.value)}
               placeholder="例）熊市販第123号"
               disabled={isSubmitting}
               aria-invalid={Boolean(fieldErrors.businessRegistrationNumber)}
@@ -187,10 +179,7 @@ export function LicenseStepForm({
               placeholder="例）熊本市"
               disabled={isSubmitting}
               aria-invalid={Boolean(fieldErrors.registrationAuthority)}
-              className={cn(
-                inputClassName,
-                fieldErrors.registrationAuthority && "border-red-400",
-              )}
+              className={cn(inputClassName, fieldErrors.registrationAuthority && "border-red-400")}
             />
           </ProfileFormField>
 
@@ -208,10 +197,7 @@ export function LicenseStepForm({
               onChange={(event) => updateField("registrationExpiresAt", event.target.value)}
               disabled={isSubmitting}
               aria-invalid={Boolean(fieldErrors.registrationExpiresAt)}
-              className={cn(
-                inputClassName,
-                fieldErrors.registrationExpiresAt && "border-red-400",
-              )}
+              className={cn(inputClassName, fieldErrors.registrationExpiresAt && "border-red-400")}
             />
           </ProfileFormField>
 

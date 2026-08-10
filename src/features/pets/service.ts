@@ -297,9 +297,7 @@ export async function deletePetPhotoAction(
   }
 }
 
-export async function submitPetForReviewAction(
-  petId: string,
-): Promise<SubmitPetForReviewResult> {
+export async function submitPetForReviewAction(petId: string): Promise<SubmitPetForReviewResult> {
   const supabase = await createClient();
   const {
     data: { user },

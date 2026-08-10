@@ -1,10 +1,10 @@
 # inquiry_messages テーブル
 
-| 項目 | 内容 |
-|------|------|
+| 項目       | 内容                      |
+| ---------- | ------------------------- |
 | テーブル名 | `public.inquiry_messages` |
-| Version | 1.0 |
-| 状態 | 確定 |
+| Version    | 1.0                       |
+| 状態       | 確定                      |
 
 ## 目的
 
@@ -14,27 +14,27 @@
 
 ## カラム定義
 
-| カラム名 | 型 | NULL | 初期値 | 説明 |
-|---------|-----|------|--------|------|
-| `id` | uuid | NOT NULL | `gen_random_uuid()` | メッセージID、主キー |
-| `inquiry_id` | uuid | NOT NULL | なし | `inquiries.id` への外部キー |
-| `sender_type` | text | NOT NULL | なし | `buyer` / `breeder` / `admin` |
-| `sender_user_id` | uuid | NOT NULL | なし | `auth.users.id` |
-| `message` | text | NOT NULL | なし | メッセージ本文 |
-| `is_read` | boolean | NOT NULL | `false` | 既読状態 |
-| `read_at` | timestamptz | NULL | `null` | 既読日時 |
-| `created_at` | timestamptz | NOT NULL | `now()` | 送信日時 |
+| カラム名         | 型          | NULL     | 初期値              | 説明                          |
+| ---------------- | ----------- | -------- | ------------------- | ----------------------------- |
+| `id`             | uuid        | NOT NULL | `gen_random_uuid()` | メッセージID、主キー          |
+| `inquiry_id`     | uuid        | NOT NULL | なし                | `inquiries.id` への外部キー   |
+| `sender_type`    | text        | NOT NULL | なし                | `buyer` / `breeder` / `admin` |
+| `sender_user_id` | uuid        | NOT NULL | なし                | `auth.users.id`               |
+| `message`        | text        | NOT NULL | なし                | メッセージ本文                |
+| `is_read`        | boolean     | NOT NULL | `false`             | 既読状態                      |
+| `read_at`        | timestamptz | NULL     | `null`              | 既読日時                      |
+| `created_at`     | timestamptz | NOT NULL | `now()`             | 送信日時                      |
 
 ## TypeScript 対応（参考）
 
 | DB カラム（snake_case） | TypeScript（camelCase） |
-|------------------------|------------------------|
-| `inquiry_id` | `inquiryId` |
-| `sender_type` | `senderType` |
-| `sender_user_id` | `senderUserId` |
-| `is_read` | `isRead` |
-| `read_at` | `readAt` |
-| `created_at` | `createdAt` |
+| ----------------------- | ----------------------- |
+| `inquiry_id`            | `inquiryId`             |
+| `sender_type`           | `senderType`            |
+| `sender_user_id`        | `senderUserId`          |
+| `is_read`               | `isRead`                |
+| `read_at`               | `readAt`                |
+| `created_at`            | `createdAt`             |
 
 ## 制約
 
@@ -46,10 +46,10 @@
 
 ### CHECK 制約
 
-| カラム | 制約 |
-|--------|------|
-| `sender_type` | `buyer` / `breeder` / `admin` のみ |
-| `message` | 空文字不可（`length(trim(message)) > 0`） |
+| カラム        | 制約                                      |
+| ------------- | ----------------------------------------- |
+| `sender_type` | `buyer` / `breeder` / `admin` のみ        |
+| `message`     | 空文字不可（`length(trim(message)) > 0`） |
 
 ### ビジネスルール
 
@@ -74,12 +74,12 @@ RLS を有効化する。
 
 関連 `inquiries` の当事者である場合のみ:
 
-| 操作 | 許可 |
-|------|------|
-| SELECT | 可 |
-| INSERT | 可（下記条件） |
+| 操作   | 許可                                     |
+| ------ | ---------------------------------------- |
+| SELECT | 可                                       |
+| INSERT | 可（下記条件）                           |
 | UPDATE | 可（既読更新のみ、Server Action で制限） |
-| DELETE | 不可 |
+| DELETE | 不可                                     |
 
 INSERT 時に確認する項目:
 
@@ -95,16 +95,16 @@ UPDATE は、受信者が `is_read` および `read_at` を更新する場合に
 
 ## インデックス
 
-| インデックス名 | カラム / 条件 |
-|---------------|--------------|
-| `inquiry_messages_inquiry_id_idx` | `inquiry_id` |
-| `inquiry_messages_created_at_idx` | `created_at` |
-| `inquiry_messages_unread_idx` | `is_read = false`（部分インデックス） |
+| インデックス名                    | カラム / 条件                         |
+| --------------------------------- | ------------------------------------- |
+| `inquiry_messages_inquiry_id_idx` | `inquiry_id`                          |
+| `inquiry_messages_created_at_idx` | `created_at`                          |
+| `inquiry_messages_unread_idx`     | `is_read = false`（部分インデックス） |
 
 ## マイグレーション
 
-| ファイル | 内容 |
-|---------|------|
+| ファイル                                              | 内容                 |
+| ----------------------------------------------------- | -------------------- |
 | `20260804163239_create_inquiries_messages_visits.sql` | Version 1.0 新規作成 |
 
 ## 関連テーブル

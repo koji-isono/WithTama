@@ -1,10 +1,10 @@
 # pets status 遷移トリガー設計（確定）
 
-| 項目 | 内容 |
-|------|------|
-| 確定日 | 2026-08-07 |
-| 方式 | `BEFORE UPDATE OF status` トリガー |
-| 目的 | DB 側で不正な `pets.status` 遷移を防止 |
+| 項目      | 内容                                                                    |
+| --------- | ----------------------------------------------------------------------- |
+| 確定日    | 2026-08-07                                                              |
+| 方式      | `BEFORE UPDATE OF status` トリガー                                      |
+| 目的      | DB 側で不正な `pets.status` 遷移を防止                                  |
 | Migration | `20260807130000_enforce_pets_status_transition.sql`（作成済み・未適用） |
 
 ## 関連ドキュメント
@@ -21,10 +21,10 @@
 
 `public.pets` の **`status` 列が変わる UPDATE** の直前に、許可遷移だけを通す `BEFORE UPDATE OF status` トリガーを置く。
 
-| レイヤー | 役割 |
-|---------|------|
-| **RLS** | 操作可能な行（誰の行を SELECT / INSERT / UPDATE できるか） |
-| **トリガー** | status 遷移（`status` がどう変わってよいか） |
+| レイヤー     | 役割                                                       |
+| ------------ | ---------------------------------------------------------- |
+| **RLS**      | 操作可能な行（誰の行を SELECT / INSERT / UPDATE できるか） |
+| **トリガー** | status 遷移（`status` がどう変わってよいか）               |
 
 RLS とトリガーは別レイヤーとして併用する。RLS を変更・迂回しない。
 
@@ -34,16 +34,16 @@ RLS とトリガーは別レイヤーとして併用する。RLS を変更・迂
 
 **今回許可するのは 1 件のみ。**
 
-| 主体 | 変更前 | 変更後 | 条件 |
-|------|--------|--------|------|
+| 主体            | 変更前  | 変更後         | 条件                                                                        |
+| --------------- | ------- | -------------- | --------------------------------------------------------------------------- |
 | breeder（本人） | `draft` | `under_review` | 対象 `pets.breeder_id` がログインユーザーの `public.breeders.id` であること |
 
 **それ以外の status 変更はすべて拒否**（明示 allowlist 方式）。
 
 ### status が変わらない UPDATE
 
-| 条件 | 結果 |
-|------|------|
+| 条件                      | 結果    |
+| ------------------------- | ------- |
 | `OLD.status = NEW.status` | ✅ 許可 |
 
 ---
@@ -108,10 +108,10 @@ EXECUTE FUNCTION public.enforce_pets_status_transition();
 
 status が変更される場合:
 
-| 条件 | 扱い |
-|------|------|
-| `auth.uid() IS NULL` | **RAISE EXCEPTION** で拒否 |
-| `auth.uid()` あり | 許可遷移表 + 所有者チェックを評価 |
+| 条件                 | 扱い                              |
+| -------------------- | --------------------------------- |
+| `auth.uid() IS NULL` | **RAISE EXCEPTION** で拒否        |
+| `auth.uid()` あり    | 許可遷移表 + 所有者チェックを評価 |
 
 Service Role Key 前提にしない。`auth.uid() IS NULL` の status 変更は拒否する。
 
@@ -145,29 +145,29 @@ EXISTS (
 
 **影響なし。**
 
-| 処理 | UPDATE 内容 | トリガー |
-|------|------------|---------|
-| `updatePetDraft()` | `management_name` 等のみ、`status` なし | **発火しない** |
-| `submitPetForReview()` | `status: under_review` | **発火する** → `draft → under_review` + 所有者チェック |
+| 処理                   | UPDATE 内容                             | トリガー                                               |
+| ---------------------- | --------------------------------------- | ------------------------------------------------------ |
+| `updatePetDraft()`     | `management_name` 等のみ、`status` なし | **発火しない**                                         |
+| `submitPetForReview()` | `status: under_review`                  | **発火する** → `draft → under_review` + 所有者チェック |
 
 ---
 
 ## 既存公開申請が壊れない根拠
 
-| チェック | 内容 |
-|---------|------|
-| 遷移 | `submitPetForReview()` は `draft → under_review` のみ |
-| 主体 | 認証済みブリーダー JWT |
-| 所有者 | Repository も `breeder_id` で絞り込み。トリガーも `breeders.user_id = auth.uid()` を確認 |
-| RLS（適用後） | `pets_update_breeder_own` で本人 UPDATE 可 |
-| `OF status` | 通常編集 `updatePetDraft()` は非発火 |
+| チェック      | 内容                                                                                     |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| 遷移          | `submitPetForReview()` は `draft → under_review` のみ                                    |
+| 主体          | 認証済みブリーダー JWT                                                                   |
+| 所有者        | Repository も `breeder_id` で絞り込み。トリガーも `breeders.user_id = auth.uid()` を確認 |
+| RLS（適用後） | `pets_update_breeder_own` で本人 UPDATE 可                                               |
+| `OF status`   | 通常編集 `updatePetDraft()` は非発火                                                     |
 
 ---
 
 ## Migration
 
-| ファイル | 内容 |
-|---------|------|
+| ファイル                                            | 内容            |
+| --------------------------------------------------- | --------------- |
 | `20260807130000_enforce_pets_status_transition.sql` | 関数 + トリガー |
 
 適用順序: `20260807120000_harden_pets_rls.sql` → 本 Migration
@@ -197,9 +197,9 @@ EXISTS (
 
 ## 未決定事項（将来）
 
-| 項目 | 内容 |
-|------|------|
-| admin 兼 breeder アカウント | 審査実装時に admin / breeder 遷移の評価順を決定 |
-| `published → paused` 等 | 公開後遷移は要件未確定 |
-| `auth.uid() IS NULL` の運用例外 | Service Role / メンテナンス用バイパス要否 |
-| 管理者訂正運用 | pets.md「将来検討」 |
+| 項目                            | 内容                                            |
+| ------------------------------- | ----------------------------------------------- |
+| admin 兼 breeder アカウント     | 審査実装時に admin / breeder 遷移の評価順を決定 |
+| `published → paused` 等         | 公開後遷移は要件未確定                          |
+| `auth.uid() IS NULL` の運用例外 | Service Role / メンテナンス用バイパス要否       |
+| 管理者訂正運用                  | pets.md「将来検討」                             |

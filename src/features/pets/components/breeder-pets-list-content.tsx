@@ -142,9 +142,7 @@ function PetListCard({
             </div>
           </dl>
 
-          {updatedLabel ? (
-            <p className="text-xs text-neutral-500">更新：{updatedLabel}</p>
-          ) : null}
+          {updatedLabel ? <p className="text-xs text-neutral-500">更新：{updatedLabel}</p> : null}
 
           {submitError && !dialogOpen ? (
             <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">

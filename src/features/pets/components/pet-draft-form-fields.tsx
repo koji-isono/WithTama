@@ -209,7 +209,12 @@ export function PetDraftFormFields({
         />
       </ProfileFormField>
 
-      <ProfileFormField id="price_comment" label="価格補足" optional error={fieldErrors.priceComment}>
+      <ProfileFormField
+        id="price_comment"
+        label="価格補足"
+        optional
+        error={fieldErrors.priceComment}
+      >
         <div className="space-y-1">
           <Textarea
             id="price_comment"

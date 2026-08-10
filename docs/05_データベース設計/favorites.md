@@ -1,10 +1,10 @@
 # favorites テーブル
 
-| 項目 | 内容 |
-|------|------|
+| 項目       | 内容               |
+| ---------- | ------------------ |
 | テーブル名 | `public.favorites` |
-| Version | 1.0 |
-| 状態 | 確定 |
+| Version    | 1.0                |
+| 状態       | 確定               |
 
 ## 目的
 
@@ -12,20 +12,20 @@
 
 ## カラム定義
 
-| カラム名 | 型 | NULL | 初期値 | 説明 |
-|---------|-----|------|--------|------|
-| `id` | uuid | NOT NULL | `gen_random_uuid()` | お気に入りID、主キー |
-| `buyer_id` | uuid | NOT NULL | なし | `buyers.id` への外部キー |
-| `pet_id` | uuid | NOT NULL | なし | `pets.id` への外部キー |
-| `created_at` | timestamptz | NOT NULL | `now()` | 登録日時 |
+| カラム名     | 型          | NULL     | 初期値              | 説明                     |
+| ------------ | ----------- | -------- | ------------------- | ------------------------ |
+| `id`         | uuid        | NOT NULL | `gen_random_uuid()` | お気に入りID、主キー     |
+| `buyer_id`   | uuid        | NOT NULL | なし                | `buyers.id` への外部キー |
+| `pet_id`     | uuid        | NOT NULL | なし                | `pets.id` への外部キー   |
+| `created_at` | timestamptz | NOT NULL | `now()`             | 登録日時                 |
 
 ## TypeScript 対応（参考）
 
 | DB カラム（snake_case） | TypeScript（camelCase） |
-|------------------------|------------------------|
-| `buyer_id` | `buyerId` |
-| `pet_id` | `petId` |
-| `created_at` | `createdAt` |
+| ----------------------- | ----------------------- |
+| `buyer_id`              | `buyerId`               |
+| `pet_id`                | `petId`                 |
+| `created_at`            | `createdAt`             |
 
 ## 制約
 
@@ -38,10 +38,10 @@
 
 ### ON DELETE
 
-| 親テーブル | 動作 |
-|-----------|------|
-| `buyers` | 関連 `favorites` も削除（CASCADE） |
-| `pets` | 関連 `favorites` も削除（CASCADE） |
+| 親テーブル | 動作                               |
+| ---------- | ---------------------------------- |
+| `buyers`   | 関連 `favorites` も削除（CASCADE） |
+| `pets`     | 関連 `favorites` も削除（CASCADE） |
 
 ### ビジネスルール
 
@@ -53,12 +53,12 @@
 
 RLS を有効化する。購入希望者本人のみ、自分の `favorites` を参照・追加・削除できる。
 
-| 操作 | 方針 |
-|------|------|
+| 操作   | 方針                                                                       |
+| ------ | -------------------------------------------------------------------------- |
 | SELECT | `favorites.buyer_id` に紐づく `buyers.user_id = auth.uid()` の場合のみ許可 |
-| INSERT | 登録対象 `buyer_id` に紐づく `buyers.user_id = auth.uid()` の場合のみ許可 |
+| INSERT | 登録対象 `buyer_id` に紐づく `buyers.user_id = auth.uid()` の場合のみ許可  |
 | DELETE | `favorites.buyer_id` に紐づく `buyers.user_id = auth.uid()` の場合のみ許可 |
-| UPDATE | 使用しないため許可しない |
+| UPDATE | 使用しないため許可しない                                                   |
 
 管理者の全件参照・削除権限は [権限設計](../07_権限設計/README.md) で別途定義する。
 
@@ -73,15 +73,15 @@ RLS を有効化する。購入希望者本人のみ、自分の `favorites` を
 
 ## インデックス
 
-| インデックス名 | カラム |
-|---------------|--------|
+| インデックス名           | カラム     |
+| ------------------------ | ---------- |
 | `favorites_buyer_id_idx` | `buyer_id` |
-| `favorites_pet_id_idx` | `pet_id` |
+| `favorites_pet_id_idx`   | `pet_id`   |
 
 ## マイグレーション
 
-| ファイル | 内容 |
-|---------|------|
+| ファイル                              | 内容                 |
+| ------------------------------------- | -------------------- |
 | `20260804161228_create_favorites.sql` | Version 1.0 新規作成 |
 
 ## 関連テーブル

@@ -39,8 +39,7 @@ export type UpdateBasicProfileData = {
 };
 
 export type SaveBasicProfileResult =
-  | { success: true }
-  | { success: false; fieldErrors?: BasicProfileFieldErrors; error?: string };
+  { success: true } | { success: false; fieldErrors?: BasicProfileFieldErrors; error?: string };
 
 export type LocationProfileInput = {
   postalCode: string;
@@ -68,8 +67,7 @@ export type UpdateLocationProfileData = {
 };
 
 export type SaveLocationProfileResult =
-  | { success: true }
-  | { success: false; fieldErrors?: LocationProfileFieldErrors; error?: string };
+  { success: true } | { success: false; fieldErrors?: LocationProfileFieldErrors; error?: string };
 
 export type LicenseProfileInput = {
   businessRegistrationType: string;
@@ -105,8 +103,7 @@ export type UpdateLicenseProfileData = {
 };
 
 export type SaveLicenseProfileResult =
-  | { success: true }
-  | { success: false; fieldErrors?: LicenseProfileErrors; error?: string };
+  { success: true } | { success: false; fieldErrors?: LicenseProfileErrors; error?: string };
 
 export const INTRODUCTION_PROFILE_MIN_LENGTH = 20;
 export const INTRODUCTION_PROFILE_MAX_LENGTH = 1000;
@@ -118,9 +115,7 @@ export type IntroductionProfileInput = {
   breedingEnvironment: string;
 };
 
-export type IntroductionProfileErrors = Partial<
-  Record<keyof IntroductionProfileInput, string>
->;
+export type IntroductionProfileErrors = Partial<Record<keyof IntroductionProfileInput, string>>;
 
 export const INITIAL_INTRODUCTION_PROFILE_INPUT: IntroductionProfileInput = {
   profileText: "",
@@ -144,8 +139,7 @@ export type UpdateIntroductionProfileData = {
 };
 
 export type SaveIntroductionProfileResult =
-  | { success: true }
-  | { success: false; fieldErrors?: IntroductionProfileErrors; error?: string };
+  { success: true } | { success: false; fieldErrors?: IntroductionProfileErrors; error?: string };
 
 export type BreederDocumentType = "identity" | "license";
 
@@ -197,9 +191,7 @@ export type UpdateVerificationProfileData = {
 export type CompleteBreederProfileInput = Record<string, never>;
 
 export type UploadBreederDocumentResult =
-  | { success: true; documentType: BreederDocumentType }
-  | { success: false; error: string };
+  { success: true; documentType: BreederDocumentType } | { success: false; error: string };
 
 export type CompleteBreederProfileResult =
-  | { success: true }
-  | { success: false; error?: string; missingSteps?: ProfileMissingStep[] };
+  { success: true } | { success: false; error?: string; missingSteps?: ProfileMissingStep[] };

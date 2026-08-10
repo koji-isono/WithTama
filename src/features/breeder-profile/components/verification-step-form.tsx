@@ -46,19 +46,14 @@ export function VerificationStepForm({ initialState }: VerificationStepFormProps
   const [identitySubmitted, setIdentitySubmitted] = useState(
     initialState.identityDocumentSubmitted,
   );
-  const [licenseSubmitted, setLicenseSubmitted] = useState(
-    initialState.businessLicenseSubmitted,
-  );
+  const [licenseSubmitted, setLicenseSubmitted] = useState(initialState.businessLicenseSubmitted);
   const [missingSteps, setMissingSteps] = useState(initialState.missingSteps);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canComplete = identitySubmitted && licenseSubmitted;
 
-  const visibleMissingSteps = useMemo(
-    () => dedupeMissingSteps(missingSteps),
-    [missingSteps],
-  );
+  const visibleMissingSteps = useMemo(() => dedupeMissingSteps(missingSteps), [missingSteps]);
 
   const priorStepMissing = visibleMissingSteps.some((step) => step.step < 5);
 
@@ -93,16 +88,12 @@ export function VerificationStepForm({ initialState }: VerificationStepFormProps
 
   function handleIdentityUploaded() {
     setIdentitySubmitted(true);
-    setMissingSteps((current) =>
-      current.filter((step) => step.label !== "本人確認書類"),
-    );
+    setMissingSteps((current) => current.filter((step) => step.label !== "本人確認書類"));
   }
 
   function handleLicenseUploaded() {
     setLicenseSubmitted(true);
-    setMissingSteps((current) =>
-      current.filter((step) => step.label !== "第一種動物取扱業登録証"),
-    );
+    setMissingSteps((current) => current.filter((step) => step.label !== "第一種動物取扱業登録証"));
   }
 
   return (

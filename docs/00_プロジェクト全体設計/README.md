@@ -6,13 +6,13 @@ WithTama は、命を大切に育てるブリーダーと、家族として迎�
 
 ## 技術スタック
 
-| 区分 | 技術 |
-|------|------|
-| フロントエンド | Next.js（App Router）、TypeScript、Tailwind CSS |
-| UI | shadcn/ui |
-| バックエンド / DB | Supabase |
-| ソース管理 | GitHub（設計書の正本） |
-| 成果物保管 | Google Drive |
+| 区分              | 技術                                            |
+| ----------------- | ----------------------------------------------- |
+| フロントエンド    | Next.js（App Router）、TypeScript、Tailwind CSS |
+| UI                | shadcn/ui                                       |
+| バックエンド / DB | Supabase                                        |
+| ソース管理        | GitHub（設計書の正本）                          |
+| 成果物保管        | Google Drive                                    |
 
 ## リポジトリ構成（概要）
 

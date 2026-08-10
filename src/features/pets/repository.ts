@@ -2,10 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 
-import {
-  formatPetPhotoDeleteError,
-  logPetPhotoOperationFailure,
-} from "./format-pet-photo-error";
+import { formatPetPhotoDeleteError, logPetPhotoOperationFailure } from "./format-pet-photo-error";
 import { PET_PHOTOS_BUCKET, PET_PHOTO_SIGNED_URL_EXPIRES_SECONDS } from "./photo-constants";
 import { isValidPetPhotoStoragePath } from "./photo-utils";
 import type {
@@ -210,11 +207,7 @@ export async function createPet(userId: string, data: InsertPetData): Promise<{ 
 
   const supabase = await createClient();
 
-  const { data: row, error } = await supabase
-    .from("pets")
-    .insert(petData)
-    .select("id")
-    .single();
+  const { data: row, error } = await supabase.from("pets").insert(petData).select("id").single();
 
   if (error) {
     throw error;
@@ -416,10 +409,12 @@ export async function uploadPetPhotoToStorage(
   const supabase = await createClient();
   const arrayBuffer = await file.arrayBuffer();
 
-  const { error } = await supabase.storage.from(PET_PHOTOS_BUCKET).upload(storagePath, arrayBuffer, {
-    contentType: file.type,
-    upsert: false,
-  });
+  const { error } = await supabase.storage
+    .from(PET_PHOTOS_BUCKET)
+    .upload(storagePath, arrayBuffer, {
+      contentType: file.type,
+      upsert: false,
+    });
 
   if (error) {
     logPetPhotoOperationFailure(error, {
@@ -578,9 +573,7 @@ export async function deletePetPhoto(
       storagePath,
       bucket: PET_PHOTOS_BUCKET,
     });
-    throw new Error(
-      "写真レコードの削除に失敗しました。Storage 上のファイルは削除済みです。",
-    );
+    throw new Error("写真レコードの削除に失敗しました。Storage 上のファイルは削除済みです。");
   }
 
   if (wasMain) {

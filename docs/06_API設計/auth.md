@@ -6,55 +6,55 @@
 
 ## ロール型
 
-| 型 | 定義 | 用途 |
-|----|------|------|
-| `PublicSignupRole` | `"buyer" \| "breeder"` | `/signup` |
-| `MemberUserRole` | `"buyer" \| "breeder"` | `user_metadata.role` |
-| `AuthenticatedUserRole` | `"buyer" \| "breeder" \| "admin"` | ログイン済み全体 |
+| 型                      | 定義                              | 用途                 |
+| ----------------------- | --------------------------------- | -------------------- |
+| `PublicSignupRole`      | `"buyer" \| "breeder"`            | `/signup`            |
+| `MemberUserRole`        | `"buyer" \| "breeder"`            | `user_metadata.role` |
+| `AuthenticatedUserRole` | `"buyer" \| "breeder" \| "admin"` | ログイン済み全体     |
 
 ## isAdminUser
 
-| 項目 | 内容 |
-|------|------|
-| 実装 | `src/features/auth/types.ts` |
-| 判定 | `user.app_metadata?.role === "admin"` のみ |
-| 使用禁止 | `user_metadata.role` で admin 判定しない |
+| 項目     | 内容                                       |
+| -------- | ------------------------------------------ |
+| 実装     | `src/features/auth/types.ts`               |
+| 判定     | `user.app_metadata?.role === "admin"` のみ |
+| 使用禁止 | `user_metadata.role` で admin 判定しない   |
 
 Client / Server 両方から利用可（純関数）。
 
 ## getCurrentAdmin
 
-| 項目 | 内容 |
-|------|------|
-| 実装 | `src/features/auth/admin-auth.ts` |
-| 種別 | Server 専用（`server-only`） |
-| 戻り値 | admin ユーザーまたは `null` |
+| 項目   | 内容                              |
+| ------ | --------------------------------- |
+| 実装   | `src/features/auth/admin-auth.ts` |
+| 種別   | Server 専用（`server-only`）      |
+| 戻り値 | admin ユーザーまたは `null`       |
 
 ## requireAdmin
 
-| 項目 | 内容 |
-|------|------|
+| 項目 | 内容                              |
+| ---- | --------------------------------- |
 | 実装 | `src/features/auth/admin-auth.ts` |
-| 種別 | Server 専用 |
-| 用途 | `/admin/*` layout ガード |
+| 種別 | Server 専用                       |
+| 用途 | `/admin/*` layout ガード          |
 
 ### リダイレクト
 
-| 状態 | 遷移先 |
-|------|--------|
-| 未ログイン | `/login` |
-| admin | 処理続行（`User` を返す） |
-| buyer | `/buyer` |
-| breeder | `/breeder` |
-| ロール不明 | `/login` |
+| 状態       | 遷移先                    |
+| ---------- | ------------------------- |
+| 未ログイン | `/login`                  |
+| admin      | 処理続行（`User` を返す） |
+| buyer      | `/buyer`                  |
+| breeder    | `/breeder`                |
+| ロール不明 | `/login`                  |
 
 ## ログイン後遷移
 
-| 条件 | 遷移先 | 備考 |
-|------|--------|------|
-| `app_metadata.role === "admin"` | `/admin` | `ensureUserProfile` を呼ばない |
-| `user_metadata.role === "buyer"` | `/buyer` | 既存フロー |
-| `user_metadata.role === "breeder"` | `/breeder` | 既存フロー |
+| 条件                               | 遷移先     | 備考                           |
+| ---------------------------------- | ---------- | ------------------------------ |
+| `app_metadata.role === "admin"`    | `/admin`   | `ensureUserProfile` を呼ばない |
+| `user_metadata.role === "buyer"`   | `/buyer`   | 既存フロー                     |
+| `user_metadata.role === "breeder"` | `/breeder` | 既存フロー                     |
 
 ## ensureUserProfile
 

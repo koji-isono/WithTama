@@ -1,10 +1,10 @@
 # inquiries テーブル
 
-| 項目 | 内容 |
-|------|------|
+| 項目       | 内容               |
+| ---------- | ------------------ |
 | テーブル名 | `public.inquiries` |
-| Version | 1.0 |
-| 状態 | 確定 |
+| Version    | 1.0                |
+| 状態       | 確定               |
 
 ## 目的
 
@@ -14,32 +14,32 @@
 
 ## カラム定義
 
-| カラム名 | 型 | NULL | 初期値 | 説明 |
-|---------|-----|------|--------|------|
-| `id` | uuid | NOT NULL | `gen_random_uuid()` | 問い合わせID、主キー |
-| `buyer_id` | uuid | NOT NULL | なし | `buyers.id` への外部キー |
-| `breeder_id` | uuid | NOT NULL | なし | `breeders.id` への外部キー |
-| `pet_id` | uuid | NOT NULL | なし | `pets.id` への外部キー |
-| `status` | text | NOT NULL | `open` | 問い合わせ状態 |
-| `subject` | text | NULL | `null` | 問い合わせ件名 |
-| `last_message_at` | timestamptz | NULL | `null` | 最終メッセージ日時 |
-| `closed_at` | timestamptz | NULL | `null` | クローズ日時 |
-| `deleted_at` | timestamptz | NULL | `null` | 論理削除日時 |
-| `created_at` | timestamptz | NOT NULL | `now()` | 作成日時 |
-| `updated_at` | timestamptz | NOT NULL | `now()` | 更新日時（UPDATE 時にトリガーで自動更新） |
+| カラム名          | 型          | NULL     | 初期値              | 説明                                      |
+| ----------------- | ----------- | -------- | ------------------- | ----------------------------------------- |
+| `id`              | uuid        | NOT NULL | `gen_random_uuid()` | 問い合わせID、主キー                      |
+| `buyer_id`        | uuid        | NOT NULL | なし                | `buyers.id` への外部キー                  |
+| `breeder_id`      | uuid        | NOT NULL | なし                | `breeders.id` への外部キー                |
+| `pet_id`          | uuid        | NOT NULL | なし                | `pets.id` への外部キー                    |
+| `status`          | text        | NOT NULL | `open`              | 問い合わせ状態                            |
+| `subject`         | text        | NULL     | `null`              | 問い合わせ件名                            |
+| `last_message_at` | timestamptz | NULL     | `null`              | 最終メッセージ日時                        |
+| `closed_at`       | timestamptz | NULL     | `null`              | クローズ日時                              |
+| `deleted_at`      | timestamptz | NULL     | `null`              | 論理削除日時                              |
+| `created_at`      | timestamptz | NOT NULL | `now()`             | 作成日時                                  |
+| `updated_at`      | timestamptz | NOT NULL | `now()`             | 更新日時（UPDATE 時にトリガーで自動更新） |
 
 ## TypeScript 対応（参考）
 
 | DB カラム（snake_case） | TypeScript（camelCase） |
-|------------------------|------------------------|
-| `buyer_id` | `buyerId` |
-| `breeder_id` | `breederId` |
-| `pet_id` | `petId` |
-| `last_message_at` | `lastMessageAt` |
-| `closed_at` | `closedAt` |
-| `deleted_at` | `deletedAt` |
-| `created_at` | `createdAt` |
-| `updated_at` | `updatedAt` |
+| ----------------------- | ----------------------- |
+| `buyer_id`              | `buyerId`               |
+| `breeder_id`            | `breederId`             |
+| `pet_id`                | `petId`                 |
+| `last_message_at`       | `lastMessageAt`         |
+| `closed_at`             | `closedAt`              |
+| `deleted_at`            | `deletedAt`             |
+| `created_at`            | `createdAt`             |
+| `updated_at`            | `updatedAt`             |
 
 ## 制約
 
@@ -52,14 +52,14 @@
 
 ### CHECK 制約 — status
 
-| 値 | 説明 |
-|----|------|
-| `open` | 問い合わせ受付 |
-| `replied` | ブリーダー返信済み |
-| `visit_requested` | 見学希望あり |
-| `visit_scheduled` | 見学日時確定 |
-| `completed` | 問い合わせ対応完了 |
-| `closed` | クローズ |
+| 値                | 説明               |
+| ----------------- | ------------------ |
+| `open`            | 問い合わせ受付     |
+| `replied`         | ブリーダー返信済み |
+| `visit_requested` | 見学希望あり       |
+| `visit_scheduled` | 見学日時確定       |
+| `completed`       | 問い合わせ対応完了 |
+| `closed`          | クローズ           |
 
 ### ステータス遷移
 
@@ -83,11 +83,11 @@ RLS を有効化する。
 
 `buyers.user_id = auth.uid()` である問い合わせのみ:
 
-| 操作 | 許可 |
-|------|------|
-| SELECT | 可 |
-| INSERT | 可 |
-| UPDATE | 可 |
+| 操作   | 許可                 |
+| ------ | -------------------- |
+| SELECT | 可                   |
+| INSERT | 可                   |
+| UPDATE | 可                   |
 | DELETE | 不可（物理削除禁止） |
 
 INSERT 時に確認する項目:
@@ -104,10 +104,10 @@ INSERT 時に確認する項目:
 
 `breeders.user_id = auth.uid()` である問い合わせのみ:
 
-| 操作 | 許可 |
-|------|------|
-| SELECT | 可 |
-| UPDATE | 可 |
+| 操作   | 許可 |
+| ------ | ---- |
+| SELECT | 可   |
+| UPDATE | 可   |
 | INSERT | 不可 |
 | DELETE | 不可 |
 
@@ -117,19 +117,19 @@ INSERT 時に確認する項目:
 
 ## インデックス
 
-| インデックス名 | カラム / 条件 |
-|---------------|--------------|
-| `inquiries_buyer_id_idx` | `buyer_id` |
-| `inquiries_breeder_id_idx` | `breeder_id` |
-| `inquiries_pet_id_idx` | `pet_id` |
-| `inquiries_status_idx` | `status` |
-| `inquiries_last_message_at_idx` | `last_message_at` |
-| `inquiries_active_idx` | `deleted_at IS NULL`（部分インデックス） |
+| インデックス名                  | カラム / 条件                            |
+| ------------------------------- | ---------------------------------------- |
+| `inquiries_buyer_id_idx`        | `buyer_id`                               |
+| `inquiries_breeder_id_idx`      | `breeder_id`                             |
+| `inquiries_pet_id_idx`          | `pet_id`                                 |
+| `inquiries_status_idx`          | `status`                                 |
+| `inquiries_last_message_at_idx` | `last_message_at`                        |
+| `inquiries_active_idx`          | `deleted_at IS NULL`（部分インデックス） |
 
 ## マイグレーション
 
-| ファイル | 内容 |
-|---------|------|
+| ファイル                                              | 内容                                                                |
+| ----------------------------------------------------- | ------------------------------------------------------------------- |
 | `20260804163239_create_inquiries_messages_visits.sql` | Version 1.0 新規作成（`inquiries` / `inquiry_messages` / `visits`） |
 
 ## 関連テーブル

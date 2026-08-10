@@ -1,10 +1,10 @@
 # ER図
 
-| 項目 | 内容 |
-|------|------|
-| Version | 1.4 |
-| 対象 | 第1期データベース構造 |
-| 状態 | 確定済みテーブルと設計予定テーブルを区別して記載 |
+| 項目    | 内容                                             |
+| ------- | ------------------------------------------------ |
+| Version | 1.4                                              |
+| 対象    | 第1期データベース構造                            |
+| 状態    | 確定済みテーブルと設計予定テーブルを区別して記載 |
 
 ## 概要
 
@@ -181,23 +181,23 @@ erDiagram
 
 ### 設計確定済み
 
-| 親 | 関係 | 子 | 備考 |
-|----|------|-----|------|
-| `auth.users` | 1 対 0 または 1 | `breeders` | `breeders.user_id` → `auth.users.id` |
-| `auth.users` | 1 対 0 または 1 | `buyers` | `buyers.user_id` → `auth.users.id` |
-| `breeders` | 1 対多 | `pets` | `pets.breeder_id` → `breeders.id`（最終方針） |
-| `pets` | 1 対多 | `pet_photos` | `pet_photos.pet_id` → `pets.id` |
-| `buyers` | 1 対多 | `favorites` | `favorites.buyer_id` → `buyers.id` |
-| `pets` | 1 対多 | `favorites` | `favorites.pet_id` → `pets.id` |
-| `buyers` | 1 対多 | `inquiries` | `inquiries.buyer_id` → `buyers.id` |
-| `breeders` | 1 対多 | `inquiries` | `inquiries.breeder_id` → `breeders.id` |
-| `pets` | 1 対多 | `inquiries` | `inquiries.pet_id` → `pets.id` |
-| `inquiries` | 1 対多 | `inquiry_messages` | `inquiry_messages.inquiry_id` → `inquiries.id` |
-| `auth.users` | 1 対多 | `inquiry_messages` | `inquiry_messages.sender_user_id` → `auth.users.id` |
-| `inquiries` | 1 対 0 または 1 | `visits` | `visits.inquiry_id` → `inquiries.id`（UNIQUE） |
-| `buyers` | 1 対多 | `visits` | `visits.buyer_id` → `buyers.id` |
-| `breeders` | 1 対多 | `visits` | `visits.breeder_id` → `breeders.id` |
-| `pets` | 1 対多 | `visits` | `visits.pet_id` → `pets.id` |
+| 親           | 関係            | 子                 | 備考                                                |
+| ------------ | --------------- | ------------------ | --------------------------------------------------- |
+| `auth.users` | 1 対 0 または 1 | `breeders`         | `breeders.user_id` → `auth.users.id`                |
+| `auth.users` | 1 対 0 または 1 | `buyers`           | `buyers.user_id` → `auth.users.id`                  |
+| `breeders`   | 1 対多          | `pets`             | `pets.breeder_id` → `breeders.id`（最終方針）       |
+| `pets`       | 1 対多          | `pet_photos`       | `pet_photos.pet_id` → `pets.id`                     |
+| `buyers`     | 1 対多          | `favorites`        | `favorites.buyer_id` → `buyers.id`                  |
+| `pets`       | 1 対多          | `favorites`        | `favorites.pet_id` → `pets.id`                      |
+| `buyers`     | 1 対多          | `inquiries`        | `inquiries.buyer_id` → `buyers.id`                  |
+| `breeders`   | 1 対多          | `inquiries`        | `inquiries.breeder_id` → `breeders.id`              |
+| `pets`       | 1 対多          | `inquiries`        | `inquiries.pet_id` → `pets.id`                      |
+| `inquiries`  | 1 対多          | `inquiry_messages` | `inquiry_messages.inquiry_id` → `inquiries.id`      |
+| `auth.users` | 1 対多          | `inquiry_messages` | `inquiry_messages.sender_user_id` → `auth.users.id` |
+| `inquiries`  | 1 対 0 または 1 | `visits`           | `visits.inquiry_id` → `inquiries.id`（UNIQUE）      |
+| `buyers`     | 1 対多          | `visits`           | `visits.buyer_id` → `buyers.id`                     |
+| `breeders`   | 1 対多          | `visits`           | `visits.breeder_id` → `breeders.id`                 |
+| `pets`       | 1 対多          | `visits`           | `visits.pet_id` → `pets.id`                         |
 
 ## 設計上の注意事項
 
@@ -217,18 +217,18 @@ erDiagram
 
 ## テーブル一覧（補足）
 
-| テーブル | 状態 | 主な役割 |
-|---------|------|---------|
-| `auth.users` | Supabase 管理 | 認証 |
-| `breeders` | 設計確定 | ブリーダー情報・審査・課金状態 |
-| `buyers` | 設計確定 | 購入希望者プロフィール |
-| `pets` | 設計確定 | 犬猫情報 |
-| `pet_photos` | 設計確定 | 犬猫写真 |
-| `favorites` | 設計確定 | お気に入り（犬猫） |
-| `inquiries` | 設計確定 | 問い合わせ案件 |
-| `inquiry_messages` | 設計確定 | 問い合わせメッセージ履歴 |
-| `visits` | 設計確定 | 見学管理 |
-| `audit_logs` | 設計予定 | 操作履歴 |
+| テーブル           | 状態          | 主な役割                       |
+| ------------------ | ------------- | ------------------------------ |
+| `auth.users`       | Supabase 管理 | 認証                           |
+| `breeders`         | 設計確定      | ブリーダー情報・審査・課金状態 |
+| `buyers`           | 設計確定      | 購入希望者プロフィール         |
+| `pets`             | 設計確定      | 犬猫情報                       |
+| `pet_photos`       | 設計確定      | 犬猫写真                       |
+| `favorites`        | 設計確定      | お気に入り（犬猫）             |
+| `inquiries`        | 設計確定      | 問い合わせ案件                 |
+| `inquiry_messages` | 設計確定      | 問い合わせメッセージ履歴       |
+| `visits`           | 設計確定      | 見学管理                       |
+| `audit_logs`       | 設計予定      | 操作履歴                       |
 
 ## 関連ドキュメント
 

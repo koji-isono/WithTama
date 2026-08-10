@@ -10,11 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 
-import {
-  deletePetPhotoAction,
-  setMainPetPhotoAction,
-  uploadPetPhotoAction,
-} from "../service";
+import { deletePetPhotoAction, setMainPetPhotoAction, uploadPetPhotoAction } from "../service";
 import { PET_PHOTO_FORM_FIELD, PET_PHOTO_MAX_COUNT } from "../photo-constants";
 import { formatPetPhotoFileSize } from "../photo-validation";
 import type { PetPhotoListItem } from "../types";
@@ -151,9 +147,7 @@ export function PetPhotoManager({ petId, initialPhotos }: PetPhotoManagerProps) 
     <Card className="mt-6 border-[var(--border)] bg-white shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">写真</CardTitle>
-        <CardDescription>
-          犬猫の様子や育った環境が伝わる写真を登録してください。
-        </CardDescription>
+        <CardDescription>犬猫の様子や育った環境が伝わる写真を登録してください。</CardDescription>
         <p className="text-sm font-medium text-neutral-700">
           現在 {photoCount} / {PET_PHOTO_MAX_COUNT} 枚
         </p>

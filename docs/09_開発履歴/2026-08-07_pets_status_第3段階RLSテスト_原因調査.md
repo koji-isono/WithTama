@@ -1,10 +1,10 @@
 # pets status Trigger 第3段階 RLS テスト失敗 原因調査
 
-| 項目 | 内容 |
-|------|------|
-| 調査日 | 2026-08-07 |
-| 対象 | `scripts/test-pets-status-trigger.mts` 第3段階（`--phase3`） |
-| 状態 | 原因調査記録。最終再試験 **6 passed / 0 failed（合格）** |
+| 項目   | 内容                                                         |
+| ------ | ------------------------------------------------------------ |
+| 調査日 | 2026-08-07                                                   |
+| 対象   | `scripts/test-pets-status-trigger.mts` 第3段階（`--phase3`） |
+| 状態   | 原因調査記録。最終再試験 **6 passed / 0 failed（合格）**     |
 
 ## 背景
 
@@ -23,11 +23,11 @@ FAIL other breeder pet still hidden after update attempt (visible count 1)
 
 ### 対象 Pet（ブリーダー B 所有）
 
-| 項目 | 値 |
-|------|-----|
-| id | `663f174b-7c07-40af-b635-100a0342b179` |
-| management_name | `[SEC-TEST-B] RLS Other Breeder Pet` |
-| status | `draft` |
+| 項目            | 値                                     |
+| --------------- | -------------------------------------- |
+| id              | `663f174b-7c07-40af-b635-100a0342b179` |
+| management_name | `[SEC-TEST-B] RLS Other Breeder Pet`   |
+| status          | `draft`                                |
 
 ### 適用済み pets RLS Policy
 
@@ -52,11 +52,11 @@ FAIL other breeder pet still hidden after update attempt (visible count 1)
 
 UPDATE が 0 件（PASS）なのに SELECT で 1 件見える組み合わせは、現在の RLS 定義と整合する。
 
-| Policy | SELECT | UPDATE |
-|--------|--------|--------|
-| `pets_select_breeder_own` | 本人のみ | — |
-| `pets_select_admin` | **admin なら全件** | — |
-| `pets_update_breeder_own` | — | 本人のみ |
+| Policy                    | SELECT             | UPDATE   |
+| ------------------------- | ------------------ | -------- |
+| `pets_select_breeder_own` | 本人のみ           | —        |
+| `pets_select_admin`       | **admin なら全件** | —        |
+| `pets_update_breeder_own` | —                  | 本人のみ |
 
 **最も有力な原因:** `SEC_TEST_BREEDER_EMAIL` のユーザーに `app_metadata.role = "admin"` が付いており、`pets_select_admin` 経由で **B の draft pet も SELECT できる** 一方、`pets_update_admin` が無いため **B の pet への UPDATE は 0 件** になる。
 
@@ -72,17 +72,17 @@ UPDATE が 0 件（PASS）なのに SELECT で 1 件見える組み合わせは�
 const { data: hiddenPets, error: hiddenError } = await supabase
   .from("pets")
   .select("id")
-  .like("management_name", `${SEC_TEST_B_PREFIX}%`)  // '[SEC-TEST-B]%'
+  .like("management_name", `${SEC_TEST_B_PREFIX}%`) // '[SEC-TEST-B]%'
   .is("deleted_at", null);
 ```
 
-| 項目 | 内容 |
-|------|------|
-| SELECT カラム | `id` のみ |
-| WHERE | `management_name LIKE '[SEC-TEST-B]%'` |
-| 追加条件 | `deleted_at IS NULL` |
-| `SEC_TEST_OTHER_PET_ID` | **SELECT では未使用**（UPDATE の `.eq('id', otherPetId)` のみ） |
-| RLS | クエリ側に breeder フィルタなし。PostgREST が JWT + RLS で行を絞る |
+| 項目                    | 内容                                                               |
+| ----------------------- | ------------------------------------------------------------------ |
+| SELECT カラム           | `id` のみ                                                          |
+| WHERE                   | `management_name LIKE '[SEC-TEST-B]%'`                             |
+| 追加条件                | `deleted_at IS NULL`                                               |
+| `SEC_TEST_OTHER_PET_ID` | **SELECT では未使用**（UPDATE の `.eq('id', otherPetId)` のみ）    |
+| RLS                     | クエリ側に breeder フィルタなし。PostgREST が JWT + RLS で行を絞る |
 
 `visible count` の算出:
 
@@ -93,12 +93,12 @@ const hiddenOk = hiddenError == null && (hiddenPets?.length ?? 0) === 0;
 
 ### `[SEC-TEST]` の誤マッチについて
 
-| 比較 | 内容 |
-|------|------|
-| パターン | `[SEC-TEST-B]%`（定数 `SEC_TEST_B_PREFIX`） |
-| 比較対象例 | `[SEC-TEST] Trigger Test Pet` |
-| PostgreSQL `LIKE` | `[` はメタ文字ではない |
-| 9 文字目 | パターン `-` vs 文字列 `]` → **不一致** |
+| 比較              | 内容                                        |
+| ----------------- | ------------------------------------------- |
+| パターン          | `[SEC-TEST-B]%`（定数 `SEC_TEST_B_PREFIX`） |
+| 比較対象例        | `[SEC-TEST] Trigger Test Pet`               |
+| PostgreSQL `LIKE` | `[` はメタ文字ではない                      |
+| 9 文字目          | パターン `-` vs 文字列 `]` → **不一致**     |
 
 → **`[SEC-TEST]` pet を LIKE で誤カウントしている可能性は低い。**
 
@@ -108,10 +108,10 @@ const hiddenOk = hiddenError == null && (hiddenPets?.length ?? 0) === 0;
 
 **結論: RLS 自体は想定どおり動いている可能性が高く、第3段階の「期待値・前提」の問題が主因。**
 
-| 観察 | 解釈 |
-|------|------|
-| UPDATE 0 件 PASS | 他ブリーダー pet への UPDATE 拒否は **RLS 正常** |
-| SELECT 1 件 FAIL | 「非 admin なら見えない」前提が満たされていない（admin SELECT が効いている） |
+| 観察                                 | 解釈                                                                             |
+| ------------------------------------ | -------------------------------------------------------------------------------- |
+| UPDATE 0 件 PASS                     | 他ブリーダー pet への UPDATE 拒否は **RLS 正常**                                 |
+| SELECT 1 件 FAIL                     | 「非 admin なら見えない」前提が満たされていない（admin SELECT が効いている）     |
 | 2 つの FAIL が同じ `visible count 1` | 同じ LIKE SELECT の結果。UPDATE 前後で見え方は変わらない（UPDATE も 0 件のため） |
 
 RLS が壊れている（誰でも他人の pet が見える）なら、UPDATE も通る可能性がある。今回 UPDATE が拒否されているので、**所有者分離は UPDATE 側では機能している** と判断できる。

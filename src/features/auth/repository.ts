@@ -2,11 +2,7 @@ import type { User } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/client";
 
-import {
-  emailLocalPart,
-  type BreederRow,
-  type BuyerRow,
-} from "./types";
+import { emailLocalPart, type BreederRow, type BuyerRow } from "./types";
 
 function getSupabase() {
   return createClient();
@@ -18,9 +14,7 @@ const buyerSelect =
 const breederSelect =
   "id, user_id, business_name, representative_name, review_status, membership_status, subscription_status, profile_completed";
 
-export async function getBuyerByUserId(
-  userId: string,
-): Promise<BuyerRow | null> {
+export async function getBuyerByUserId(userId: string): Promise<BuyerRow | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("buyers")
@@ -53,9 +47,7 @@ export async function createBuyer(user: User): Promise<BuyerRow> {
   return data;
 }
 
-export async function getBreederByUserId(
-  userId: string,
-): Promise<BreederRow | null> {
+export async function getBreederByUserId(userId: string): Promise<BreederRow | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("breeders")

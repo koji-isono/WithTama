@@ -8,10 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-import {
-  BREEDER_DOCUMENT_MAX_BYTES,
-  type BreederDocumentType,
-} from "../document-constants";
+import { BREEDER_DOCUMENT_MAX_BYTES, type BreederDocumentType } from "../document-constants";
 import { formatDocumentFileSize, validateBreederDocumentFile } from "../document-utils";
 import { uploadBreederDocument } from "../service";
 
@@ -135,7 +132,9 @@ export function DocumentUploadField({
             <p>
               選択ファイル: <span className="font-medium">{selectedFileName}</span>
             </p>
-            {selectedFileSize ? <p className="text-neutral-500">サイズ: {selectedFileSize}</p> : null}
+            {selectedFileSize ? (
+              <p className="text-neutral-500">サイズ: {selectedFileSize}</p>
+            ) : null}
           </div>
         ) : null}
 

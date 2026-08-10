@@ -8,11 +8,7 @@ const EXTENSION_BY_MIME: Record<PetPhotoAllowedMimeType, PetPhotoAllowedExtensio
   "image/png": "png",
 };
 
-export function buildPetPhotoStoragePath(
-  userId: string,
-  petId: string,
-  file: File,
-): string {
+export function buildPetPhotoStoragePath(userId: string, petId: string, file: File): string {
   const validationError = validatePetPhotoFile(file);
 
   if (validationError) {

@@ -10,25 +10,25 @@
 
 ## ファイル構成
 
-| ファイル | 内容 |
-|---------|------|
-| `types.ts` | 犬猫ドメイン型 |
-| `validation.ts` | `validateCreatePetDraftInput`（登録・編集共通） |
-| `repository.ts` | `getBreederIdByUserId`, `createPet`, `getPetByIdForBreeder`, `updatePetDraft` |
-| `service.ts` | `createPetDraft`, `updatePetDraftAction`, `getPetEditData` |
-| `loaders.ts` | `loadPetEditPageData` |
-| `constants.ts` | URL・選択肢・ステータスラベル |
-| `components/pet-draft-form-fields.tsx` | 登録・編集共通フォーム |
-| `components/pet-registration-form.tsx` | 新規登録 UI |
-| `components/pet-edit-form.tsx` | 編集 UI |
-| `index.ts` | 公開 export |
+| ファイル                               | 内容                                                                          |
+| -------------------------------------- | ----------------------------------------------------------------------------- |
+| `types.ts`                             | 犬猫ドメイン型                                                                |
+| `validation.ts`                        | `validateCreatePetDraftInput`（登録・編集共通）                               |
+| `repository.ts`                        | `getBreederIdByUserId`, `createPet`, `getPetByIdForBreeder`, `updatePetDraft` |
+| `service.ts`                           | `createPetDraft`, `updatePetDraftAction`, `getPetEditData`                    |
+| `loaders.ts`                           | `loadPetEditPageData`                                                         |
+| `constants.ts`                         | URL・選択肢・ステータスラベル                                                 |
+| `components/pet-draft-form-fields.tsx` | 登録・編集共通フォーム                                                        |
+| `components/pet-registration-form.tsx` | 新規登録 UI                                                                   |
+| `components/pet-edit-form.tsx`         | 編集 UI                                                                       |
+| `index.ts`                             | 公開 export                                                                   |
 
 ## 関連 URL
 
-| 画面 | URL |
-|------|-----|
-| 犬猫一覧 | `/breeder/pets` |
-| 犬猫登録 | `/breeder/pets/new` |
+| 画面         | URL                          |
+| ------------ | ---------------------------- |
+| 犬猫一覧     | `/breeder/pets`              |
+| 犬猫登録     | `/breeder/pets/new`          |
 | 犬猫情報編集 | `/breeder/pets/[petId]/edit` |
 
 ## 関連テーブル

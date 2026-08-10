@@ -1,10 +1,10 @@
 # breeders テーブル
 
-| 項目 | 内容 |
-|------|------|
+| 項目       | 内容              |
+| ---------- | ----------------- |
 | テーブル名 | `public.breeders` |
-| Version | 1.4 |
-| 状態 | 確定 |
+| Version    | 1.4               |
+| 状態       | 確定              |
 
 ## 目的
 
@@ -14,77 +14,77 @@
 
 ## カラム定義
 
-| カラム名 | 型 | NULL | 初期値 | 説明 |
-|---------|-----|------|--------|------|
-| `id` | uuid | NOT NULL | `gen_random_uuid()` | ブリーダーID、主キー |
-| `user_id` | uuid | NOT NULL | なし | `auth.users.id` への外部キー |
-| `business_name` | text | NULL | `null` | 屋号・事業所名 |
-| `representative_name` | text | NULL | `null` | 代表者名 |
-| `profile_text` | text | NULL | `null` | 自己紹介 |
-| `breeding_policy` | text | NULL | `null` | 繁殖方針 |
-| `health_policy` | text | NULL | `null` | 健康管理方針 |
-| `breeding_environment` | text | NULL | `null` | 飼育環境 |
-| `postal_code` | text | NULL | `null` | 郵便番号 |
-| `prefecture` | text | NULL | `null` | 都道府県 |
-| `city` | text | NULL | `null` | 市区町村 |
-| `address_line` | text | NULL | `null` | 番地・建物名。一般公開しない |
-| `phone` | text | NULL | `null` | 電話番号 |
-| `public_email` | text | NULL | `null` | 公開用メールアドレス |
-| `website_url` | text | NULL | `null` | 公式サイト URL |
-| `business_registration_number` | text | NULL | `null` | 第一種動物取扱業登録番号 |
-| `business_registration_type` | text | NULL | `null` | 登録種別 |
-| `registration_authority` | text | NULL | `null` | 登録自治体 |
-| `registration_expires_at` | date | NULL | `null` | 登録有効期限 |
-| `identity_document_path` | text | NULL | `null` | 本人確認書類の Storage パス |
-| `business_license_path` | text | NULL | `null` | 登録証画像の Storage パス |
-| `identity_verification_status` | text | NOT NULL | `unverified` | 本人確認状態 |
-| `business_verification_status` | text | NOT NULL | `unverified` | 登録証確認状態 |
-| `review_status` | text | NOT NULL | `draft` | 審査状態 |
-| `membership_status` | text | NOT NULL | `pending` | 利用状態 |
-| `profile_completed` | boolean | NOT NULL | `false` | プロフィール入力完了 |
-| `stripe_customer_id` | text | NULL | `null` | Stripe 顧客 ID |
-| `stripe_subscription_id` | text | NULL | `null` | Stripe 定期課金 ID |
-| `subscription_status` | text | NULL | `null` | Stripe 課金状態 |
-| `approved_at` | timestamptz | NULL | `null` | 承認日時 |
-| `suspended_at` | timestamptz | NULL | `null` | 利用停止日時 |
-| `deleted_at` | timestamptz | NULL | `null` | 論理削除日時 |
-| `created_at` | timestamptz | NOT NULL | `now()` | 作成日時 |
-| `updated_at` | timestamptz | NOT NULL | `now()` | 更新日時（UPDATE 時にトリガーで自動更新） |
+| カラム名                       | 型          | NULL     | 初期値              | 説明                                      |
+| ------------------------------ | ----------- | -------- | ------------------- | ----------------------------------------- |
+| `id`                           | uuid        | NOT NULL | `gen_random_uuid()` | ブリーダーID、主キー                      |
+| `user_id`                      | uuid        | NOT NULL | なし                | `auth.users.id` への外部キー              |
+| `business_name`                | text        | NULL     | `null`              | 屋号・事業所名                            |
+| `representative_name`          | text        | NULL     | `null`              | 代表者名                                  |
+| `profile_text`                 | text        | NULL     | `null`              | 自己紹介                                  |
+| `breeding_policy`              | text        | NULL     | `null`              | 繁殖方針                                  |
+| `health_policy`                | text        | NULL     | `null`              | 健康管理方針                              |
+| `breeding_environment`         | text        | NULL     | `null`              | 飼育環境                                  |
+| `postal_code`                  | text        | NULL     | `null`              | 郵便番号                                  |
+| `prefecture`                   | text        | NULL     | `null`              | 都道府県                                  |
+| `city`                         | text        | NULL     | `null`              | 市区町村                                  |
+| `address_line`                 | text        | NULL     | `null`              | 番地・建物名。一般公開しない              |
+| `phone`                        | text        | NULL     | `null`              | 電話番号                                  |
+| `public_email`                 | text        | NULL     | `null`              | 公開用メールアドレス                      |
+| `website_url`                  | text        | NULL     | `null`              | 公式サイト URL                            |
+| `business_registration_number` | text        | NULL     | `null`              | 第一種動物取扱業登録番号                  |
+| `business_registration_type`   | text        | NULL     | `null`              | 登録種別                                  |
+| `registration_authority`       | text        | NULL     | `null`              | 登録自治体                                |
+| `registration_expires_at`      | date        | NULL     | `null`              | 登録有効期限                              |
+| `identity_document_path`       | text        | NULL     | `null`              | 本人確認書類の Storage パス               |
+| `business_license_path`        | text        | NULL     | `null`              | 登録証画像の Storage パス                 |
+| `identity_verification_status` | text        | NOT NULL | `unverified`        | 本人確認状態                              |
+| `business_verification_status` | text        | NOT NULL | `unverified`        | 登録証確認状態                            |
+| `review_status`                | text        | NOT NULL | `draft`             | 審査状態                                  |
+| `membership_status`            | text        | NOT NULL | `pending`           | 利用状態                                  |
+| `profile_completed`            | boolean     | NOT NULL | `false`             | プロフィール入力完了                      |
+| `stripe_customer_id`           | text        | NULL     | `null`              | Stripe 顧客 ID                            |
+| `stripe_subscription_id`       | text        | NULL     | `null`              | Stripe 定期課金 ID                        |
+| `subscription_status`          | text        | NULL     | `null`              | Stripe 課金状態                           |
+| `approved_at`                  | timestamptz | NULL     | `null`              | 承認日時                                  |
+| `suspended_at`                 | timestamptz | NULL     | `null`              | 利用停止日時                              |
+| `deleted_at`                   | timestamptz | NULL     | `null`              | 論理削除日時                              |
+| `created_at`                   | timestamptz | NOT NULL | `now()`             | 作成日時                                  |
+| `updated_at`                   | timestamptz | NOT NULL | `now()`             | 更新日時（UPDATE 時にトリガーで自動更新） |
 
 ## TypeScript 対応（参考）
 
-| DB カラム（snake_case） | TypeScript（camelCase） |
-|------------------------|------------------------|
-| `user_id` | `userId` |
-| `business_name` | `businessName` |
-| `representative_name` | `representativeName` |
-| `profile_text` | `profileText` |
-| `breeding_policy` | `breedingPolicy` |
-| `health_policy` | `healthPolicy` |
-| `breeding_environment` | `breedingEnvironment` |
-| `postal_code` | `postalCode` |
-| `address_line` | `addressLine` |
-| `public_email` | `publicEmail` |
-| `website_url` | `websiteUrl` |
+| DB カラム（snake_case）        | TypeScript（camelCase）      |
+| ------------------------------ | ---------------------------- |
+| `user_id`                      | `userId`                     |
+| `business_name`                | `businessName`               |
+| `representative_name`          | `representativeName`         |
+| `profile_text`                 | `profileText`                |
+| `breeding_policy`              | `breedingPolicy`             |
+| `health_policy`                | `healthPolicy`               |
+| `breeding_environment`         | `breedingEnvironment`        |
+| `postal_code`                  | `postalCode`                 |
+| `address_line`                 | `addressLine`                |
+| `public_email`                 | `publicEmail`                |
+| `website_url`                  | `websiteUrl`                 |
 | `business_registration_number` | `businessRegistrationNumber` |
-| `business_registration_type` | `businessRegistrationType` |
-| `registration_authority` | `registrationAuthority` |
-| `registration_expires_at` | `registrationExpiresAt` |
-| `identity_document_path` | `identityDocumentPath` |
-| `business_license_path` | `businessLicensePath` |
+| `business_registration_type`   | `businessRegistrationType`   |
+| `registration_authority`       | `registrationAuthority`      |
+| `registration_expires_at`      | `registrationExpiresAt`      |
+| `identity_document_path`       | `identityDocumentPath`       |
+| `business_license_path`        | `businessLicensePath`        |
 | `identity_verification_status` | `identityVerificationStatus` |
 | `business_verification_status` | `businessVerificationStatus` |
-| `review_status` | `reviewStatus` |
-| `membership_status` | `membershipStatus` |
-| `profile_completed` | `profileCompleted` |
-| `stripe_customer_id` | `stripeCustomerId` |
-| `stripe_subscription_id` | `stripeSubscriptionId` |
-| `subscription_status` | `subscriptionStatus` |
-| `approved_at` | `approvedAt` |
-| `suspended_at` | `suspendedAt` |
-| `deleted_at` | `deletedAt` |
-| `created_at` | `createdAt` |
-| `updated_at` | `updatedAt` |
+| `review_status`                | `reviewStatus`               |
+| `membership_status`            | `membershipStatus`           |
+| `profile_completed`            | `profileCompleted`           |
+| `stripe_customer_id`           | `stripeCustomerId`           |
+| `stripe_subscription_id`       | `stripeSubscriptionId`       |
+| `subscription_status`          | `subscriptionStatus`         |
+| `approved_at`                  | `approvedAt`                 |
+| `suspended_at`                 | `suspendedAt`                |
+| `deleted_at`                   | `deletedAt`                  |
+| `created_at`                   | `createdAt`                  |
+| `updated_at`                   | `updatedAt`                  |
 
 ## 制約
 
@@ -98,52 +98,52 @@
 
 ### CHECK 制約 — identity_verification_status
 
-| 値 | 説明 |
-|----|------|
-| `unverified` | 未確認 |
-| `submitted` | 提出済み |
-| `verified` | 確認済み |
-| `rejected` | 却下 |
+| 値           | 説明     |
+| ------------ | -------- |
+| `unverified` | 未確認   |
+| `submitted`  | 提出済み |
+| `verified`   | 確認済み |
+| `rejected`   | 却下     |
 
 ### CHECK 制約 — business_verification_status
 
-| 値 | 説明 |
-|----|------|
-| `unverified` | 未確認 |
-| `submitted` | 提出済み |
-| `verified` | 確認済み |
-| `rejected` | 却下 |
-| `expired` | 期限切れ |
+| 値           | 説明     |
+| ------------ | -------- |
+| `unverified` | 未確認   |
+| `submitted`  | 提出済み |
+| `verified`   | 確認済み |
+| `rejected`   | 却下     |
+| `expired`    | 期限切れ |
 
 ### CHECK 制約 — review_status
 
-| 値 | 説明 |
-|----|------|
-| `draft` | 下書き |
-| `submitted` | 提出済み |
-| `under_review` | 審査中 |
-| `approved` | 承認 |
-| `rejected` | 却下 |
+| 値                      | 説明             |
+| ----------------------- | ---------------- |
+| `draft`                 | 下書き           |
+| `submitted`             | 提出済み         |
+| `under_review`          | 審査中           |
+| `approved`              | 承認             |
+| `rejected`              | 却下             |
 | `resubmission_required` | 修正・再提出依頼 |
 
 ### CHECK 制約 — membership_status
 
-| 値 | 説明 |
-|----|------|
-| `pending` | 利用開始前 |
-| `active` | 利用中 |
-| `suspended` | 停止中 |
-| `canceled` | 解約済み |
+| 値          | 説明       |
+| ----------- | ---------- |
+| `pending`   | 利用開始前 |
+| `active`    | 利用中     |
+| `suspended` | 停止中     |
+| `canceled`  | 解約済み   |
 
 ### CHECK 制約 — subscription_status
 
-| 値 | 説明 |
-|----|------|
+| 値         | 説明         |
+| ---------- | ------------ |
 | `trialing` | トライアル中 |
-| `active` | 有効 |
-| `past_due` | 支払い遅延 |
-| `unpaid` | 未払い |
-| `canceled` | 解約 |
+| `active`   | 有効         |
+| `past_due` | 支払い遅延   |
+| `unpaid`   | 未払い       |
+| `canceled` | 解約         |
 
 ## 仮登録方針
 
@@ -155,33 +155,33 @@
 
 ### DB 初期値（自動設定）
 
-| カラム | 初期値 |
-|--------|--------|
-| `identity_verification_status` | `unverified` |
-| `business_verification_status` | `unverified` |
-| `review_status` | `draft` |
-| `membership_status` | `pending` |
-| `profile_completed` | `false` |
-| `subscription_status` | `null`（初回は未設定。`inactive` は許可値に含まれない） |
-| `created_at` / `updated_at` | `now()` |
+| カラム                         | 初期値                                                  |
+| ------------------------------ | ------------------------------------------------------- |
+| `identity_verification_status` | `unverified`                                            |
+| `business_verification_status` | `unverified`                                            |
+| `review_status`                | `draft`                                                 |
+| `membership_status`            | `pending`                                               |
+| `profile_completed`            | `false`                                                 |
+| `subscription_status`          | `null`（初回は未設定。`inactive` は許可値に含まれない） |
+| `created_at` / `updated_at`    | `now()`                                                 |
 
 `review_status` が `draft` の間は、申請に必要な基本情報が未入力でも保存可能とする。以下は NULL のまま作成してよい。
 
-| カラム | 備考 |
-|--------|------|
-| `business_name` | プロフィール入力画面で後から入力 |
-| `representative_name` | 同上 |
-| `postal_code` | 同上 |
-| `prefecture` | 同上 |
-| `city` | 同上 |
-| `address_line` | 同上 |
-| `phone` | 同上 |
-| `business_registration_number` | 同上 |
-| `business_registration_type` | 同上 |
-| `registration_authority` | 同上 |
-| `registration_expires_at` | 同上 |
-| `website_url` | 同上 |
-| `profile_text` | 同上 |
+| カラム                         | 備考                             |
+| ------------------------------ | -------------------------------- |
+| `business_name`                | プロフィール入力画面で後から入力 |
+| `representative_name`          | 同上                             |
+| `postal_code`                  | 同上                             |
+| `prefecture`                   | 同上                             |
+| `city`                         | 同上                             |
+| `address_line`                 | 同上                             |
+| `phone`                        | 同上                             |
+| `business_registration_number` | 同上                             |
+| `business_registration_type`   | 同上                             |
+| `registration_authority`       | 同上                             |
+| `registration_expires_at`      | 同上                             |
+| `website_url`                  | 同上                             |
+| `profile_text`                 | 同上                             |
 
 プロフィール入力完了後、アプリケーション側で `profile_completed` を `true` に更新する。
 
@@ -189,32 +189,32 @@
 
 以下がすべて入力・提出済みの場合のみ、`review_status` を `submitted` へ変更できる。
 
-| 項目 | カラム |
-|------|--------|
-| 屋号・事業所名 | `business_name` |
-| 代表者名 | `representative_name` |
-| 郵便番号 | `postal_code` |
-| 都道府県 | `prefecture` |
-| 市区町村 | `city` |
-| 番地・建物名 | `address_line` |
-| 電話番号 | `phone` |
-| 登録番号 | `business_registration_number` |
-| 登録種別 | `business_registration_type` |
-| 登録自治体 | `registration_authority` |
-| 登録有効期限 | `registration_expires_at` |
-| 本人確認書類 | `identity_document_path` |
-| 登録証画像 | `business_license_path` |
+| 項目           | カラム                         |
+| -------------- | ------------------------------ |
+| 屋号・事業所名 | `business_name`                |
+| 代表者名       | `representative_name`          |
+| 郵便番号       | `postal_code`                  |
+| 都道府県       | `prefecture`                   |
+| 市区町村       | `city`                         |
+| 番地・建物名   | `address_line`                 |
+| 電話番号       | `phone`                        |
+| 登録番号       | `business_registration_number` |
+| 登録種別       | `business_registration_type`   |
+| 登録自治体     | `registration_authority`       |
+| 登録有効期限   | `registration_expires_at`      |
+| 本人確認書類   | `identity_document_path`       |
+| 登録証画像     | `business_license_path`        |
 
 必須チェックはアプリケーション側で実施する。将来は DB 関数または制約での補強を検討する。
 
 ## 書類 Storage（`breeder-documents`）
 
-| 項目 | 内容 |
-|------|------|
-| バケット名 | `breeder-documents` |
-| 公開設定 | **private**（公開 URL を発行しない） |
-| DB 保存 | Storage パスのみ（`identity_document_path` / `business_license_path`） |
-| パス例 | `breeders/{userId}/identity/{timestamp}-{uuid}.jpg` |
+| 項目       | 内容                                                                   |
+| ---------- | ---------------------------------------------------------------------- |
+| バケット名 | `breeder-documents`                                                    |
+| 公開設定   | **private**（公開 URL を発行しない）                                   |
+| DB 保存    | Storage パスのみ（`identity_document_path` / `business_license_path`） |
+| パス例     | `breeders/{userId}/identity/{timestamp}-{uuid}.jpg`                    |
 
 ### ファイル制限
 
@@ -259,16 +259,16 @@ Step1〜Step4 の必須項目および Step5 の両書類パスがすべて揃�
 
 以下は一般公開しない。
 
-| 区分 | カラム | 備考 |
-|------|--------|------|
-| 住所（詳細） | `postal_code` | 郵便番号 |
-| 住所（詳細） | `address_line` | 番地・建物名 |
-| 連絡先 | `phone` | 電話番号 |
-| 書類 | `identity_document_path` | 本人確認書類 |
-| 書類 | `business_license_path` | 登録証画像 |
-| Stripe | `stripe_customer_id` | 顧客 ID |
-| Stripe | `stripe_subscription_id` | 定期課金 ID |
-| Stripe | `subscription_status` | 課金状態 |
+| 区分         | カラム                   | 備考         |
+| ------------ | ------------------------ | ------------ |
+| 住所（詳細） | `postal_code`            | 郵便番号     |
+| 住所（詳細） | `address_line`           | 番地・建物名 |
+| 連絡先       | `phone`                  | 電話番号     |
+| 書類         | `identity_document_path` | 本人確認書類 |
+| 書類         | `business_license_path`  | 登録証画像   |
+| Stripe       | `stripe_customer_id`     | 顧客 ID      |
+| Stripe       | `stripe_subscription_id` | 定期課金 ID  |
+| Stripe       | `subscription_status`    | 課金状態     |
 
 **住所の公開範囲:** 都道府県（`prefecture`）・市区町村（`city`）までを一般公開する。郵便番号・番地は非公開とする（Decision No.44）。
 
@@ -278,11 +278,11 @@ Step1〜Step4 の必須項目および Step5 の両書類パスがすべて揃�
 
 WithTama 側では以下のみ保持する（Decision No.45）。
 
-| カラム | 内容 |
-|--------|------|
-| `stripe_customer_id` | Stripe 顧客 ID |
+| カラム                   | 内容               |
+| ------------------------ | ------------------ |
+| `stripe_customer_id`     | Stripe 顧客 ID     |
 | `stripe_subscription_id` | Stripe 定期課金 ID |
-| `subscription_status` | 課金状態 |
+| `subscription_status`    | 課金状態           |
 
 請求金額、請求履歴、支払い方法の正本は Stripe とする。
 
@@ -290,20 +290,20 @@ WithTama 側では以下のみ保持する（Decision No.45）。
 
 RLS を有効化する。
 
-| 主体 | 方針 |
-|------|------|
-| ブリーダー本人 | `user_id = auth.uid()` のレコードのみ参照・更新可能 |
-| 管理者 | 全件参照・更新可能（ロール判定は [権限設計](../07_権限設計/README.md) で別途定義） |
-| 一般公開 | 公開用 View または API 経由で必要項目のみ返す |
+| 主体           | 方針                                                                               |
+| -------------- | ---------------------------------------------------------------------------------- |
+| ブリーダー本人 | `user_id = auth.uid()` のレコードのみ参照・更新可能                                |
+| 管理者         | 全件参照・更新可能（ロール判定は [権限設計](../07_権限設計/README.md) で別途定義） |
+| 一般公開       | 公開用 View または API 経由で必要項目のみ返す                                      |
 
 ## マイグレーション
 
-| ファイル | 内容 |
-|---------|------|
-| `20260804135800_create_breeders.sql` | Version 1.0 新規作成 |
-| `20260804144700_update_breeders_draft_nullable.sql` | Version 1.1 仮登録向け NULL 許可（審査申請項目） |
+| ファイル                                              | 内容                                                               |
+| ----------------------------------------------------- | ------------------------------------------------------------------ |
+| `20260804135800_create_breeders.sql`                  | Version 1.0 新規作成                                               |
+| `20260804144700_update_breeders_draft_nullable.sql`   | Version 1.1 仮登録向け NULL 許可（審査申請項目）                   |
 | `20260805112007_update_breeders_profile_nullable.sql` | Version 1.2 プロフィール項目の NULL 許可（初回ログイン仮レコード） |
-| `20260805112809_update_profile_registration_flow.sql` | Version 1.4 仮登録フロー向け NULL 許可・`profile_completed` |
+| `20260805112809_update_profile_registration_flow.sql` | Version 1.4 仮登録フロー向け NULL 許可・`profile_completed`        |
 
 ## 関連テーブル
 
@@ -347,14 +347,14 @@ Foreign Key 設定
 
 `saveBasicProfile` Server Action により、ブリーダー本人の `breeders` レコードを UPDATE する（Decision No.69）。
 
-| 更新カラム | 備考 |
-|-----------|------|
-| `business_name` | 必須 |
-| `representative_name` | 必須 |
-| `phone` | 必須 |
-| `public_email` | 任意（空は NULL） |
-| `website_url` | 任意（空は NULL） |
-| `updated_at` | 明示更新（DB トリガーでも自動更新） |
+| 更新カラム            | 備考                                |
+| --------------------- | ----------------------------------- |
+| `business_name`       | 必須                                |
+| `representative_name` | 必須                                |
+| `phone`               | 必須                                |
+| `public_email`        | 任意（空は NULL）                   |
+| `website_url`         | 任意（空は NULL）                   |
+| `updated_at`          | 明示更新（DB トリガーでも自動更新） |
 
 - 実装: `src/features/breeder-profile/repository.ts` — `updateBasicProfile(userId, data)`
 - RLS: `breeders_update_own`（`user_id = auth.uid()`）

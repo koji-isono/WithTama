@@ -1,10 +1,10 @@
 # pet_photos テーブル
 
-| 項目 | 内容 |
-|------|------|
-| テーブル名 | `public.pet_photos` |
-| Version | 1.0 |
-| 状態 | 確定（pets Version 1.1 と整合） |
+| 項目       | 内容                            |
+| ---------- | ------------------------------- |
+| テーブル名 | `public.pet_photos`             |
+| Version    | 1.0                             |
+| 状態       | 確定（pets Version 1.1 と整合） |
 
 ## 目的
 
@@ -12,28 +12,28 @@
 
 ## カラム定義
 
-| カラム名 | 型 | NULL | 初期値 | 説明 |
-|---------|-----|------|--------|------|
-| `id` | uuid | NOT NULL | `gen_random_uuid()` | 写真ID、主キー |
-| `pet_id` | uuid | NOT NULL | なし | `pets.id` への外部キー |
-| `storage_path` | text | NOT NULL | なし | Supabase Storage 内のファイルパス |
-| `display_order` | integer | NOT NULL | `0` | 表示順 |
-| `is_main` | boolean | NOT NULL | `false` | メイン写真かどうか |
-| `alt_text` | text | NULL | `null` | アクセシビリティ用代替テキスト |
-| `created_at` | timestamptz | NOT NULL | `now()` | 登録日時 |
-| `updated_at` | timestamptz | NOT NULL | `now()` | 更新日時 |
+| カラム名        | 型          | NULL     | 初期値              | 説明                              |
+| --------------- | ----------- | -------- | ------------------- | --------------------------------- |
+| `id`            | uuid        | NOT NULL | `gen_random_uuid()` | 写真ID、主キー                    |
+| `pet_id`        | uuid        | NOT NULL | なし                | `pets.id` への外部キー            |
+| `storage_path`  | text        | NOT NULL | なし                | Supabase Storage 内のファイルパス |
+| `display_order` | integer     | NOT NULL | `0`                 | 表示順                            |
+| `is_main`       | boolean     | NOT NULL | `false`             | メイン写真かどうか                |
+| `alt_text`      | text        | NULL     | `null`              | アクセシビリティ用代替テキスト    |
+| `created_at`    | timestamptz | NOT NULL | `now()`             | 登録日時                          |
+| `updated_at`    | timestamptz | NOT NULL | `now()`             | 更新日時                          |
 
 ## TypeScript 対応（参考）
 
 | DB カラム（snake_case） | TypeScript（camelCase） |
-|------------------------|------------------------|
-| `pet_id` | `petId` |
-| `storage_path` | `storagePath` |
-| `display_order` | `displayOrder` |
-| `is_main` | `isMain` |
-| `alt_text` | `altText` |
-| `created_at` | `createdAt` |
-| `updated_at` | `updatedAt` |
+| ----------------------- | ----------------------- |
+| `pet_id`                | `petId`                 |
+| `storage_path`          | `storagePath`           |
+| `display_order`         | `displayOrder`          |
+| `is_main`               | `isMain`                |
+| `alt_text`              | `altText`               |
+| `created_at`            | `createdAt`             |
+| `updated_at`            | `updatedAt`             |
 
 ## 制約
 
@@ -45,8 +45,8 @@
 
 ### CHECK 制約
 
-| カラム | 制約 |
-|--------|------|
+| カラム          | 制約     |
+| --------------- | -------- |
 | `display_order` | `0` 以上 |
 
 ### ビジネスルール
@@ -62,13 +62,13 @@
 
 ## Storage（`pet-photos`）
 
-| 項目 | 内容 |
-|------|------|
-| バケット名 | `pet-photos` |
-| 公開設定 | **private** |
-| ファイルサイズ上限 | 10MB |
-| 許可 MIME | `image/jpeg`, `image/png` |
-| Migration | `20260806143000_create_pet_photos_storage.sql` |
+| 項目               | 内容                                           |
+| ------------------ | ---------------------------------------------- |
+| バケット名         | `pet-photos`                                   |
+| 公開設定           | **private**                                    |
+| ファイルサイズ上限 | 10MB                                           |
+| 許可 MIME          | `image/jpeg`, `image/png`                      |
+| Migration          | `20260806143000_create_pet_photos_storage.sql` |
 
 ## RLS
 

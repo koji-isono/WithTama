@@ -18,7 +18,12 @@ export type BreederNavItem = {
 };
 
 export const BREEDER_SIDEBAR_ITEMS: BreederNavItem[] = [
-  { label: "ダッシュボード", href: "/breeder/dashboard", icon: Home, title: "ブリーダーダッシュボード" },
+  {
+    label: "ダッシュボード",
+    href: "/breeder/dashboard",
+    icon: Home,
+    title: "ブリーダーダッシュボード",
+  },
   { label: "犬猫管理", href: "/breeder/pets", icon: PawPrint, title: "犬猫管理" },
   { label: "見学管理", href: "/breeder/visits", icon: CalendarDays, title: "見学管理" },
   { label: "問い合わせ", href: "/breeder/inquiries", icon: MessageCircle, title: "問い合わせ" },

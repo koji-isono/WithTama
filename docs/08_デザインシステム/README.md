@@ -4,12 +4,12 @@ WithTama の UI は **Tailwind CSS** + **shadcn/ui** を基盤とします（Dec
 
 ## 技術構成
 
-| 項目 | 採用技術 |
-|------|---------|
-| スタイリング | Tailwind CSS |
-| コンポーネント | shadcn/ui（new-york スタイル） |
-| アイコン | lucide-react |
-| 設定 | `components.json`, `src/app/globals.css` |
+| 項目           | 採用技術                                 |
+| -------------- | ---------------------------------------- |
+| スタイリング   | Tailwind CSS                             |
+| コンポーネント | shadcn/ui（new-york スタイル）           |
+| アイコン       | lucide-react                             |
+| 設定           | `components.json`, `src/app/globals.css` |
 
 ## ブランドカラー（CSS 変数）
 
@@ -76,30 +76,30 @@ WithTama の UI は **Tailwind CSS** + **shadcn/ui** を基盤とします（Dec
 
 ## 命名規則（Decision No.29）
 
-| 種別 | 配置 | 例 |
-|------|------|-----|
-| 汎用 UI | `src/components/ui/` | `Button`, `Card` |
+| 種別         | 配置                       | 例                  |
+| ------------ | -------------------------- | ------------------- |
+| 汎用 UI      | `src/components/ui/`       | `Button`, `Card`    |
 | ドメイン固有 | `src/components/{domain}/` | `PetManagementList` |
-| ページ専用 | `src/app/{route}/` | colocation 可 |
+| ページ専用   | `src/app/{route}/`         | colocation 可       |
 
 ## ブリーダー共通レイアウト
 
 BR-06〜BR-09 で共通利用する DashboardLayout。
 
-| コンポーネント | パス | 用途 |
-|---------------|------|------|
-| BreederSidebar | `src/components/layout/breeder-sidebar.tsx` | PC 左固定サイドバー（240px） |
-| BreederHeader | `src/components/layout/breeder-header.tsx` | 画面上部共通ヘッダー |
-| BreederMobileNav | `src/components/layout/breeder-mobile-nav.tsx` | スマホ下部固定ナビ |
-| BreederLayout | `src/app/breeder/layout.tsx` | `/breeder/*` 共通レイアウト |
-| ナビ設定 | `src/components/layout/breeder-nav-items.ts` | メニュー項目・アクティブ判定 |
+| コンポーネント   | パス                                           | 用途                         |
+| ---------------- | ---------------------------------------------- | ---------------------------- |
+| BreederSidebar   | `src/components/layout/breeder-sidebar.tsx`    | PC 左固定サイドバー（240px） |
+| BreederHeader    | `src/components/layout/breeder-header.tsx`     | 画面上部共通ヘッダー         |
+| BreederMobileNav | `src/components/layout/breeder-mobile-nav.tsx` | スマホ下部固定ナビ           |
+| BreederLayout    | `src/app/breeder/layout.tsx`                   | `/breeder/*` 共通レイアウト  |
+| ナビ設定         | `src/components/layout/breeder-nav-items.ts`   | メニュー項目・アクティブ判定 |
 
 ### レスポンシブ方針
 
-| デバイス | サイドバー | ヘッダー | 下部ナビ |
-|---------|-----------|---------|---------|
-| PC（md以上） | 表示 | 表示 | 非表示 |
-| スマホ | 非表示 | 表示 | 表示 |
+| デバイス     | サイドバー | ヘッダー | 下部ナビ |
+| ------------ | ---------- | -------- | -------- |
+| PC（md以上） | 表示       | 表示     | 非表示   |
+| スマホ       | 非表示     | 表示     | 表示     |
 
 ### アクティブ表示
 
