@@ -5,17 +5,10 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import {
-  BREEDER_PETS_PATH,
-  PET_EDIT_SCREEN_ID,
-  PET_REGISTRATION_SCREEN_ID,
-  PET_STATUS_LABELS,
-  getPetEditPath,
-} from "../constants";
+import { BREEDER_PETS_PATH, PET_REGISTRATION_SCREEN_ID, getPetEditPath } from "../constants";
 import { createPetDraft } from "../service";
 import {
   INITIAL_CREATE_PET_DRAFT_INPUT,

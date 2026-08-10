@@ -1,7 +1,6 @@
 import { randomUUID } from "crypto";
 
 import {
-  BREEDER_DOCUMENT_ALLOWED_EXTENSIONS,
   BREEDER_DOCUMENT_ALLOWED_MIME_TYPES,
   BREEDER_DOCUMENT_MAX_BYTES,
   type BreederDocumentAllowedExtension,

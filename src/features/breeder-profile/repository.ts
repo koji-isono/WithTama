@@ -17,10 +17,7 @@ import { BREEDER_DOCUMENTS_BUCKET } from "./document-constants";
 import {
   isValidBreederDocumentStoragePath,
 } from "./document-utils";
-import {
-  formatBreederDocumentUploadError,
-  logBreederDocumentUploadFailure,
-} from "./format-document-upload-error";
+import { logBreederDocumentUploadFailure } from "./format-document-upload-error";
 
 const licenseProfileSelect =
   "business_registration_type, business_registration_number, registration_authority, registration_expires_at";

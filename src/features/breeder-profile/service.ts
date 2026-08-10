@@ -18,7 +18,6 @@ import { validateProfileCompletion } from "./profile-completion";
 import type {
   BasicProfileInput,
   BreederDocumentType,
-  CompleteBreederProfileInput,
   CompleteBreederProfileResult,
   IntroductionProfileInput,
   LicenseProfileInput,
@@ -257,9 +256,7 @@ export async function uploadBreederDocument(
   }
 }
 
-export async function completeBreederProfile(
-  _input: CompleteBreederProfileInput = {},
-): Promise<CompleteBreederProfileResult> {
+export async function completeBreederProfile(): Promise<CompleteBreederProfileResult> {
   const supabase = await createClient();
   const {
     data: { user },

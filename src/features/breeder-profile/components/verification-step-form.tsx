@@ -67,7 +67,7 @@ export function VerificationStepForm({ initialState }: VerificationStepFormProps
     setIsSubmitting(true);
 
     try {
-      const result = await completeBreederProfile({});
+      const result = await completeBreederProfile();
 
       if (!result.success) {
         if (result.missingSteps) {

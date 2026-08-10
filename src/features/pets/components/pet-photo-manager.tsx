@@ -2,7 +2,7 @@
 
 import { AlertCircle, CheckCircle2, ImagePlus, Loader2, Star, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +38,6 @@ function formatUploadedAt(isoString: string): string {
 export function PetPhotoManager({ petId, initialPhotos }: PetPhotoManagerProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [photos, setPhotos] = useState(initialPhotos);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFileLabel, setSelectedFileLabel] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -47,12 +46,8 @@ export function PetPhotoManager({ petId, initialPhotos }: PetPhotoManagerProps) 
   const [actionError, setActionError] = useState<string | null>(null);
   const [pendingPhotoId, setPendingPhotoId] = useState<string | null>(null);
 
-  const photoCount = photos.length;
+  const photoCount = initialPhotos.length;
   const canUploadMore = photoCount < PET_PHOTO_MAX_COUNT;
-
-  useEffect(() => {
-    setPhotos(initialPhotos);
-  }, [initialPhotos]);
 
   function handleFileChange(file: File | null) {
     setUploadError(null);
@@ -127,12 +122,6 @@ export function PetPhotoManager({ petId, initialPhotos }: PetPhotoManagerProps) 
         return;
       }
 
-      setPhotos((current) =>
-        current.map((photo) => ({
-          ...photo,
-          isMain: photo.id === photoId,
-        })),
-      );
       router.refresh();
     } finally {
       setPendingPhotoId(null);
@@ -234,11 +223,11 @@ export function PetPhotoManager({ petId, initialPhotos }: PetPhotoManagerProps) 
           </Alert>
         ) : null}
 
-        {photos.length === 0 ? (
+        {initialPhotos.length === 0 ? (
           <p className="text-sm text-neutral-600">まだ写真が登録されていません。</p>
         ) : (
           <ul className="grid gap-4 sm:grid-cols-2">
-            {photos.map((photo) => {
+            {initialPhotos.map((photo) => {
               const isPending = pendingPhotoId === photo.id;
 
               return (
