@@ -21,7 +21,7 @@ WithTama の API は Next.js App Router の Route Handlers および Supabase �
 | `setMainPetPhotoAction`     | Server Action | 犬猫メイン写真設定                                     | 実装済み |
 | `deletePetPhotoAction`      | Server Action | 犬猫写真削除                                           | 実装済み |
 | `loadBreederPets`           | Server 関数   | ブリーダー犬猫一覧取得                                 | 実装済み |
-| `submitPetForReviewAction`  | Server Action | 犬猫公開申請（draft → under_review）                   | 実装済み |
+| `submitPetForReviewAction`  | Server Action | 犬猫公開申請（RPC `submit_pet_for_review`）            | 実装済み |
 | `isAdminUser`               | 関数          | 管理者判定（`app_metadata.role`）                      | 実装済み |
 | `getCurrentAdmin`           | Server 関数   | 現在の admin ユーザー取得                              | 実装済み |
 | `requireAdmin`              | Server 関数   | admin 必須ガード（redirect）                           | 実装済み |
@@ -33,9 +33,9 @@ WithTama の API は Next.js App Router の Route Handlers および Supabase �
 | エンドポイント / アクション  | 種別          | 説明                                                            |
 | ---------------------------- | ------------- | --------------------------------------------------------------- |
 | 審査待ち一覧取得             | Server 関数   | AD-10。`under_review` pets + breeder JOIN                       |
+| `submit_pet_for_review`      | PostgreSQL RPC | breeder 公開申請（`draft` → `under_review` + `submitted` log） | 実装済み |
 | `approvePetForPublishAction` | Server Action | AD-11。`under_review` → `published` + `pet_review_logs`         |
 | `returnPetReviewAction`      | Server Action | AD-11。`under_review` → `draft` + 差戻し理由                    |
-| `submitPetForReview`（改修） | Repository    | `draft` → `under_review` + `pet_review_logs.action = submitted` |
 
 ## 今後追加予定 — その他
 

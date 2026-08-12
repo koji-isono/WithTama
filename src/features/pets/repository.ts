@@ -243,11 +243,7 @@ export async function getPetByIdForBreeder(
   return data as PetEditRow | null;
 }
 
-export async function submitPetForReview(
-  userId: string,
-  petId: string,
-  updatedBy: string,
-): Promise<boolean> {
+export async function submitPetForReview(userId: string, petId: string): Promise<boolean> {
   const breederId = await getBreederIdByUserId(userId);
 
   if (!breederId) {
@@ -256,24 +252,25 @@ export async function submitPetForReview(
 
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("pets")
-    .update({
-      status: "under_review",
-      updated_by: updatedBy,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", petId)
-    .eq("breeder_id", breederId)
-    .eq("status", "draft")
-    .select("id")
-    .maybeSingle();
+  const { error } = await supabase.rpc("submit_pet_for_review", {
+    p_pet_id: petId,
+  });
 
   if (error) {
+    const message = error.message.toLowerCase();
+
+    if (
+      message.includes("invalid pet status") ||
+      message.includes("pet not found") ||
+      message.includes("unauthorized")
+    ) {
+      return false;
+    }
+
     throw error;
   }
 
-  return data != null;
+  return true;
 }
 
 export async function updatePetDraft(

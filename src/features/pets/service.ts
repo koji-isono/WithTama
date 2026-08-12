@@ -331,7 +331,7 @@ export async function submitPetForReviewAction(petId: string): Promise<SubmitPet
       return { success: false, error: PET_REVIEW_SUBMIT_PHOTO_REQUIRED_MESSAGE };
     }
 
-    const updated = await submitPetForReview(user.id, petId, user.id);
+    const updated = await submitPetForReview(user.id, petId);
 
     if (!updated) {
       return { success: false, error: PET_REVIEW_SUBMIT_STATUS_INVALID_MESSAGE };

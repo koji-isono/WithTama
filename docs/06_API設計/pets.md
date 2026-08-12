@@ -193,11 +193,14 @@ PostgreSQL 関数 `set_main_pet_photo` により、対象 pet の全写真を `i
 
 ### Repository
 
-`submitPetForReview` — UPDATE 条件: `id`, `breeder_id`, `status = draft`
+`submitPetForReview` — RPC `submit_pet_for_review(p_pet_id)` を呼び出し。Migration: `20260812120000_create_submit_pet_for_review_rpc.sql`
 
-### 将来改修（Decision No.105）
+### DB 処理（RPC 内・単一トランザクション）
 
-公開申請時に `pet_review_logs` へ `action = submitted` を同時 INSERT する。詳細: [pet_review_logs テーブル](../05_データベース設計/pet_review_logs.md)
+1. `pets.status` を `draft` → `under_review`
+2. `pet_review_logs` へ `action = submitted` を INSERT（`actor_user_id = auth.uid()`）
+
+詳細: [pet_review_logs テーブル](../05_データベース設計/pet_review_logs.md)
 
 ## 今後追加予定 — 管理者審査（Decision No.96〜105）
 
