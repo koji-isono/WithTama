@@ -15,10 +15,11 @@
     "format:check": "prettier --check .",
     "prepare": "husky",
     "test:pets-status-trigger": "node --env-file=.env.local --experimental-strip-types scripts/test-pets-status-trigger.mts",
-    "test:pet-review-rpcs": "node --env-file=.env.local --experimental-strip-types scripts/test-pet-review-rpcs.mts",
-    "test:submit-pet-for-review": "node --env-file=.env.local --experimental-strip-types scripts/test-submit-pet-for-review.mts",
+    "test:pet-review-rpcs": "npm run prepare:sec-test-review-pets && node --env-file=.env.local --experimental-strip-types scripts/test-pet-review-rpcs.mts",
+    "test:submit-pet-for-review": "npm run prepare:sec-test-submit-pet && node --env-file=.env.local --experimental-strip-types scripts/test-submit-pet-for-review.mts",
     "prepare:sec-test-review-breeder": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-review-breeder.mts",
-    "prepare:sec-test-review-pets": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-review-pets.mts"
+    "prepare:sec-test-review-pets": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-review-pets.mts",
+    "prepare:sec-test-submit-pet": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-submit-pet.mts"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.7",

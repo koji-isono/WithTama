@@ -30,6 +30,7 @@ const { loadEnvConfig } = nextEnv;
 loadEnvConfig(process.cwd());
 
 const SEC_TEST_PREFIX = "[SEC-TEST]";
+const APPROVE_PET_NAME_PREFIX = "[SEC-TEST] Review RPC Approve Pet";
 const RETURN_COMMENT = "SEC-TEST return reason";
 const UNAUTHORIZED_RETURN_COMMENT = "SEC-TEST unauthorized return";
 
@@ -135,6 +136,88 @@ async function signIn(
   }
 
   return user;
+}
+
+async function fetchSecTestPet(
+  supabase: SupabaseClient,
+  petId: string,
+): Promise<{ pet: ReviewTestPet | null; errorMessage?: string }> {
+  const { data, error } = await supabase
+    .from("pets")
+    .select("id, management_name, status, published_at, breeder_id")
+    .eq("id", petId)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (error || !data) {
+    return { pet: null, errorMessage: error?.message ?? "pet not found or not visible" };
+  }
+
+  if (!data.management_name.includes(SEC_TEST_PREFIX)) {
+    return {
+      pet: null,
+      errorMessage:
+        "management_name does not include [SEC-TEST] — aborting to protect non-test data",
+    };
+  }
+
+  return { pet: data as ReviewTestPet };
+}
+
+async function findUnderReviewApprovePet(supabase: SupabaseClient): Promise<ReviewTestPet | null> {
+  const { data, error } = await supabase
+    .from("pets")
+    .select("id, management_name, status, published_at, breeder_id")
+    .like("management_name", `${APPROVE_PET_NAME_PREFIX}%`)
+    .eq("status", "under_review")
+    .is("deleted_at", null)
+    .is("published_at", null)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return data as ReviewTestPet;
+}
+
+async function resolveApprovePet(
+  supabase: SupabaseClient,
+  envPetId: string,
+  checks: Check[],
+): Promise<ReviewTestPet | null> {
+  const { pet: envPet, errorMessage: envError } = await fetchSecTestPet(supabase, envPetId);
+
+  if (envPet && envPet.status === "under_review") {
+    record(checks, "approve pet lookup", true, envPet.id);
+    return envPet;
+  }
+
+  const fallback = await findUnderReviewApprovePet(supabase);
+
+  if (fallback) {
+    record(
+      checks,
+      "approve pet lookup",
+      true,
+      envPet
+        ? `fallback from stale env id (${envPet.status}) to ${fallback.management_name}`
+        : `fallback (${fallback.management_name})`,
+    );
+    return fallback;
+  }
+
+  record(
+    checks,
+    "approve pet lookup",
+    false,
+    envPet
+      ? `expected status under_review, got ${envPet.status}`
+      : (envError ?? "no under_review approve pet — run prepare:sec-test-review-pets"),
+  );
+  return null;
 }
 
 async function loadSecTestPet(
@@ -333,13 +416,7 @@ async function main(): Promise<void> {
   }
   record(checks, "admin role", true);
 
-  const approvePet = await loadSecTestPet(
-    adminClient,
-    approvePetId,
-    "under_review",
-    checks,
-    "approve pet lookup",
-  );
+  const approvePet = await resolveApprovePet(adminClient, approvePetId, checks);
   const returnPet = await loadSecTestPet(
     adminClient,
     returnPetId,

@@ -2,10 +2,11 @@
  * SEC-TEST pet preparation for phase 5 pet review RPC security test.
  *
  * Creates or reuses two pets owned by SEC_TEST_REVIEW_BREEDER_ID:
- *   A: [SEC-TEST] Review RPC Approve Pet
+ *   A: [SEC-TEST] Review RPC Approve Pet (or numbered variant if canonical is published)
  *   B: [SEC-TEST] Review RPC Return Pet
  *
  * Both end in status = under_review, published_at IS NULL.
+ * Published approve pets are left untouched; a fresh numbered approve pet is created instead.
  * Does NOT modify [SEC-TEST] Trigger Test Pet (phases 1–4).
  *
  * NOT production code. Dev/test only.
@@ -32,8 +33,10 @@ const { loadEnvConfig } = nextEnv;
 loadEnvConfig(process.cwd());
 
 const APPROVE_PET_NAME = "[SEC-TEST] Review RPC Approve Pet";
+const APPROVE_PET_NAME_PREFIX = "[SEC-TEST] Review RPC Approve Pet";
 const RETURN_PET_NAME = "[SEC-TEST] Review RPC Return Pet";
 const PROTECTED_PET_NAME = "[SEC-TEST] Trigger Test Pet";
+const MAX_APPROVE_PET_SLOTS = 50;
 
 type Check = {
   name: string;
@@ -175,6 +178,148 @@ async function submitDraftForReview(
   return { ok: true };
 }
 
+function buildApprovePetManagementName(slotIndex: number): string {
+  if (slotIndex <= 1) {
+    return APPROVE_PET_NAME;
+  }
+
+  return `${APPROVE_PET_NAME_PREFIX} #${slotIndex}`;
+}
+
+async function findReusableUnderReviewApprovePet(
+  supabase: SupabaseClient,
+  breederId: string,
+): Promise<{ pet: PetRow | null; errorMessage?: string }> {
+  const { data, error } = await supabase
+    .from("pets")
+    .select("id, management_name, status, published_at")
+    .eq("breeder_id", breederId)
+    .like("management_name", `${APPROVE_PET_NAME_PREFIX}%`)
+    .eq("status", "under_review")
+    .is("deleted_at", null)
+    .is("published_at", null)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    return { pet: null, errorMessage: error.message };
+  }
+
+  return { pet: data as PetRow | null };
+}
+
+async function insertDraftAndSubmitForReview(
+  supabase: SupabaseClient,
+  breederId: string,
+  userId: string,
+  managementName: string,
+): Promise<{ petId: string | null; errorMessage?: string }> {
+  const { data: inserted, error: insertError } = await supabase
+    .from("pets")
+    .insert(buildDraftInsertPayload(breederId, managementName, userId))
+    .select("id, status, published_at");
+
+  if (insertError || !inserted?.[0]) {
+    return { petId: null, errorMessage: insertError?.message ?? "insert failed" };
+  }
+
+  const petId = inserted[0].id as string;
+  const submit = await submitDraftForReview(supabase, breederId, petId, userId);
+
+  if (!submit.ok) {
+    return {
+      petId: null,
+      errorMessage: submit.errorMessage ?? "inserted draft -> under_review failed",
+    };
+  }
+
+  return { petId };
+}
+
+async function ensureUnderReviewApprovePet(
+  supabase: SupabaseClient,
+  breederId: string,
+  userId: string,
+  checks: Check[],
+  label: string,
+): Promise<string | null> {
+  const { pet: reusable, errorMessage: reusableError } = await findReusableUnderReviewApprovePet(
+    supabase,
+    breederId,
+  );
+
+  if (reusableError) {
+    record(checks, label, false, reusableError);
+    return null;
+  }
+
+  if (reusable) {
+    record(checks, label, true, `reused existing under_review pet (${reusable.management_name})`);
+    return reusable.id;
+  }
+
+  for (let slotIndex = 1; slotIndex <= MAX_APPROVE_PET_SLOTS; slotIndex += 1) {
+    const managementName = buildApprovePetManagementName(slotIndex);
+    const { pet: existing, errorMessage: findError } = await findPetByName(
+      supabase,
+      breederId,
+      managementName,
+    );
+
+    if (findError) {
+      record(checks, label, false, findError);
+      return null;
+    }
+
+    if (!existing) {
+      const created = await insertDraftAndSubmitForReview(
+        supabase,
+        breederId,
+        userId,
+        managementName,
+      );
+      record(
+        checks,
+        label,
+        created.petId != null,
+        created.errorMessage ?? `created fresh approve pet (${managementName})`,
+      );
+      return created.petId;
+    }
+
+    if (existing.status === "under_review" && existing.published_at == null) {
+      record(checks, label, true, `reused under_review pet (${managementName})`);
+      return existing.id;
+    }
+
+    if (existing.status === "draft") {
+      const submit = await submitDraftForReview(supabase, breederId, existing.id, userId);
+      record(
+        checks,
+        label,
+        submit.ok,
+        submit.errorMessage ?? `reused draft pet -> under_review (${managementName})`,
+      );
+      return submit.ok ? existing.id : null;
+    }
+
+    if (existing.status === "published") {
+      continue;
+    }
+
+    continue;
+  }
+
+  record(
+    checks,
+    label,
+    false,
+    `could not allocate fresh approve pet within ${MAX_APPROVE_PET_SLOTS} slots`,
+  );
+  return null;
+}
+
 async function ensureUnderReviewPet(
   supabase: SupabaseClient,
   breederId: string,
@@ -243,29 +388,32 @@ async function ensureUnderReviewPet(
 
 async function verifyFinalPetState(
   supabase: SupabaseClient,
-  breederId: string,
   petId: string,
-  managementName: string,
   checks: Check[],
   label: string,
 ): Promise<boolean> {
-  const { pet, errorMessage } = await findPetByName(supabase, breederId, managementName);
+  const { data, error } = await supabase
+    .from("pets")
+    .select("id, status, published_at, management_name")
+    .eq("id", petId)
+    .is("deleted_at", null)
+    .maybeSingle();
 
   const ok =
-    pet != null &&
-    pet.id === petId &&
-    pet.status === "under_review" &&
-    pet.published_at == null &&
-    errorMessage == null;
+    data != null &&
+    data.id === petId &&
+    data.status === "under_review" &&
+    data.published_at == null &&
+    error == null;
 
   record(
     checks,
     label,
     ok,
-    errorMessage ??
+    error?.message ??
       (ok
         ? undefined
-        : `expected under_review with null published_at, got status=${pet?.status ?? "missing"}`),
+        : `expected under_review with null published_at, got status=${data?.status ?? "missing"}`),
   );
 
   return ok;
@@ -392,11 +540,10 @@ async function main(): Promise<void> {
     return;
   }
 
-  const approvePetId = await ensureUnderReviewPet(
+  const approvePetId = await ensureUnderReviewApprovePet(
     supabase,
     breederId,
     user.id,
-    APPROVE_PET_NAME,
     checks,
     "prepare approve pet",
   );
@@ -419,18 +566,14 @@ async function main(): Promise<void> {
 
   const approveFinalOk = await verifyFinalPetState(
     supabase,
-    breederId,
     approvePetId,
-    APPROVE_PET_NAME,
     checks,
     "final approve pet state",
   );
 
   const returnFinalOk = await verifyFinalPetState(
     supabase,
-    breederId,
     returnPetId,
-    RETURN_PET_NAME,
     checks,
     "final return pet state",
   );
