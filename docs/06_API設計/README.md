@@ -30,12 +30,12 @@ WithTama の API は Next.js App Router の Route Handlers および Supabase �
 
 ## 今後追加予定 — 管理者審査（Decision No.96〜105）
 
-| エンドポイント / アクション  | 種別          | 説明                                                            |
-| ---------------------------- | ------------- | --------------------------------------------------------------- |
-| 審査待ち一覧取得             | Server 関数   | AD-10。`under_review` pets + breeder JOIN                       |
+| エンドポイント / アクション  | 種別           | 説明                                                           |
+| ---------------------------- | -------------- | -------------------------------------------------------------- |
+| 審査待ち一覧取得             | Server 関数    | AD-10。`under_review` pets + breeder JOIN                      |
 | `submit_pet_for_review`      | PostgreSQL RPC | breeder 公開申請（`draft` → `under_review` + `submitted` log） | 実装済み |
-| `approvePetForPublishAction` | Server Action | AD-11。`under_review` → `published` + `pet_review_logs`         |
-| `returnPetReviewAction`      | Server Action | AD-11。`under_review` → `draft` + 差戻し理由                    |
+| `approvePetForPublishAction` | Server Action  | AD-11。`under_review` → `published` + `pet_review_logs`        |
+| `returnPetReviewAction`      | Server Action  | AD-11。`under_review` → `draft` + 差戻し理由                   |
 
 ## 今後追加予定 — その他
 

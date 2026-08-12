@@ -1,10 +1,10 @@
 # submit_pet_for_review RPC 設計・影響調査
 
-| 項目   | 内容                                                         |
-| ------ | ------------------------------------------------------------ |
-| 調査日 | 2026-08-12                                                   |
+| 項目   | 内容                                                               |
+| ------ | ------------------------------------------------------------------ |
+| 調査日 | 2026-08-12                                                         |
 | 対象   | `submitPetForReview()` の完全原子化（`submit_pet_for_review` RPC） |
-| 種別   | **調査・設計のみ**（コード・Migration・DB 変更なし）         |
+| 種別   | **調査・設計のみ**（コード・Migration・DB 変更なし）               |
 
 ## 概要
 
@@ -15,11 +15,11 @@
 
 ## 1. 結論
 
-| 質問 | 回答 |
-| ---- | ---- |
-| **方式 A / B どちらを推奨か** | **方式 B（`submit_pet_for_review` RPC 移行）** |
-| **第1期として** | RPC 移行を推奨。Migration 1 本 + Repository 差替 + テスト更新 |
-| **方式 A を維持するケース** | Migration 適用窗口が第1期に取れない短期間のみ |
+| 質問                          | 回答                                                          |
+| ----------------------------- | ------------------------------------------------------------- |
+| **方式 A / B どちらを推奨か** | **方式 B（`submit_pet_for_review` RPC 移行）**                |
+| **第1期として**               | RPC 移行を推奨。Migration 1 本 + Repository 差替 + テスト更新 |
+| **方式 A を維持するケース**   | Migration 適用窗口が第1期に取れない短期間のみ                 |
 
 **理由:**
 
@@ -44,10 +44,10 @@ submitPetForReviewAction (service.ts)
 
 ### 問題点
 
-| 不整合 | 2 リクエスト方式 | RPC 方式 |
-| ------ | ---------------- | -------- |
-| `under_review` だが `submitted` log なし | 起こりうる（INSERT 失敗時） | 防止 |
-| log のみ追加で status 不変 | 起こりにくい | 防止 |
+| 不整合                                   | 2 リクエスト方式            | RPC 方式 |
+| ---------------------------------------- | --------------------------- | -------- |
+| `under_review` だが `submitted` log なし | 起こりうる（INSERT 失敗時） | 防止     |
+| log のみ追加で status 不変               | 起こりにくい                | 防止     |
 
 ---
 
@@ -148,21 +148,21 @@ GRANT EXECUTE ON FUNCTION public.submit_pet_for_review(uuid) TO authenticated;
 
 ### 4.1 SECURITY DEFINER が必要か
 
-| 観点 | 結論 |
-| ---- | ---- |
-| 管理者 RPC | **必須** — `pets_update_admin` が無く、DEFINER で UPDATE |
+| 観点        | 結論                                                                                             |
+| ----------- | ------------------------------------------------------------------------------------------------ |
+| 管理者 RPC  | **必須** — `pets_update_admin` が無く、DEFINER で UPDATE                                         |
 | breeder RPC | **必須ではない** — `pets_update_breeder_own` / `pet_review_logs_insert_submitted_breeder` が既存 |
 
 **推奨:** 第1期は **SECURITY DEFINER** で admin RPC / `set_main_pet_photo` と揃える。
 
 **代替:** SECURITY INVOKER も有効（RLS を活かし、関数内チェックを補助）。admin RPC との対称性は劣る。
 
-| | SECURITY DEFINER（推奨） | SECURITY INVOKER（代替） |
-| --- | --- | --- |
-| admin RPC との対称性 | ◎ | △ |
-| RLS bypass リスク | 関数内チェック必須 | RLS が最終防衛 |
-| 原子性 | ◎ | ◎ |
-| 既存 precedent | `set_main_pet_photo`, admin RPC | Trigger（INVOKER） |
+|                      | SECURITY DEFINER（推奨）        | SECURITY INVOKER（代替） |
+| -------------------- | ------------------------------- | ------------------------ |
+| admin RPC との対称性 | ◎                               | △                        |
+| RLS bypass リスク    | 関数内チェック必須              | RLS が最終防衛           |
+| 原子性               | ◎                               | ◎                        |
+| 既存 precedent       | `set_main_pet_photo`, admin RPC | Trigger（INVOKER）       |
 
 ### 4.2 search_path 固定
 
@@ -211,12 +211,12 @@ admin RPC の `under_review` 確認と同パターン。
 
 **結論: submit RPC では検証しない（No.107 は承認時のみ）**
 
-| 条件 | submit（申請） | approve（承認） |
-| ---- | -------------- | --------------- |
-| `review_status = approved` | 現状チェックなし | RPC で必須 |
-| `identity_verification_status = verified` | なし | RPC で必須 |
-| `business_verification_status = verified` | なし | RPC で必須 |
-| `registration_expires_at` | なし | RPC で必須 |
+| 条件                                      | submit（申請）   | approve（承認） |
+| ----------------------------------------- | ---------------- | --------------- |
+| `review_status = approved`                | 現状チェックなし | RPC で必須      |
+| `identity_verification_status = verified` | なし             | RPC で必須      |
+| `business_verification_status = verified` | なし             | RPC で必須      |
+| `registration_expires_at`                 | なし             | RPC で必須      |
 
 根拠:
 
@@ -226,11 +226,11 @@ admin RPC の `under_review` 確認と同パターン。
 
 **RPC に入れるべき breeder 側チェック（第1期）:**
 
-| チェック | 推奨 | 根拠 |
-| -------- | ---- | ---- |
-| 写真 1 枚以上 | **推奨** | Decision No.96 |
+| チェック                 | 推奨             | 根拠                                |
+| ------------------------ | ---------------- | ----------------------------------- |
+| 写真 1 枚以上            | **推奨**         | Decision No.96                      |
 | 必須項目（品種・価格等） | **アプリ層維持** | `validatePetForReviewSubmit` が複雑 |
-| `is_admin()` 拒否 | **推奨** | Trigger と二重防御 |
+| `is_admin()` 拒否        | **推奨**         | Trigger と二重防御                  |
 
 ### 4.7 同一トランザクション化
 
@@ -255,12 +255,12 @@ actor_user_id = auth.uid()  -- 引数・クライアント値は使わない
 
 ### 4.9 二重申請防止
 
-| レイヤー | 手段 |
-| -------- | ---- |
-| RPC | `FOR UPDATE` + `status = 'draft'` 条件 UPDATE |
-| Trigger | `draft → under_review` のみ許可（非 admin breeder） |
-| アプリ | `submitPetForReviewAction` の事前 status チェック |
-| ログ | 2 回目は UPDATE 0 行 → EXCEPTION → INSERT なし |
+| レイヤー | 手段                                                |
+| -------- | --------------------------------------------------- |
+| RPC      | `FOR UPDATE` + `status = 'draft'` 条件 UPDATE       |
+| Trigger  | `draft → under_review` のみ許可（非 admin breeder） |
+| アプリ   | `submitPetForReviewAction` の事前 status チェック   |
+| ログ     | 2 回目は UPDATE 0 行 → EXCEPTION → INSERT なし      |
 
 ### 4.10 差戻し後の再申請
 
@@ -278,11 +278,11 @@ draft → under_review + submitted   (2回目 — 新しい submitted 行)
 
 admin RPC と同じ:
 
-| ロール | EXECUTE |
-| ------ | ------- |
-| `anon` | **禁止** |
+| ロール          | EXECUTE                                             |
+| --------------- | --------------------------------------------------- |
+| `anon`          | **禁止**                                            |
 | `authenticated` | **許可**（関数内で breeder 本人 + 非 admin を検証） |
-| `PUBLIC` | **禁止** |
+| `PUBLIC`        | **禁止**                                            |
 
 ```sql
 REVOKE ALL ... FROM PUBLIC;
@@ -299,12 +299,12 @@ Server Action (validatePetForReviewSubmit, photo count)
           → Trigger: enforce_pets_status_transition (UPDATE 時発火)
 ```
 
-| コンポーネント | 役割 | 変更 |
-| -------------- | ---- | ---- |
-| `pets_update_breeder_own` | breeder 直接 UPDATE 用 RLS | **変更不要** |
-| `pet_review_logs_insert_submitted_breeder` | breeder 直接 INSERT 用 RLS | **変更不要** |
-| `enforce_pets_status_transition` | status 遷移 allowlist | **削除・変更しない** |
-| `approve_pet_for_publish` / `return_pet_review` | 管理者審査 | **変更しない** |
+| コンポーネント                                  | 役割                       | 変更                 |
+| ----------------------------------------------- | -------------------------- | -------------------- |
+| `pets_update_breeder_own`                       | breeder 直接 UPDATE 用 RLS | **変更不要**         |
+| `pet_review_logs_insert_submitted_breeder`      | breeder 直接 INSERT 用 RLS | **変更不要**         |
+| `enforce_pets_status_transition`                | status 遷移 allowlist      | **削除・変更しない** |
+| `approve_pet_for_publish` / `return_pet_review` | 管理者審査                 | **変更しない**       |
 
 Trigger は **最終防御**として残す。
 
@@ -312,17 +312,17 @@ Trigger は **最終防御**として残す。
 
 ## 5. admin RPC との設計比較
 
-| 項目 | `submit_pet_for_review` | `approve_pet_for_publish` | `return_pet_review` |
-| ---- | ----------------------- | ------------------------- | ------------------- |
-| 主体 | breeder（非 admin） | admin | admin |
-| 引数 | `p_pet_id` のみ | `p_pet_id` | `p_pet_id`, `p_comment` |
-| status 遷移 | `draft → under_review` | `under_review → published` | `under_review → draft` |
-| log action | `submitted` | `approved` | `returned` |
-| breeder 資格 | **検証しない** | **No.107 必須** | 不要 |
-| `published_at` | 触らない | `now()` 設定 | 触らない |
-| SECURITY | DEFINER（推奨） | DEFINER | DEFINER |
-| Trigger | 発火 | 発火 | 発火 |
-| 原子性 | UPDATE + INSERT | UPDATE + INSERT | UPDATE + INSERT |
+| 項目           | `submit_pet_for_review` | `approve_pet_for_publish`  | `return_pet_review`     |
+| -------------- | ----------------------- | -------------------------- | ----------------------- |
+| 主体           | breeder（非 admin）     | admin                      | admin                   |
+| 引数           | `p_pet_id` のみ         | `p_pet_id`                 | `p_pet_id`, `p_comment` |
+| status 遷移    | `draft → under_review`  | `under_review → published` | `under_review → draft`  |
+| log action     | `submitted`             | `approved`                 | `returned`              |
+| breeder 資格   | **検証しない**          | **No.107 必須**            | 不要                    |
+| `published_at` | 触らない                | `now()` 設定               | 触らない                |
+| SECURITY       | DEFINER（推奨）         | DEFINER                    | DEFINER                 |
+| Trigger        | 発火                    | 発火                       | 発火                    |
+| 原子性         | UPDATE + INSERT         | UPDATE + INSERT            | UPDATE + INSERT         |
 
 参照 Migration: `supabase/migrations/20260810120000_create_pet_review_admin_rpcs.sql`
 
@@ -330,14 +330,14 @@ Trigger は **最終防御**として残す。
 
 ## 6. アプリケーション影響範囲
 
-| ファイル | 影響 |
-| -------- | ---- |
+| ファイル                          | 影響                                                                                                 |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `src/features/pets/repository.ts` | `submitPetForReview` を `.rpc('submit_pet_for_review')` に置換。`insertPetReviewSubmittedLog` 削除可 |
-| `src/features/pets/service.ts` | **変更最小** — 申請前バリデーションは維持 |
-| `breeder-pets-list-content.tsx` | 変更なし |
-| `src/features/admin/*` | 変更なし |
-| `docs/06_API設計/pets.md` | RPC 記載追加 |
-| Migration | 新規 1 ファイル |
+| `src/features/pets/service.ts`    | **変更最小** — 申請前バリデーションは維持                                                            |
+| `breeder-pets-list-content.tsx`   | 変更なし                                                                                             |
+| `src/features/admin/*`            | 変更なし                                                                                             |
+| `docs/06_API設計/pets.md`         | RPC 記載追加                                                                                         |
+| Migration                         | 新規 1 ファイル                                                                                      |
 
 Repository 変更イメージ:
 
@@ -358,21 +358,21 @@ const { error } = await supabase.rpc("submit_pet_for_review", { p_pet_id: petId 
 await supabase.rpc("submit_pet_for_review", { p_pet_id: petId });
 ```
 
-| テスト観点 | RPC 移行 |
-| ---------- | -------- |
-| draft → under_review | ✅ |
-| submitted 1 件 | ✅ |
-| actor / pet_id / created_at | ✅ |
-| 二重 log 防止 | ✅ |
-| 他人 pet | ✅ |
-| 不正 status | ✅ |
+| テスト観点                  | RPC 移行 |
+| --------------------------- | -------- |
+| draft → under_review        | ✅       |
+| submitted 1 件              | ✅       |
+| actor / pet_id / created_at | ✅       |
+| 二重 log 防止               | ✅       |
+| 他人 pet                    | ✅       |
+| 不正 status                 | ✅       |
 
 ### 7.2 変更しないテスト
 
-| スクリプト | 理由 |
-| ---------- | ---- |
+| スクリプト                     | 理由                                 |
+| ------------------------------ | ------------------------------------ |
 | `test-pets-status-trigger.mts` | Trigger 単体検証（直接 UPDATE 継続） |
-| `test-pet-review-rpcs.mts` | admin RPC（29 件） |
+| `test-pet-review-rpcs.mts`     | admin RPC（29 件）                   |
 
 ### 7.3 追加推奨テスト
 
@@ -385,27 +385,27 @@ await supabase.rpc("submit_pet_for_review", { p_pet_id: petId });
 
 リポジトリは **forward-only Migration**（DOWN ファイルなし）。
 
-| 段階 | 方針 |
-| ---- | ---- |
-| ロールバック | 新 Migration で `DROP FUNCTION public.submit_pet_for_review(uuid);` |
-| アプリ | Repository を 2 リクエスト方式に戻す |
-| データ | RPC 適用後に作成された `submitted` log は監査証跡として **削除しない** |
-| Trigger / admin RPC | 触らない |
+| 段階                | 方針                                                                   |
+| ------------------- | ---------------------------------------------------------------------- |
+| ロールバック        | 新 Migration で `DROP FUNCTION public.submit_pet_for_review(uuid);`    |
+| アプリ              | Repository を 2 リクエスト方式に戻す                                   |
+| データ              | RPC 適用後に作成された `submitted` log は監査証跡として **削除しない** |
+| Trigger / admin RPC | 触らない                                                               |
 
 ---
 
 ## 9. 方式 A / B 比較
 
-| 観点 | A. 現行 2 リクエスト維持 | B. `submit_pet_for_review` RPC |
-| ---- | ------------------------ | ------------------------------ |
-| 原子性 | INSERT 失敗時に log 欠落リスク | **DB が保証** |
-| Service Role | 不使用 | 不使用 |
-| RLS 回避 | なし | DEFINER 時は bypass（関数内検証で補完） |
-| admin RPC との対称 | △ | **◎** |
-| Migration | 不要 | **1 本必要** |
-| 実装コスト | 済 | Repository 差替 + テスト更新 |
-| 必須項目 bypass | アプリ直叩きで可能 | RPC 直叩きで可能（現状と同程度） |
-| AD-10 申請日時 | 通常動作 | **より信頼性高い** |
+| 観点               | A. 現行 2 リクエスト維持       | B. `submit_pet_for_review` RPC          |
+| ------------------ | ------------------------------ | --------------------------------------- |
+| 原子性             | INSERT 失敗時に log 欠落リスク | **DB が保証**                           |
+| Service Role       | 不使用                         | 不使用                                  |
+| RLS 回避           | なし                           | DEFINER 時は bypass（関数内検証で補完） |
+| admin RPC との対称 | △                              | **◎**                                   |
+| Migration          | 不要                           | **1 本必要**                            |
+| 実装コスト         | 済                             | Repository 差替 + テスト更新            |
+| 必須項目 bypass    | アプリ直叩きで可能             | RPC 直叩きで可能（現状と同程度）        |
+| AD-10 申請日時     | 通常動作                       | **より信頼性高い**                      |
 
 ---
 

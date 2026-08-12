@@ -1,10 +1,10 @@
 # submit_pet_for_review セキュリティテスト — draft+写真 Pet 不足 調査
 
-| 項目     | 内容                                                         |
-| -------- | ------------------------------------------------------------ |
-| 調査日   | 2026-08-12                                                   |
-| 対象     | `npm run test:submit-pet-for-review` の失敗原因調査          |
-| 種別     | **調査・提案のみ**（コード・Migration・DB 変更なし）         |
+| 項目   | 内容                                                 |
+| ------ | ---------------------------------------------------- |
+| 調査日 | 2026-08-12                                           |
+| 対象   | `npm run test:submit-pet-for-review` の失敗原因調査  |
+| 種別   | **調査・提案のみ**（コード・Migration・DB 変更なし） |
 
 ## 概要
 
@@ -24,12 +24,12 @@ FAIL draft test pet with photo lookup
 
 `scripts/test-submit-pet-for-review.mts` の `findSecTestDraftPetWithPhoto()` は以下を **すべて** 満たす Pet を探す。
 
-| 条件 | 内容 |
-| ---- | ---- |
-| `management_name` | `[SEC-TEST]%` |
-| `status` | `draft` |
-| `pet_photos` | **1 枚以上** |
-| 所有者 | `SEC_TEST_BREEDER` の breeder |
+| 条件              | 内容                          |
+| ----------------- | ----------------------------- |
+| `management_name` | `[SEC-TEST]%`                 |
+| `status`          | `draft`                       |
+| `pet_photos`      | **1 枚以上**                  |
+| 所有者            | `SEC_TEST_BREEDER` の breeder |
 
 現状、この組み合わせを満たす Pet が **0 件** のため、成功系テスト（draft→under_review、submitted log 等）以降が実行されず早期終了した。
 
@@ -39,11 +39,11 @@ FAIL draft test pet with photo lookup
 
 RPC 適用済みの環境では、失敗前に以下は合格している。
 
-| 区分 | 内容 |
-| ---- | ---- |
-| 前提 | RPC 存在確認、breeder サインイン、breeder id |
+| 区分      | 内容                                                |
+| --------- | --------------------------------------------------- |
+| 前提      | RPC 存在確認、breeder サインイン、breeder id        |
 | 写真 0 枚 | 拒否、status draft 維持、log 不変、ロールバック確認 |
-| admin | 実行拒否（admin サインイン成功時） |
+| admin     | 実行拒否（admin サインイン成功時）                  |
 
 **失敗はデータ準備不足のみ** で、RPC ロジック自体の問題ではない。
 
@@ -51,13 +51,13 @@ RPC 適用済みの環境では、失敗前に以下は合格している。
 
 ## 3. 既存 SEC-TEST データの状態（推定）
 
-| Pet 名 | 想定 status | 写真 | submit テストへの利用 |
-| ------ | ----------- | ---- | --------------------- |
-| `[SEC-TEST] Trigger Test Pet` | `under_review` 等 | 不明 | **不可**（第1〜4段階用・変更禁止） |
-| `[SEC-TEST] Review RPC Approve Pet` | `under_review` | **なし** | **不可**（第5段階 approve 用） |
-| `[SEC-TEST] Review RPC Return Pet` | `under_review` | **なし** | **不可**（第5段階 return 用） |
-| `[SEC-TEST] Submit RPC No Photo Pet` | `draft` | **0 枚** | 写真拒否テスト専用（テスト内自動作成） |
-| 以前の submit テスト消費分 | `under_review` | なしの可能性大 | draft ではない |
+| Pet 名                               | 想定 status       | 写真           | submit テストへの利用                  |
+| ------------------------------------ | ----------------- | -------------- | -------------------------------------- |
+| `[SEC-TEST] Trigger Test Pet`        | `under_review` 等 | 不明           | **不可**（第1〜4段階用・変更禁止）     |
+| `[SEC-TEST] Review RPC Approve Pet`  | `under_review`    | **なし**       | **不可**（第5段階 approve 用）         |
+| `[SEC-TEST] Review RPC Return Pet`   | `under_review`    | **なし**       | **不可**（第5段階 return 用）          |
+| `[SEC-TEST] Submit RPC No Photo Pet` | `draft`           | **0 枚**       | 写真拒否テスト専用（テスト内自動作成） |
+| 以前の submit テスト消費分           | `under_review`    | なしの可能性大 | draft ではない                         |
 
 **結論:** 既存 SEC-TEST Pet をそのまま再利用して成功系を満たすことはできない。
 
@@ -70,7 +70,7 @@ RPC 適用済みの環境では、失敗前に以下は合格している。
 ```typescript
 // recoverDraftPetWithPhotoViaAdminReturn 内
 if (photoCount < 1) {
-  return null;  // ← ここで失敗
+  return null; // ← ここで失敗
 }
 ```
 
@@ -85,11 +85,11 @@ if (photoCount < 1) {
 
 ## 5. 既存準備スクリプトとのギャップ
 
-| スクリプト | 目的 | draft + 写真 |
-| ---------- | ---- | ------------ |
-| `prepare-sec-test-review-pets.mts` | 第5段階 Approve/Return Pet（`under_review`） | ❌ 写真なし |
-| `prepare-sec-test-review-breeder.mts` | breeder 資格整備 | Pet 作成なし |
-| `test-submit-pet-for-review.mts` | 写真 **なし** Pet のみ自動作成 | ❌ 写真あり Pet は作らない |
+| スクリプト                            | 目的                                         | draft + 写真               |
+| ------------------------------------- | -------------------------------------------- | -------------------------- |
+| `prepare-sec-test-review-pets.mts`    | 第5段階 Approve/Return Pet（`under_review`） | ❌ 写真なし                |
+| `prepare-sec-test-review-breeder.mts` | breeder 資格整備                             | Pet 作成なし               |
+| `test-submit-pet-for-review.mts`      | 写真 **なし** Pet のみ自動作成               | ❌ 写真あり Pet は作らない |
 
 **submit RPC 用の「draft + 写真 1 枚以上」Pet を用意する専用準備が存在しない。**
 
@@ -123,23 +123,23 @@ if (photoCount < 1) {
 
 ### 避けるべき方法
 
-| 方法 | 理由 |
-| ---- | ---- |
-| Approve / Return Pet の再利用 | 第5段階テスト（`test:pet-review-rpcs`）を壊す |
-| Trigger Test Pet の変更 | 第1〜4段階用・運用手順で変更禁止 |
-| admin return のみ | draft には戻るが **写真不足** で不十分 |
-| Service Role / SQL Editor 直接 UPDATE | 要件違反 |
-| 本番用 Pet（`[SEC-TEST]` 以外）の変更 | 要件違反 |
+| 方法                                  | 理由                                          |
+| ------------------------------------- | --------------------------------------------- |
+| Approve / Return Pet の再利用         | 第5段階テスト（`test:pet-review-rpcs`）を壊す |
+| Trigger Test Pet の変更               | 第1〜4段階用・運用手順で変更禁止              |
+| admin return のみ                     | draft には戻るが **写真不足** で不十分        |
+| Service Role / SQL Editor 直接 UPDATE | 要件違反                                      |
+| 本番用 Pet（`[SEC-TEST]` 以外）の変更 | 要件違反                                      |
 
 ---
 
 ## 7. テスト改善案（参考・今回未実施）
 
-| 案 | 内容 |
-| -- | ---- |
-| env 明示 | `SEC_TEST_SUBMIT_DRAFT_PET_ID` を env で指定し lookup を固定 |
+| 案           | 内容                                                                             |
+| ------------ | -------------------------------------------------------------------------------- |
+| env 明示     | `SEC_TEST_SUBMIT_DRAFT_PET_ID` を env で指定し lookup を固定                     |
 | prepare 連携 | `prepare-sec-test-submit-pet.mts` を `test:submit-pet-for-review` 前段に組み込む |
-| テスト後復旧 | 成功系実行後、admin return で draft に戻す（第5段階との兼ね合いに注意） |
+| テスト後復旧 | 成功系実行後、admin return で draft に戻す（第5段階との兼ね合いに注意）          |
 
 ---
 
