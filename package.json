@@ -19,7 +19,11 @@
     "test:submit-pet-for-review": "npm run prepare:sec-test-submit-pet && node --env-file=.env.local --experimental-strip-types scripts/test-submit-pet-for-review.mts",
     "prepare:sec-test-review-breeder": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-review-breeder.mts",
     "prepare:sec-test-review-pets": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-review-pets.mts",
-    "prepare:sec-test-submit-pet": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-submit-pet.mts"
+    "prepare:sec-test-submit-pet": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-submit-pet.mts",
+    "prepare:sec-test-public-read": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-public-read.mts",
+    "test:public-pet-read": "npm run prepare:sec-test-public-read && node --env-file=.env.local --experimental-strip-types scripts/test-public-pet-read.mts",
+    "test:public-pets-page": "npm run prepare:sec-test-public-read && node --env-file=.env.local --experimental-strip-types scripts/test-public-pets-page.mts",
+    "test:public-pet-detail": "npm run prepare:sec-test-public-read && node --env-file=.env.local --experimental-strip-types scripts/test-public-pet-detail.mts"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.7",

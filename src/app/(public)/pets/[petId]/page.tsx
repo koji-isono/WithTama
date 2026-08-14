@@ -1,9 +1,33 @@
-export default async function PetDetailPage({ params }: { params: Promise<{ petId: string }> }) {
+import { notFound } from "next/navigation";
+
+import { loadPublicPetDetailPage, PublicPetDetailView } from "@/features/pets";
+
+export const dynamic = "force-dynamic";
+
+type PetDetailPageProps = {
+  params: Promise<{ petId: string }>;
+};
+
+export async function generateMetadata({ params }: PetDetailPageProps) {
   const { petId } = await params;
-  return (
-    <div className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="text-3xl font-bold">犬猫詳細</h1>
-      <p className="mt-3">ID: {petId}</p>
-    </div>
-  );
+  const result = await loadPublicPetDetailPage(petId);
+
+  if (!result.success) {
+    return { title: "犬猫詳細" };
+  }
+
+  return {
+    title: result.detail.publicDisplayName,
+  };
+}
+
+export default async function PetDetailPage({ params }: PetDetailPageProps) {
+  const { petId } = await params;
+  const result = await loadPublicPetDetailPage(petId);
+
+  if (!result.success && "notFound" in result && result.notFound) {
+    notFound();
+  }
+
+  return <PublicPetDetailView result={result} />;
 }

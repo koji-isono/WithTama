@@ -172,13 +172,30 @@ stateDiagram-v2
 
 ## マイグレーション
 
-| ファイル                                            | 内容                                                             |
-| --------------------------------------------------- | ---------------------------------------------------------------- |
-| `20260804132200_update_pets_v1_1.sql`               | Version 1.0 → 1.1（`name` リネーム、カラム追加、制約、トリガー） |
-| `20260807120000_harden_pets_rls.sql`                | RLS 本番化（Decision No.103、作成済み・未適用）                  |
-| `20260807130000_enforce_pets_status_transition.sql` | status 遷移トリガー（作成済み・未適用。RLS 本番化の後に適用）    |
+| ファイル                                              | 内容                                                             |
+| ----------------------------------------------------- | ---------------------------------------------------------------- |
+| `20260804132200_update_pets_v1_1.sql`                 | Version 1.0 → 1.1（`name` リネーム、カラム追加、制約、トリガー） |
+| `20260807120000_harden_pets_rls.sql`                  | RLS 本番化（Decision No.103、作成済み・未適用）                  |
+| `20260807130000_enforce_pets_status_transition.sql`   | status 遷移トリガー（作成済み・未適用。RLS 本番化の後に適用）    |
+| `20260814120000_add_public_pet_list_read_access.sql`  | PU-01 公開一覧 View + `is_publicly_listable_pet` + 写真 RLS      |
+| `20260814130000_add_public_pet_detail_read_views.sql` | PU-02 公開詳細 View（RLS / Storage 変更なし）                    |
 
 既存データを保持する。`DROP TABLE` / `TRUNCATE` / `DELETE` は使用しない。
+
+## 一般公開 READ（View）
+
+anon / authenticated の公開画面（PU-01 / PU-02）は **テーブル直接 SELECT ではなく View 経由**で取得する。公開条件は `public.is_publicly_listable_pet(uuid)` および一覧 / 詳細 View の WHERE 句で **同一** とする。
+
+| View                             | 画面  | 公開列                                                                                                                                             |
+| -------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `published_pets_public`          | PU-01 | `id`, `public_display_name`, `species`, `breed`, `sex`, `birthday`, `price`, `breeder_id`（サーバー JOIN 用）                                      |
+| `published_pet_detail_public`    | PU-02 | 上記 + `color`, `temperament`, `description`, `price_comment`, `breeder_id`（サーバー JOIN 用）                                                    |
+| `breeder_public_profiles`        | PU-01 | `id`, `business_name`, `prefecture`                                                                                                                |
+| `breeder_public_detail_profiles` | PU-02 | `id`, `business_name`, `prefecture`, `city`, `profile_text`, `breeding_policy`, `health_policy`, `breeding_environment`（`id` はサーバー JOIN 用） |
+
+**View に含めない列:** `management_name`, `status`, `ai_description`, `ai_generated_at`, 監査カラム, `deleted_at` 等。
+
+セキュリティテスト: `npm run test:public-pet-read`, `npm run test:public-pet-detail`
 
 ## 関連テーブル
 

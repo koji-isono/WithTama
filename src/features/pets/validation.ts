@@ -177,3 +177,13 @@ export function validatePetForReviewSubmit(pet: {
 
   return null;
 }
+
+const PUBLIC_PET_ID_UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/** PU-02 — 不正 UUID は 404 扱い */
+export function isValidPublicPetId(petId: string): boolean {
+  const trimmed = petId.trim();
+
+  return trimmed.length > 0 && PUBLIC_PET_ID_UUID_REGEX.test(trimmed);
+}

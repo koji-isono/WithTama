@@ -183,6 +183,108 @@ export type PetPhotoActionResult = { success: true } | { success: false; error: 
 
 export type SubmitPetForReviewResult = { success: true } | { success: false; error: string };
 
+/** published_pets_public View 行（Repository 用） */
+export type PublishedPetPublicRow = {
+  id: string;
+  public_display_name: string | null;
+  species: PetSpecies;
+  breed: string;
+  sex: PetSex;
+  birthday: string | null;
+  price: number | null;
+  breeder_id: string;
+};
+
+/** breeder_public_profiles View 行（Repository 用） */
+export type BreederPublicProfileRow = {
+  id: string;
+  business_name: string | null;
+  prefecture: string | null;
+};
+
+/** PU-01 公開犬猫一覧カード DTO */
+export type PublicPetListItem = {
+  id: string;
+  publicDisplayName: string;
+  species: PetSpecies;
+  breed: string;
+  sex: PetSex;
+  birthday: string | null;
+  price: number | null;
+  breederBusinessName: string | null;
+  breederPrefecture: string | null;
+  mainPhotoUrl: string | null;
+};
+
+export type LoadPublicPetsPageResult =
+  { success: true; pets: PublicPetListItem[] } | { success: false; error: string };
+
+/** published_pet_detail_public View 行（Repository 用） */
+export type PublishedPetDetailPublicRow = {
+  id: string;
+  public_display_name: string | null;
+  species: PetSpecies;
+  breed: string;
+  sex: PetSex;
+  birthday: string | null;
+  color: string | null;
+  temperament: string | null;
+  description: string | null;
+  price: number | null;
+  price_comment: string | null;
+  breeder_id: string;
+};
+
+/** breeder_public_detail_profiles View 行（Repository 用） */
+export type BreederPublicDetailProfileRow = {
+  id: string;
+  business_name: string | null;
+  prefecture: string | null;
+  city: string | null;
+  profile_text: string | null;
+  breeding_policy: string | null;
+  health_policy: string | null;
+  breeding_environment: string | null;
+};
+
+export type PublicPetDetailPhoto = {
+  id: string;
+  signedUrl: string;
+  alt: string;
+};
+
+export type PublicBreederDetail = {
+  businessName: string | null;
+  prefecture: string | null;
+  city: string | null;
+  profileText: string | null;
+  breedingPolicy: string | null;
+  healthPolicy: string | null;
+  breedingEnvironment: string | null;
+};
+
+/** PU-02 公開犬猫詳細 DTO（breeder_id / storage_path 非含有） */
+export type PublicPetDetail = {
+  id: string;
+  publicDisplayName: string;
+  species: PetSpecies;
+  breed: string;
+  sex: PetSex;
+  birthday: string | null;
+  color: string | null;
+  temperament: string | null;
+  description: string | null;
+  price: number | null;
+  priceComment: string | null;
+  photos: PublicPetDetailPhoto[];
+  breeder: PublicBreederDetail | null;
+};
+
+export type LoadPublicPetDetailPageResult =
+  | { success: true; detail: PublicPetDetail }
+  | { success: false; notFound: true }
+  | { success: false; error: string };
+
 export type UpdatePetDraftData = {
   management_name: string;
   public_display_name: string;
@@ -248,6 +350,66 @@ export function mapPetPhotoRowToListItem(row: PetPhotoRow, signedUrl: string): P
     altText: row.alt_text,
     createdAt: row.created_at,
     signedUrl,
+  };
+}
+
+export function mapPublishedPetPublicRowToListItem(
+  row: PublishedPetPublicRow,
+  breeder: BreederPublicProfileRow | null,
+  mainPhotoUrl: string | null,
+): PublicPetListItem {
+  return {
+    id: row.id,
+    publicDisplayName: row.public_display_name?.trim() || "名称未設定",
+    species: row.species,
+    breed: row.breed,
+    sex: row.sex,
+    birthday: row.birthday,
+    price: row.price,
+    breederBusinessName: breeder?.business_name ?? null,
+    breederPrefecture: breeder?.prefecture ?? null,
+    mainPhotoUrl,
+  };
+}
+
+function trimToNull(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+export function mapBreederPublicDetailProfileRow(
+  row: BreederPublicDetailProfileRow,
+): PublicBreederDetail {
+  return {
+    businessName: trimToNull(row.business_name),
+    prefecture: trimToNull(row.prefecture),
+    city: trimToNull(row.city),
+    profileText: trimToNull(row.profile_text),
+    breedingPolicy: trimToNull(row.breeding_policy),
+    healthPolicy: trimToNull(row.health_policy),
+    breedingEnvironment: trimToNull(row.breeding_environment),
+  };
+}
+
+export function mapPublishedPetDetailPublicRow(
+  row: PublishedPetDetailPublicRow,
+  breeder: PublicBreederDetail | null,
+  photos: PublicPetDetailPhoto[],
+): PublicPetDetail {
+  return {
+    id: row.id,
+    publicDisplayName: row.public_display_name?.trim() || "名称未設定",
+    species: row.species,
+    breed: row.breed,
+    sex: row.sex,
+    birthday: row.birthday,
+    color: trimToNull(row.color),
+    temperament: trimToNull(row.temperament),
+    description: trimToNull(row.description),
+    price: row.price,
+    priceComment: trimToNull(row.price_comment),
+    photos,
+    breeder,
   };
 }
 

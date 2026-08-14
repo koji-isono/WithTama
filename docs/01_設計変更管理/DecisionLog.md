@@ -855,3 +855,15 @@ _*管理者画面は AD-* で採番する_*
 - **影響範囲:** AD-11 承認操作、管理者承認 Server Action / RPC、`breeders` 参照、`enforce_pets_status_transition`（将来拡張）
 - **決定日:** 2026-08-10
 - **参照:** [AD-11 犬猫掲載審査詳細](../04_画面設計/AD-11_犬猫掲載審査詳細.md) / [Decision No.101](#decision-no101) / [breeders テーブル](../05_データベース設計/breeders.md)
+
+---
+
+## Decision No.108
+
+**PU-02 公開詳細は一覧 View とは別の詳細 View 2 本で公開列のみ返す**
+
+- **決定内容:** 一般公開 `/pets/[petId]` の READ は、PU-01 一覧 View を拡張せず、詳細専用 View `published_pet_detail_public` / `breeder_public_detail_profiles` から公開列のみ SELECT する。公開条件（`published` + approved + active + not deleted）は `is_publicly_listable_pet` / 一覧 View と **同一 WHERE 句** とする。RLS・Storage・`is_publicly_listable_pet` は変更しない。
+- **理由:** 一覧 API の列肥大化を避けつつ、詳細画面に必要な `color` / `temperament` / `description` / ブリーダー長文を安全に公開するため。
+- **影響範囲:** `supabase/migrations/20260814130000_add_public_pet_detail_read_views.sql`、PU-02 loader / UI、セキュリティテスト `test:public-pet-detail`
+- **決定日:** 2026-08-14
+- **参照:** [PU-02 公開犬猫詳細](../04_画面設計/PU-02_公開犬猫詳細.md) / [pets テーブル](../05_データベース設計/pets.md)

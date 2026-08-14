@@ -304,6 +304,20 @@ RLS を有効化する。
 | `20260804144700_update_breeders_draft_nullable.sql`   | Version 1.1 仮登録向け NULL 許可（審査申請項目）                   |
 | `20260805112007_update_breeders_profile_nullable.sql` | Version 1.2 プロフィール項目の NULL 許可（初回ログイン仮レコード） |
 | `20260805112809_update_profile_registration_flow.sql` | Version 1.4 仮登録フロー向け NULL 許可・`profile_completed`        |
+| `20260814120000_add_public_pet_list_read_access.sql`  | PU-01 公開一覧 View `breeder_public_profiles`                      |
+| `20260814130000_add_public_pet_detail_read_views.sql` | PU-02 公開詳細 View `breeder_public_detail_profiles`               |
+
+### 一般公開 View（PU-02 詳細）
+
+| View                             | 公開列                                                                                                                  |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `breeder_public_detail_profiles` | `id`, `business_name`, `prefecture`, `city`, `profile_text`, `breeding_policy`, `health_policy`, `breeding_environment` |
+
+公開条件: `deleted_at IS NULL`, `review_status = 'approved'`, `membership_status = 'active'`。
+
+**View に含めない列:** `user_id`, `phone`, `representative_name`, `postal_code`, `address_line`, `public_email`, `website_url`, 書類パス, Stripe 関連, 審査状態 等。
+
+PU-02 第1期では `website_url` / `public_email` は画面にも表示しない（[PU-02 画面設計](../04_画面設計/PU-02_公開犬猫詳細.md)）。
 
 ## 関連テーブル
 

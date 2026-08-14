@@ -1,5 +1,9 @@
 export { BreederPetsList } from "./components/breeder-pets-list";
 export { BreederPetsListContent } from "./components/breeder-pets-list-content";
+export { PublicPetCard } from "./components/public-pet-card";
+export { PublicPetDetailView } from "./components/public-pet-detail-view";
+export { PublicPetPhotoGallery } from "./components/public-pet-photo-gallery";
+export { PublicPetsList } from "./components/public-pets-list";
 export { PetDraftFormFields } from "./components/pet-draft-form-fields";
 export { PetEditForm } from "./components/pet-edit-form";
 export { PetPhotoManager } from "./components/pet-photo-manager";
@@ -10,8 +14,12 @@ export {
   BREEDER_PETS_NEW_PATH,
   BREEDER_PETS_PATH,
   getPetEditPath,
+  getPublicPetDetailPath,
   PET_EDIT_SCREEN_ID,
   PET_LIST_SCREEN_ID,
+  PUBLIC_PET_DETAIL_SCREEN_ID,
+  PUBLIC_PET_LIST_SCREEN_ID,
+  PUBLIC_PETS_PATH,
   PET_PRICE_COMMENT_MAX_LENGTH,
   PET_REGISTRATION_SCREEN_ID,
   PET_SPECIES_OPTIONS,
@@ -29,7 +37,8 @@ export {
   PET_PHOTO_SIGNED_URL_EXPIRES_SECONDS,
 } from "./photo-constants";
 export { formatPetPhotoFileSize, validatePetPhotoFile } from "./photo-validation";
-export { loadPetEditPageData } from "./loaders";
+export { loadPetEditPageData, loadPublicPetDetailPage, loadPublicPetsPage } from "./loaders";
+export { getPublishedPetDetailForPublic, listPublishedPetsForPublic } from "./public-repository";
 export {
   countPetPhotosForBreeder,
   createPet,
@@ -60,6 +69,7 @@ export {
 } from "./service";
 export type {
   BreederPetListItem,
+  BreederPublicProfileRow,
   CreatePetDraftFieldErrors,
   CreatePetDraftFieldKey,
   CreatePetDraftInput,
@@ -69,6 +79,8 @@ export type {
   InsertPetData,
   InsertPetPhotoData,
   LoadBreederPetsResult,
+  LoadPublicPetDetailPageResult,
+  LoadPublicPetsPageResult,
   NormalizedCreatePetDraftInput,
   PetEditPageData,
   PetEditRow,
@@ -77,6 +89,12 @@ export type {
   PetPhotoListItem,
   PetPhotoRow,
   PetRow,
+  PublicBreederDetail,
+  PublicPetDetail,
+  PublicPetDetailPhoto,
+  PublicPetListItem,
+  PublishedPetDetailPublicRow,
+  PublishedPetPublicRow,
   PetSex,
   PetSpecies,
   PetStatus,
@@ -92,11 +110,20 @@ export {
   mapPetListWithMainPhotoToBreederPetListItem,
   mapPetPhotoRowToListItem,
   mapPetRowToListItem,
+  mapBreederPublicDetailProfileRow,
+  mapPublishedPetDetailPublicRow,
+  mapPublishedPetPublicRowToListItem,
 } from "./types";
 export {
   formatPetBirthday,
   formatPetPrice,
   formatPetUpdatedAt,
+  formatPublicBreederAddress,
+  formatPublicBreederLocation,
+  formatPublicPetAge,
+  formatPublicPetAttributeLine,
+  formatPublicPetPhotoAlt,
+  getPublicSexLabel,
   getSexLabel,
   getSpeciesLabel,
 } from "./list-format";
@@ -108,6 +135,7 @@ export {
   validatePetDraftInput,
   validatePetForReviewSubmit,
   validatePetPhotoUpload,
+  isValidPublicPetId,
   PET_REVIEW_SUBMIT_GENERIC_ERROR_MESSAGE,
   PET_REVIEW_SUBMIT_PHOTO_REQUIRED_MESSAGE,
   PET_REVIEW_SUBMIT_STATUS_INVALID_MESSAGE,

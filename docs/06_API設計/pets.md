@@ -211,6 +211,23 @@ PostgreSQL 関数 `set_main_pet_photo` により、対象 pet の全写真を `i
 
 公開承認時はブリーダー承認済み・登録有効をサーバー側で再検証する（Decision No.101）。具体条件は実 DB 定義確認後に実装。
 
+## 一般公開 READ（PU-01 / PU-02）
+
+| 項目         | 内容                                                                                                                             |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| 種別         | Server Component Loader（Server Action 不要）                                                                                    |
+| 認証         | 不要（anon / publishable key）                                                                                                   |
+| Service Role | **不使用**                                                                                                                       |
+| 一覧         | `published_pets_public` + `breeder_public_profiles`（実装: `listPublishedPetsForPublic`）                                        |
+| 詳細         | `published_pet_detail_public` + `breeder_public_detail_profiles`（`getPublishedPetDetailForPublic` / `loadPublicPetDetailPage`） |
+| 写真         | `pet_photos` RLS + Storage Signed URL（`is_publicly_listable_pet`）                                                              |
+
+詳細 Loader `loadPublicPetDetailPage(petId)` — PU-02 `/pets/[petId]`。公開 DTO / HTML へ `breeder_id`・`storage_path`・内部列を含めない。
+
+Migration: `20260814130000_add_public_pet_detail_read_views.sql`
+
+テスト: `npm run test:public-pet-detail`
+
 ## 関連ドキュメント
 
 - [BR-10 犬猫登録](../04_画面設計/BR-10_犬猫登録.md)
