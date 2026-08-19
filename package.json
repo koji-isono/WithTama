@@ -23,7 +23,9 @@
     "prepare:sec-test-public-read": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-public-read.mts",
     "test:public-pet-read": "npm run prepare:sec-test-public-read && node --env-file=.env.local --experimental-strip-types scripts/test-public-pet-read.mts",
     "test:public-pets-page": "npm run prepare:sec-test-public-read && node --env-file=.env.local --experimental-strip-types scripts/test-public-pets-page.mts",
-    "test:public-pet-detail": "npm run prepare:sec-test-public-read && node --env-file=.env.local --experimental-strip-types scripts/test-public-pet-detail.mts"
+    "test:public-pet-detail": "npm run prepare:sec-test-public-read && node --env-file=.env.local --experimental-strip-types scripts/test-public-pet-detail.mts",
+    "test:buyer-profile-validation": "npx tsx scripts/test-buyer-profile-validation.mts",
+    "test:buyer-profile-page": "npx tsx scripts/test-buyer-profile-page.mts"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.7",

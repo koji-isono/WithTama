@@ -1,6 +1,45 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
+function buildAuthRedirectPath(params: Record<string, string | undefined>): string | null {
+  const tokenHash = params.token_hash;
+  const type = params.type;
+  const code = params.code;
+
+  if (tokenHash && type) {
+    const next = type === "recovery" ? "/reset-password" : "/login";
+    const query = new URLSearchParams({
+      token_hash: tokenHash,
+      type,
+      next,
+    });
+    return `/auth/confirm?${query.toString()}`;
+  }
+
+  if (code) {
+    const next = type === "recovery" || !type ? "/reset-password" : "/login";
+    const query = new URLSearchParams({
+      code,
+      next,
+    });
+    return `/auth/callback?${query.toString()}`;
+  }
+
+  return null;
+}
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const params = await searchParams;
+  const authRedirectPath = buildAuthRedirectPath(params);
+
+  if (authRedirectPath) {
+    redirect(authRedirectPath);
+  }
+
   return (
     <section className="mx-auto grid min-h-[72vh] max-w-6xl place-items-center px-4 py-20 text-center">
       <div className="max-w-3xl">

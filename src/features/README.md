@@ -29,6 +29,7 @@ src/features/{機能名}/
 | モジュール                                     | 説明                                         | 関連画面                                  |
 | ---------------------------------------------- | -------------------------------------------- | ----------------------------------------- |
 | [auth](./auth/README.md)                       | 認証、初回プロフィール作成、入口リダイレクト | `/login`, `/signup`, `/breeder`, `/buyer` |
+| [buyers](./buyers/README.md)                   | 購入希望者プロフィール（BY-01）              | `/buyer/profile`（実装済み）              |
 | [breeder-profile](./breeder-profile/README.md) | ブリーダープロフィール Step 保存             | `/breeder/profile/*`                      |
 | [pets](./pets/README.md)                       | 犬猫管理（Phase 7 基盤）                     | `/breeder/pets/*`                         |
 

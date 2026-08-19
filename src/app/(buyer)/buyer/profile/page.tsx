@@ -1,12 +1,20 @@
+import { SiteHeader } from "@/components/layout/site-header";
+import { BuyerProfileForm } from "@/features/buyers/components/buyer-profile-form";
+import { loadBuyerProfilePageData } from "@/features/buyers/loaders";
+
 export const metadata = {
-  title: "プロフィール登録",
+  title: "購入希望者プロフィール",
 };
 
-export default function BuyerProfilePage() {
+export default async function BuyerProfilePage() {
+  const pageData = await loadBuyerProfilePageData();
+
   return (
-    <main className="mx-auto max-w-6xl px-4 py-12">
-      <h1 className="text-3xl font-bold">プロフィール登録</h1>
-      <p className="mt-3 text-neutral-600">プロフィール入力画面は次工程で実装します。</p>
-    </main>
+    <>
+      <SiteHeader />
+      <main className="mx-auto max-w-2xl px-4 py-6 sm:py-10">
+        <BuyerProfileForm {...pageData} />
+      </main>
+    </>
   );
 }
