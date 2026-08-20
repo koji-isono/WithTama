@@ -20,7 +20,7 @@
 | `validation.ts`                     | バリデーション・UPDATE ペイロード生成        |
 | `profile-completion.ts`             | `profile_completed` 判定                     |
 | `repository.ts`                     | Supabase READ/UPDATE（server-only）          |
-| `service.ts`                      | Server Action                                |
+| `service.ts`                        | Server Action                                |
 | `loaders.ts`                        | ページ用 Loader（Auth email + プロフィール） |
 | `components/buyer-profile-form.tsx` | BY-01 フォーム UI                            |
 
