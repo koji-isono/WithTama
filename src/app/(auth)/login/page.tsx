@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -113,9 +114,17 @@ export default function LoginPage() {
         </div>
 
         <div className="grid gap-2">
-          <label htmlFor="password" className="text-sm font-medium">
-            パスワード
-          </label>
+          <div className="flex items-center justify-between gap-2">
+            <label htmlFor="password" className="text-sm font-medium">
+              パスワード
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-[var(--primary)] underline-offset-4 hover:underline"
+            >
+              パスワードをお忘れの方
+            </Link>
+          </div>
           <Input
             id="password"
             type="password"

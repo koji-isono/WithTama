@@ -24,7 +24,7 @@
 
 ## 関連画面
 
-- `/login`, `/signup`, `/reset-password`
+- `/login`, `/signup`, `/forgot-password`, `/reset-password`
 - `/auth/callback`, `/auth/confirm`（メールリンクの code / token_hash 処理）
 - `/breeder`, `/buyer`（入口リダイレクト）
 - `/admin`（AD-00）

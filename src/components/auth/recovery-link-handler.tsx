@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
-const AUTH_ROUTE_PREFIXES = ["/auth/", "/reset-password", "/login", "/signup"];
+const AUTH_ROUTE_PREFIXES = ["/auth/", "/reset-password", "/forgot-password", "/login", "/signup"];
 
 function isAuthRoute(pathname: string): boolean {
   return AUTH_ROUTE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix));
