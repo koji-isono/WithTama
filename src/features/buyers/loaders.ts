@@ -1,9 +1,11 @@
 import "server-only";
 
+import { redirect } from "next/navigation";
+
 import { requireBuyer } from "@/features/auth/buyer-auth";
 
 import { getBuyerProfileByUserId } from "./repository";
-import type { BuyerProfileInput, BuyerProfilePageData } from "./types";
+import type { BuyerDashboardPageData, BuyerProfileInput, BuyerProfilePageData } from "./types";
 
 export function mapBuyerProfileRowToInput(
   row: NonNullable<Awaited<ReturnType<typeof getBuyerProfileByUserId>>>,
@@ -34,5 +36,19 @@ export async function loadBuyerProfilePageData(): Promise<BuyerProfilePageData> 
     email: user.email ?? "",
     profileCompleted: profile.profile_completed,
     initialInput: mapBuyerProfileRowToInput(profile),
+  };
+}
+
+export async function loadBuyerDashboardPageData(): Promise<BuyerDashboardPageData> {
+  const user = await requireBuyer();
+
+  const profile = await getBuyerProfileByUserId(user.id);
+
+  if (!profile || !profile.profile_completed) {
+    redirect("/buyer/profile");
+  }
+
+  return {
+    displayName: profile.display_name ?? "",
   };
 }

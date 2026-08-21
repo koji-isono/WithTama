@@ -66,6 +66,10 @@ export type BuyerProfilePageData = {
   initialInput: BuyerProfileInput;
 };
 
+export type BuyerDashboardPageData = {
+  displayName: string;
+};
+
 export const INITIAL_BUYER_PROFILE_INPUT: BuyerProfileInput = {
   fullName: "",
   displayName: "",

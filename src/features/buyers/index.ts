@@ -11,15 +11,23 @@ export {
 } from "./constants";
 export type { BuyerPreferredSpecies } from "./constants";
 export { parseBuyerProfileFormData, parseBuyerProfileInputFromRecord } from "./form-data";
-export { loadBuyerProfilePageData, mapBuyerProfileRowToInput } from "./loaders";
+export { BUYER_DASHBOARD_MENU_ITEMS } from "./dashboard-menu";
+export type { BuyerDashboardMenuItem } from "./dashboard-menu";
+export {
+  loadBuyerDashboardPageData,
+  loadBuyerProfilePageData,
+  mapBuyerProfileRowToInput,
+} from "./loaders";
 export { isBuyerProfileComplete } from "./profile-completion";
 export { getBuyerProfileByUserId, updateBuyerProfile } from "./repository";
 export { saveBuyerProfileAction } from "./service";
+export { BuyerDashboardView } from "./components/buyer-dashboard-view";
 export { BuyerProfileForm } from "./components/buyer-profile-form";
 export type {
   BuyerProfileFieldErrors,
   BuyerProfileFieldKey,
   BuyerProfileInput,
+  BuyerDashboardPageData,
   BuyerProfilePageData,
   BuyerProfileRow,
   NormalizedBuyerProfileInput,
