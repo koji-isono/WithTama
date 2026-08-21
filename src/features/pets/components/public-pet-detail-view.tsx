@@ -5,6 +5,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { FavoriteToggleButton } from "@/features/favorites/components/favorite-toggle-button";
 import type { PetFavoriteUiState } from "@/features/favorites/types";
+import { InquiryStartButton } from "@/features/inquiries/components/inquiry-start-button";
+import type { InquiryStartUiState } from "@/features/inquiries/types";
 
 import { PUBLIC_PET_DETAIL_SCREEN_ID, PUBLIC_PETS_PATH } from "../constants";
 import {
@@ -18,6 +20,7 @@ import { PublicPetPhotoGallery } from "./public-pet-photo-gallery";
 type PublicPetDetailViewProps = {
   result: LoadPublicPetDetailPageResult;
   favoriteState?: PetFavoriteUiState;
+  inquiryStartState?: InquiryStartUiState;
 };
 
 function TextSection({ title, children }: { title: string; children: React.ReactNode }) {
@@ -63,9 +66,11 @@ function hasBreederSection(breeder: PublicBreederDetail | null): boolean {
 function PublicPetDetailContent({
   detail,
   favoriteState,
+  inquiryStartState,
 }: {
   detail: PublicPetDetail;
   favoriteState?: PetFavoriteUiState;
+  inquiryStartState?: InquiryStartUiState;
 }) {
   const attributeLine = formatPublicPetAttributeLine({
     species: detail.species,
@@ -121,8 +126,15 @@ function PublicPetDetailContent({
             <p className="text-sm leading-relaxed text-neutral-600">{detail.priceComment}</p>
           ) : null}
 
-          {favoriteState ? (
-            <FavoriteToggleButton petId={detail.id} initialState={favoriteState} />
+          {favoriteState || (inquiryStartState && inquiryStartState.status !== "hidden") ? (
+            <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap">
+              {favoriteState ? (
+                <FavoriteToggleButton petId={detail.id} initialState={favoriteState} />
+              ) : null}
+              {inquiryStartState && inquiryStartState.status !== "hidden" ? (
+                <InquiryStartButton state={inquiryStartState} />
+              ) : null}
+            </div>
           ) : null}
         </div>
       </div>
@@ -179,7 +191,11 @@ function PublicPetDetailContent({
   );
 }
 
-export function PublicPetDetailView({ result, favoriteState }: PublicPetDetailViewProps) {
+export function PublicPetDetailView({
+  result,
+  favoriteState,
+  inquiryStartState,
+}: PublicPetDetailViewProps) {
   if (!result.success) {
     if ("notFound" in result && result.notFound) {
       return null;
@@ -199,5 +215,11 @@ export function PublicPetDetailView({ result, favoriteState }: PublicPetDetailVi
     );
   }
 
-  return <PublicPetDetailContent detail={result.detail} favoriteState={favoriteState} />;
+  return (
+    <PublicPetDetailContent
+      detail={result.detail}
+      favoriteState={favoriteState}
+      inquiryStartState={inquiryStartState}
+    />
+  );
 }

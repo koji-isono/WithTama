@@ -154,25 +154,29 @@ Route Group `(名前)` は URL に含まれない。実際の URL はディレ�
 
 ### ルート一覧
 
-| URL                           | ファイル                               | 種別     | 状態                                      |
-| ----------------------------- | -------------------------------------- | -------- | ----------------------------------------- |
-| `/`                           | `app/(public)/page.tsx`                | 公開     | 実装済み                                  |
-| `/login`                      | `app/(auth)/login/page.tsx`            | 認証     | 実装済み                                  |
-| `/signup`                     | `app/(auth)/signup/page.tsx`           | 認証     | 実装済み                                  |
-| `/admin`                      | `app/(admin)/admin/page.tsx`           | 管理     | プレースホルダー（AD-00、ガード実装済み） |
-| `/admin/pets/reviews`         | （未作成）                             | 管理     | 設計確定（AD-10）                         |
-| `/admin/pets/reviews/[petId]` | （未作成）                             | 管理     | 設計確定（AD-11）                         |
-| `/pets`, `/pets/[petId]`      | `app/(public)/pets/`                   | 公開     | プレースホルダー                          |
-| `/breeders/[breederId]`       | `app/(public)/breeders/`               | 公開     | プレースホルダー                          |
-| `/api/health`                 | `app/api/health/route.ts`              | API      | 実装済み                                  |
-| `/breeder`                    | `app/breeder/page.tsx`                 | 入口     | リダイレクト                              |
-| `/breeder/dashboard`          | `app/breeder/dashboard/page.tsx`       | 表示専用 | 実装済み                                  |
-| `/breeder/profile/*`          | `app/breeder/profile/`                 | 編集     | Step 1 実装済み                           |
-| `/breeder/pets`               | `app/breeder/pets/page.tsx`            | 一覧     | 実装済み                                  |
-| `/breeder/pets/new`           | `app/breeder/pets/new/page.tsx`        | 編集     | 一部実装                                  |
-| `/buyer`                      | `app/(buyer)/buyer/page.tsx`           | 入口     | リダイレクト                              |
-| `/buyer/dashboard`            | `app/(buyer)/buyer/dashboard/page.tsx` | 表示     | プレースホルダー                          |
-| `/buyer/profile`              | `app/(buyer)/buyer/profile/page.tsx`   | 編集     | プレースホルダー                          |
+| URL                            | ファイル                               | 種別     | 状態                                      |
+| ------------------------------ | -------------------------------------- | -------- | ----------------------------------------- |
+| `/`                            | `app/(public)/page.tsx`                | 公開     | 実装済み                                  |
+| `/login`                       | `app/(auth)/login/page.tsx`            | 認証     | 実装済み                                  |
+| `/signup`                      | `app/(auth)/signup/page.tsx`           | 認証     | 実装済み                                  |
+| `/admin`                       | `app/(admin)/admin/page.tsx`           | 管理     | プレースホルダー（AD-00、ガード実装済み） |
+| `/admin/pets/reviews`          | （未作成）                             | 管理     | 設計確定（AD-10）                         |
+| `/admin/pets/reviews/[petId]`  | （未作成）                             | 管理     | 設計確定（AD-11）                         |
+| `/pets`, `/pets/[petId]`       | `app/(public)/pets/`                   | 公開     | プレースホルダー                          |
+| `/breeders/[breederId]`        | `app/(public)/breeders/`               | 公開     | プレースホルダー                          |
+| `/api/health`                  | `app/api/health/route.ts`              | API      | 実装済み                                  |
+| `/breeder`                     | `app/breeder/page.tsx`                 | 入口     | リダイレクト                              |
+| `/breeder/dashboard`           | `app/breeder/dashboard/page.tsx`       | 表示専用 | 実装済み                                  |
+| `/breeder/profile/*`           | `app/breeder/profile/`                 | 編集     | Step 1 実装済み                           |
+| `/breeder/pets`                | `app/breeder/pets/page.tsx`            | 一覧     | 実装済み                                  |
+| `/breeder/pets/new`            | `app/breeder/pets/new/page.tsx`        | 編集     | 一部実装                                  |
+| `/buyer`                       | `app/(buyer)/buyer/page.tsx`           | 入口     | リダイレクト                              |
+| `/buyer/dashboard`             | `app/(buyer)/buyer/dashboard/page.tsx` | 表示     | **実装済み**                              |
+| `/buyer/profile`               | `app/(buyer)/buyer/profile/page.tsx`   | 編集     | **実装済み**                              |
+| `/buyer/favorites`             | `app/(buyer)/buyer/favorites/page.tsx` | 表示     | **実装済み**（BY-03）                     |
+| `/buyer/inquiries`             | （未作成）                             | 表示     | 設計確定（BY-05）                         |
+| `/buyer/inquiries/new`         | （未作成）                             | 編集     | 設計確定（BY-04）                         |
+| `/buyer/inquiries/[inquiryId]` | （未作成）                             | 編集     | 設計確定（BY-06）                         |
 
 ### ブリーダー layout 階層
 
@@ -285,16 +289,16 @@ supabase/
 
 ### テーブルと features / lib の対応
 
-| テーブル                        | データアクセス層                            | 画面                     |
-| ------------------------------- | ------------------------------------------- | ------------------------ |
-| `auth.users`                    | Supabase Auth                               | `/login`, `/signup`      |
-| `breeders`                      | `features/auth`, `features/breeder-profile` | `/breeder/profile/*`     |
-| `buyers`                        | `features/auth`                             | `/buyer/profile`（予定） |
-| `pets`                          | `lib/supabase/pets.ts`                      | `/breeder/pets/*`        |
-| `pet_photos`                    | 未実装                                      | —                        |
-| `favorites`                     | 未実装                                      | 購入希望者画面           |
-| `inquiries`, `inquiry_messages` | 未実装                                      | `/breeder/inquiries/*`   |
-| `visits`                        | 未実装                                      | `/breeder/visits`        |
+| テーブル                        | データアクセス層                            | 画面                                         |
+| ------------------------------- | ------------------------------------------- | -------------------------------------------- |
+| `auth.users`                    | Supabase Auth                               | `/login`, `/signup`                          |
+| `breeders`                      | `features/auth`, `features/breeder-profile` | `/breeder/profile/*`                         |
+| `buyers`                        | `features/auth`                             | `/buyer/profile`（予定）                     |
+| `pets`                          | `lib/supabase/pets.ts`                      | `/breeder/pets/*`                            |
+| `pet_photos`                    | 未実装                                      | —                                            |
+| `favorites`                     | 未実装                                      | 購入希望者画面                               |
+| `inquiries`, `inquiry_messages` | **設計確定・未実装**                        | `/buyer/inquiries/*`, `/breeder/inquiries/*` |
+| `visits`                        | 未実装                                      | `/breeder/visits`                            |
 
 ### Supabase クライアント（`src/lib/supabase/`）
 

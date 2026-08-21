@@ -78,10 +78,13 @@ function main(): void {
     "10. favorites menu linked to /buyer/favorites",
     dashboardMenu.includes('id: "favorites"') && dashboardMenu.includes('href: "/buyer/favorites"'),
   );
+  const inquiriesMenuBlock = dashboardMenu.match(/id: "inquiries"[\s\S]*?\n  },/)?.[0] ?? "";
+
   record(
     checks,
-    "11. inquiries marked as coming soon",
-    dashboardMenu.includes('id: "inquiries"') && dashboardMenu.includes("comingSoon: true"),
+    "11. inquiries menu linked to /buyer/inquiries",
+    inquiriesMenuBlock.includes('href: "/buyer/inquiries"') &&
+      !inquiriesMenuBlock.includes("comingSoon"),
   );
   record(
     checks,

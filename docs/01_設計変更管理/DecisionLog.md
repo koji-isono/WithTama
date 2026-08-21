@@ -867,3 +867,111 @@ _*管理者画面は AD-* で採番する_*
 - **影響範囲:** `supabase/migrations/20260814130000_add_public_pet_detail_read_views.sql`、PU-02 loader / UI、セキュリティテスト `test:public-pet-detail`
 - **決定日:** 2026-08-14
 - **参照:** [PU-02 公開犬猫詳細](../04_画面設計/PU-02_公開犬猫詳細.md) / [pets テーブル](../05_データベース設計/pets.md)
+
+---
+
+## Decision No.109
+
+**購入希望者問い合わせ画面 ID と URL を BY-04〜BY-06 で確定する**
+
+- **決定内容:** 購入希望者向け問い合わせ機能の画面 ID と URL を以下とする。
+
+| 画面 ID | 画面名         | URL                                  |
+| ------- | -------------- | ------------------------------------ |
+| BY-04   | 問い合わせ入力 | `/buyer/inquiries/new?petId={petId}` |
+| BY-05   | 問い合わせ履歴 | `/buyer/inquiries`                   |
+| BY-06   | 問い合わせ詳細 | `/buyer/inquiries/[inquiryId]`       |
+
+- ブリーダー側は既存 **BR-12**（`/breeder/inquiries`, `/breeder/inquiries/[inquiryId]`）を変更しない。
+- **理由:** 第1期問い合わせ実装前に画面 ID・URL・遷移を固定し、Decision No.72（編集 URL 分離）に整合させるため。
+- **影響範囲:** BY-04〜BY-06 設計書、PU-02 CTA、BY-02 menu、App Router、`src/features/inquiries/`
+- **決定日:** 2026-08-21
+- **参照:** [BY-04](../04_画面設計/BY-04_購入希望者問い合わせ入力.md) / [画面設計 README](../04_画面設計/README.md)
+
+---
+
+## Decision No.110
+
+**同一購入希望者 × 同一犬猫の有効問い合わせは再利用する**
+
+- **決定内容:** 第1期では、同一 `buyer_id` × 同一 `pet_id` について **有効な inquiry が既に存在する場合、新規スレッドを作成せず既存 inquiry（BY-06）へ遷移** する。DB UNIQUE 制約は第1期設計時点では追加しない。Server 側で既存行を検索する。
+- **有効 inquiry の定義:** `deleted_at IS NULL` かつ `status NOT IN ('closed', 'completed')`。
+- **理由:** 問い合わせスレッドの乱立を防ぎ、既存 DB スキーマを維持するため。
+- **影響範囲:** BY-04 入口、PU-02 CTA、問い合わせ Server Action
+- **決定日:** 2026-08-21
+- **参照:** [BY-04](../04_画面設計/BY-04_購入希望者問い合わせ入力.md)
+
+---
+
+## Decision No.111
+
+**問い合わせ `subject` は購入希望者入力せず Server 側で自動生成する（暫定ルール）**
+
+- **決定内容:** 第1期 UI では `subject` 入力欄を設けない。`inquiries.subject` は Server Action で自動設定する。
+- **暫定生成ルール:** `{public_display_name}についてのお問い合わせ`（pet の公開表示名。取得不可時は「犬猫についてのお問い合わせ」）。
+- **理由:** 第1期 UX を簡素化し、必須入力項目を本文のみに絞るため。
+- **影響範囲:** BY-04 Server Action、`inquiries.subject`
+- **決定日:** 2026-08-21
+- **参照:** [BY-04](../04_画面設計/BY-04_購入希望者問い合わせ入力.md) / [inquiries テーブル](../05_データベース設計/inquiries.md)
+
+---
+
+## Decision No.112
+
+**第1期 BR-12 では購入希望者情報のうち表示名（`display_name`）のみをブリーダーへ開示する**
+
+- **決定内容:** ブリーダー問い合わせ画面（BR-12）で購入希望者に関して表示してよいのは **`buyers.display_name`（表示名）のみ** とする。メールアドレス・電話番号・住所は **表示しない**。
+- **RLS:** 第1期設計確定時点では **`buyers` への breeder SELECT RLS は追加しない**（BY-01 方針維持）。
+- **表示名の取得方式:** **`public.get_inquiry_buyer_display_name(uuid)` SECURITY DEFINER RPC** を採用（Migration `20260821153000`）。`buyers` への breeder SELECT RLS は **追加しない**。Service Role クライアントでの一括取得は禁止。
+- **理由:** 個人情報保護と第1期スコープのバランス。問い合わせ画面上のテキスト連絡を基本とするため。
+- **影響範囲:** BR-12 UI、問い合わせ Repository / Loader、`supabase/migrations/20260821153000_create_get_inquiry_buyer_display_name_rpc.sql`
+- **決定日:** 2026-08-21
+- **参照:** [BR-12](../04_画面設計/BR-12_ブリーダー問い合わせ.md) / [BY-01](../04_画面設計/BY-01_購入希望者プロフィール.md)
+
+---
+
+## Decision No.113
+
+**第1期問い合わせ機能では Supabase Realtime / WebSocket を使用しない**
+
+- **決定内容:** 問い合わせ・返信は **非同期メッセージ方式**（ページロード / Server Action + revalidate）とする。Supabase Realtime 購読、WebSocket、リアルタイム既読通知 UI は第1期対象外。
+- **理由:** Decision No.55（テキスト履歴）と整合。リアルタイムチャットと混同しないため。
+- **影響範囲:** BY-06、BR-12、問い合わせ feature 全体
+- **決定日:** 2026-08-21
+- **参照:** [Decision No.55](#decision-no55) / [inquiry_messages テーブル](../05_データベース設計/inquiry_messages.md)
+
+---
+
+## Decision No.114
+
+**問い合わせ開始には `buyers.profile_completed = true` を Server 側で必須とする**
+
+- **決定内容:** 問い合わせ入力（BY-04）および PU-02 からの問い合わせ開始時、`profile_completed = false` の buyer は **BY-01 `/buyer/profile` へ誘導** する。検証は **Server Action / Loader で必須**。第1期では inquiries INSERT RLS への `profile_completed` 条件追加は **行わない**。
+- **理由:** BY-01 設計方針との整合。RLS 変更なしで第1期実装可能にするため。
+- **影響範囲:** BY-04、PU-02 CTA、問い合わせ Server Action
+- **決定日:** 2026-08-21
+- **参照:** [BY-01](../04_画面設計/BY-01_購入希望者プロフィール.md) / [Decision No.61](#decision-no61)
+
+---
+
+## Decision No.115
+
+**犬猫非公開化後も既存問い合わせ履歴は購入希望者・ブリーダー双方で閲覧可能とする（第1期）**
+
+- **決定内容:** 問い合わせ成立後に対象 pet が `published` 以外へ遷移した場合でも、**既存 `inquiries` / `inquiry_messages` の閲覧・メッセージ送信（status 許可時）は維持** する。BY-05 / BY-06 / BR-12 では pet サマリーを表示し続ける。新規問い合わせ（BY-04）のみ公開 pet を必須とする。
+- **根拠:** 既存 RLS は inquiry 当事者 SELECT を pet status に依存しない。第1期 UX として過去のやり取りを失わない方が自然（**新規設計案** — 専用 Decision 以前の明示記載なし）。
+- **影響範囲:** BY-05、BY-06、BR-12 Loader、新規問い合わせ Server Action
+- **決定日:** 2026-08-21
+- **参照:** [BY-05](../04_画面設計/BY-05_購入希望者問い合わせ履歴.md) / [inquiries RLS](../05_データベース設計/inquiries.md)
+
+---
+
+## Decision No.116
+
+**問い合わせ詳細表示時に相手送信分の未読メッセージを既読化する（第1期）**
+
+- **決定内容:** BY-06 / BR-12 詳細を当事者が開いたタイミングで、**相手（`sender_type` が自分以外）の `is_read = false` メッセージ** を Server 側で `is_read = true`, `read_at = now()` に更新する。UPDATE 対象カラムは **既読関連のみ**（Decision No.55 整合）。リアルタイム既読通知 UI は行わない。
+- **理由:** DB 既存列の活用。RLS 変更なしで第1期実装可能。
+- **影響範囲:** BY-06、BR-12 Loader / Server Action、`inquiry_messages`
+- **決定日:** 2026-08-21
+- **参照:** [BY-06](../04_画面設計/BY-06_購入希望者問い合わせ詳細.md) / [inquiry_messages テーブル](../05_データベース設計/inquiry_messages.md)

@@ -96,6 +96,30 @@
 | UPDATE | `user_id = auth.uid()` のレコードのみ |
 | DELETE | 物理削除不可                          |
 
+## 問い合わせ表示名 RPC（Decision No.112）
+
+ブリーダーが `buyers` を直接 SELECT できないため、問い合わせ画面向けに専用 RPC を使用する。
+
+| 項目      | 内容                                                           |
+| --------- | -------------------------------------------------------------- |
+| 関数名    | `public.get_inquiry_buyer_display_name(p_inquiry_id uuid)`     |
+| 戻り値    | `text`（`display_name` のみ。空・未設定時は NULL）             |
+| Migration | `20260821153000_create_get_inquiry_buyer_display_name_rpc.sql` |
+| RLS 変更  | **なし**                                                       |
+
+### 呼び出し可能ロール
+
+| ロール  | 条件                                |
+| ------- | ----------------------------------- |
+| breeder | 対象 inquiry の `breeder_id` 当事者 |
+| buyer   | 対象 inquiry の `buyer_id` 当事者   |
+| admin   | `is_admin()`                        |
+| 第三者  | **不可**（NULL 返却）               |
+
+### 返却しない列
+
+`full_name`, `phone`, `prefecture`, `city`, `profile_text`, `user_id`, メールアドレス 等 — **一切返却しない**。
+
 ## インデックス
 
 | インデックス名                 | カラム / 条件                            |
@@ -106,11 +130,12 @@
 
 ## マイグレーション
 
-| ファイル                                                 | 内容                                 |
-| -------------------------------------------------------- | ------------------------------------ |
-| `20260804164648_create_buyers.sql`                       | Version 1.0 新規作成                 |
-| `20260805112236_update_initial_registration_profile.sql` | Version 1.1 `profile_completed` 追加 |
-| `20260805112809_update_profile_registration_flow.sql`    | Version 1.2 仮登録フロー整合         |
+| ファイル                                                       | 内容                                    |
+| -------------------------------------------------------------- | --------------------------------------- |
+| `20260804164648_create_buyers.sql`                             | Version 1.0 新規作成                    |
+| `20260805112236_update_initial_registration_profile.sql`       | Version 1.1 `profile_completed` 追加    |
+| `20260805112809_update_profile_registration_flow.sql`          | Version 1.2 仮登録フロー整合            |
+| `20260821153000_create_get_inquiry_buyer_display_name_rpc.sql` | 問い合わせ表示名 RPC（Decision No.112） |
 
 ## 関連ドキュメント
 

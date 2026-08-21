@@ -128,9 +128,21 @@ INSERT 時に確認する項目:
 
 ## マイグレーション
 
-| ファイル                                              | 内容                                                                |
-| ----------------------------------------------------- | ------------------------------------------------------------------- |
-| `20260804163239_create_inquiries_messages_visits.sql` | Version 1.0 新規作成（`inquiries` / `inquiry_messages` / `visits`） |
+| ファイル                                                       | 内容                                                                |
+| -------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `20260804163239_create_inquiries_messages_visits.sql`          | Version 1.0 新規作成（`inquiries` / `inquiry_messages` / `visits`） |
+| `20260821153000_create_get_inquiry_buyer_display_name_rpc.sql` | `get_inquiry_buyer_display_name` RPC（Decision No.112）             |
+
+## RPC（Decision No.112）
+
+問い合わせ当事者が buyer の **表示名のみ** を取得する。
+
+| 関数                                         | 戻り値 | 用途                         |
+| -------------------------------------------- | ------ | ---------------------------- |
+| `get_inquiry_buyer_display_name(inquiry_id)` | `text` | BR-12 / BY-06 等の表示名取得 |
+
+- breeder 向け `buyers` SELECT RLS は **追加しない**
+- 詳細: [buyers.md — 問い合わせ表示名 RPC](./buyers.md#問い合わせ表示名-rpc-decision-no112)
 
 ## 関連テーブル
 

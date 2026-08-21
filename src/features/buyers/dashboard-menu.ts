@@ -33,7 +33,8 @@ export const BUYER_DASHBOARD_MENU_ITEMS: BuyerDashboardMenuItem[] = [
     id: "inquiries",
     title: "問い合わせ履歴",
     description: "ブリーダーへの問い合わせ内容を確認できます。",
-    comingSoon: true,
+    href: "/buyer/inquiries",
+    buttonLabel: "問い合わせ履歴を見る",
   },
   {
     id: "visits",
