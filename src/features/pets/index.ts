@@ -38,7 +38,11 @@ export {
 } from "./photo-constants";
 export { formatPetPhotoFileSize, validatePetPhotoFile } from "./photo-validation";
 export { loadPetEditPageData, loadPublicPetDetailPage, loadPublicPetsPage } from "./loaders";
-export { getPublishedPetDetailForPublic, listPublishedPetsForPublic } from "./public-repository";
+export {
+  getPublishedPetDetailForPublic,
+  listPublishedPetsForPublic,
+  listPublishedPetsForPublicByIds,
+} from "./public-repository";
 export {
   countPetPhotosForBreeder,
   createPet,

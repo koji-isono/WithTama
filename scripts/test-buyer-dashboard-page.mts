@@ -75,8 +75,8 @@ function main(): void {
   );
   record(
     checks,
-    "10. favorites marked as coming soon",
-    dashboardMenu.includes('id: "favorites"') && dashboardMenu.includes("comingSoon: true"),
+    "10. favorites menu linked to /buyer/favorites",
+    dashboardMenu.includes('id: "favorites"') && dashboardMenu.includes('href: "/buyer/favorites"'),
   );
   record(
     checks,

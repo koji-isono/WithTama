@@ -94,6 +94,17 @@ export async function listPublishedPetsForPublic(): Promise<PublicPetListItem[]>
     return [];
   }
 
+  return buildPublicPetListItems(pets);
+}
+
+async function buildPublicPetListItems(
+  pets: PublishedPetPublicRow[],
+): Promise<PublicPetListItem[]> {
+  if (pets.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
   const breederIds = [...new Set(pets.map((pet) => pet.breeder_id))];
   const petIds = pets.map((pet) => pet.id);
 
@@ -141,6 +152,40 @@ export async function listPublishedPetsForPublic(): Promise<PublicPetListItem[]>
       breederById.get(pet.breeder_id) ?? null,
       storagePath ? (signedUrlByPath.get(storagePath) ?? null) : null,
     );
+  });
+}
+
+export async function listPublishedPetsForPublicByIds(
+  petIds: string[],
+): Promise<PublicPetListItem[]> {
+  if (petIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+
+  const { data: petRows, error: petsError } = await supabase
+    .from("published_pets_public")
+    .select(publishedPetPublicSelect)
+    .in("id", petIds);
+
+  if (petsError) {
+    throw petsError;
+  }
+
+  const pets = (petRows ?? []) as PublishedPetPublicRow[];
+
+  if (pets.length === 0) {
+    return [];
+  }
+
+  const items = await buildPublicPetListItems(pets);
+  const itemById = new Map(items.map((item) => [item.id, item]));
+
+  return petIds.flatMap((petId) => {
+    const item = itemById.get(petId);
+
+    return item ? [item] : [];
   });
 }
 

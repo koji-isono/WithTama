@@ -30,6 +30,7 @@ src/features/{機能名}/
 | ---------------------------------------------- | -------------------------------------------- | ----------------------------------------- |
 | [auth](./auth/README.md)                       | 認証、初回プロフィール作成、入口リダイレクト | `/login`, `/signup`, `/breeder`, `/buyer` |
 | [buyers](./buyers/README.md)                   | 購入希望者プロフィール（BY-01）              | `/buyer/profile`（実装済み）              |
+| [favorites](./favorites/)                      | 購入希望者お気に入り（BY-03）                | `/buyer/favorites`                        |
 | [breeder-profile](./breeder-profile/README.md) | ブリーダープロフィール Step 保存             | `/breeder/profile/*`                      |
 | [pets](./pets/README.md)                       | 犬猫管理（Phase 7 基盤）                     | `/breeder/pets/*`                         |
 

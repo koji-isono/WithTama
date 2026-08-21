@@ -3,6 +3,8 @@ import { AlertCircle, ArrowLeft } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
+import { FavoriteToggleButton } from "@/features/favorites/components/favorite-toggle-button";
+import type { PetFavoriteUiState } from "@/features/favorites/types";
 
 import { PUBLIC_PET_DETAIL_SCREEN_ID, PUBLIC_PETS_PATH } from "../constants";
 import {
@@ -15,6 +17,7 @@ import { PublicPetPhotoGallery } from "./public-pet-photo-gallery";
 
 type PublicPetDetailViewProps = {
   result: LoadPublicPetDetailPageResult;
+  favoriteState?: PetFavoriteUiState;
 };
 
 function TextSection({ title, children }: { title: string; children: React.ReactNode }) {
@@ -57,7 +60,13 @@ function hasBreederSection(breeder: PublicBreederDetail | null): boolean {
   );
 }
 
-function PublicPetDetailContent({ detail }: { detail: PublicPetDetail }) {
+function PublicPetDetailContent({
+  detail,
+  favoriteState,
+}: {
+  detail: PublicPetDetail;
+  favoriteState?: PetFavoriteUiState;
+}) {
   const attributeLine = formatPublicPetAttributeLine({
     species: detail.species,
     breed: detail.breed,
@@ -110,6 +119,10 @@ function PublicPetDetailContent({ detail }: { detail: PublicPetDetail }) {
 
           {detail.priceComment ? (
             <p className="text-sm leading-relaxed text-neutral-600">{detail.priceComment}</p>
+          ) : null}
+
+          {favoriteState ? (
+            <FavoriteToggleButton petId={detail.id} initialState={favoriteState} />
           ) : null}
         </div>
       </div>
@@ -166,7 +179,7 @@ function PublicPetDetailContent({ detail }: { detail: PublicPetDetail }) {
   );
 }
 
-export function PublicPetDetailView({ result }: PublicPetDetailViewProps) {
+export function PublicPetDetailView({ result, favoriteState }: PublicPetDetailViewProps) {
   if (!result.success) {
     if ("notFound" in result && result.notFound) {
       return null;
@@ -186,5 +199,5 @@ export function PublicPetDetailView({ result }: PublicPetDetailViewProps) {
     );
   }
 
-  return <PublicPetDetailContent detail={result.detail} />;
+  return <PublicPetDetailContent detail={result.detail} favoriteState={favoriteState} />;
 }

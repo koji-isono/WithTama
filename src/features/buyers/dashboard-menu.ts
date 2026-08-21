@@ -26,7 +26,8 @@ export const BUYER_DASHBOARD_MENU_ITEMS: BuyerDashboardMenuItem[] = [
     id: "favorites",
     title: "お気に入り",
     description: "気になる犬猫をあとから確認できます。",
-    comingSoon: true,
+    href: "/buyer/favorites",
+    buttonLabel: "お気に入りを見る",
   },
   {
     id: "inquiries",

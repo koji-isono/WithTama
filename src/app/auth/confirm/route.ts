@@ -2,20 +2,13 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
-
-function sanitizeNextPath(next: string | null): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//")) {
-    return "/";
-  }
-
-  return next;
-}
+import { sanitizeNextPath } from "@/lib/auth/sanitize-next-path";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  let next = sanitizeNextPath(searchParams.get("next"));
+  let next = sanitizeNextPath(searchParams.get("next")) ?? "/";
 
   if (type === "recovery" && next === "/") {
     next = "/reset-password";
