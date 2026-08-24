@@ -31,7 +31,8 @@
     "test:buyer-inquiry-validation": "npx tsx scripts/test-buyer-inquiry-validation.mts",
     "test:buyer-inquiry-new-page": "npx tsx scripts/test-buyer-inquiry-new-page.mts",
     "test:buyer-inquiry-detail-page": "npx tsx scripts/test-buyer-inquiry-detail-page.mts",
-    "test:buyer-inquiries-page": "npx tsx scripts/test-buyer-inquiries-page.mts"
+    "test:buyer-inquiries-page": "npx tsx scripts/test-buyer-inquiries-page.mts",
+    "test:select-ui": "npx tsx scripts/test-select-ui.mts"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.7",

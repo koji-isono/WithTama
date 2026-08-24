@@ -31,7 +31,6 @@ import {
 import { hasValidationErrors, validateBuyerProfile } from "../validation";
 
 const inputClassName = "h-11 rounded-xl border-[var(--border)] bg-white";
-const selectTriggerClassName = "h-11 rounded-xl border-[var(--border)] bg-white";
 const PREFECTURE_PLACEHOLDER = "__prefecture_unselected__";
 const SPECIES_PLACEHOLDER = "__species_unselected__";
 
@@ -208,10 +207,7 @@ export function BuyerProfileForm({ email, profileCompleted, initialInput }: Buye
                 }
                 disabled={isSubmitting}
               >
-                <SelectTrigger
-                  id="prefecture"
-                  className={cn(selectTriggerClassName, fieldErrors.prefecture && "border-red-400")}
-                >
+                <SelectTrigger id="prefecture" error={Boolean(fieldErrors.prefecture)}>
                   <SelectValue placeholder="都道府県を選択" />
                 </SelectTrigger>
                 <SelectContent>
@@ -280,7 +276,7 @@ export function BuyerProfileForm({ email, profileCompleted, initialInput }: Buye
                 }
                 disabled={isSubmitting}
               >
-                <SelectTrigger id="preferred_species" className={selectTriggerClassName}>
+                <SelectTrigger id="preferred_species">
                   <SelectValue placeholder="選択しない" />
                 </SelectTrigger>
                 <SelectContent>

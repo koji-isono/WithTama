@@ -89,13 +89,7 @@ export function PetRegistrationForm() {
               <FieldLabel htmlFor="sex">性別</FieldLabel>
               <input type="hidden" name="sex" value={sex} />
               <Select value={sex} onValueChange={setSex} disabled={isPending}>
-                <SelectTrigger
-                  id="sex"
-                  className={cn(
-                    "h-11 rounded-xl border-[var(--border)] bg-white",
-                    state.fieldErrors?.sex && "border-red-400",
-                  )}
-                >
+                <SelectTrigger id="sex" error={Boolean(state.fieldErrors?.sex)}>
                   <SelectValue placeholder="性別を選択" />
                 </SelectTrigger>
                 <SelectContent>

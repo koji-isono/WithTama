@@ -29,7 +29,6 @@ import { hasValidationErrors, validateLocationProfile } from "../validation";
 import { ProfileFormField } from "./profile-form-field";
 
 const inputClassName = "h-11 rounded-xl border-[var(--border)] bg-white";
-const selectTriggerClassName = "h-11 rounded-xl border-[var(--border)] bg-white";
 const basicPath = getBreederProfileStepBySlug("basic").path;
 const licensePath = getBreederProfileStepBySlug("license").path;
 
@@ -134,11 +133,7 @@ export function LocationStepForm() {
               onValueChange={(value) => updateField("prefecture", value)}
               disabled={isSubmitting}
             >
-              <SelectTrigger
-                id="prefecture"
-                aria-invalid={Boolean(fieldErrors.prefecture)}
-                className={cn(selectTriggerClassName, fieldErrors.prefecture && "border-red-400")}
-              >
+              <SelectTrigger id="prefecture" error={Boolean(fieldErrors.prefecture)}>
                 <SelectValue placeholder="都道府県を選択" />
               </SelectTrigger>
               <SelectContent>

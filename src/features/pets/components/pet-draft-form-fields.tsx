@@ -19,7 +19,6 @@ import {
 import type { CreatePetDraftFieldErrors, CreatePetDraftInput } from "../types";
 
 const inputClassName = "h-11 rounded-xl border-[var(--border)] bg-white";
-const selectTriggerClassName = "h-11 rounded-xl border-[var(--border)] bg-white";
 const textareaClassName = "min-h-[100px] rounded-xl border-[var(--border)] bg-white resize-y";
 
 export type PetDraftFormFieldsProps = {
@@ -87,8 +86,8 @@ export function PetDraftFormFields({
         >
           <SelectTrigger
             id="species"
+            error={Boolean(fieldErrors.species)}
             aria-invalid={Boolean(fieldErrors.species)}
-            className={cn(selectTriggerClassName, fieldErrors.species && "border-red-400")}
           >
             <SelectValue placeholder="犬猫種別を選択" />
           </SelectTrigger>
@@ -123,8 +122,8 @@ export function PetDraftFormFields({
         >
           <SelectTrigger
             id="sex"
+            error={Boolean(fieldErrors.sex)}
             aria-invalid={Boolean(fieldErrors.sex)}
-            className={cn(selectTriggerClassName, fieldErrors.sex && "border-red-400")}
           >
             <SelectValue placeholder="性別を選択" />
           </SelectTrigger>

@@ -61,7 +61,12 @@ export function ProfileFormField({
         </p>
       ) : null}
 
-      <div className={cn(error && "[&_input]:border-red-400 [&_input]:focus-visible:ring-red-400")}>
+      <div
+        className={cn(
+          error &&
+            "[&_input]:border-red-400 [&_input]:focus-visible:ring-red-400 [&_[data-slot=select-trigger]]:border-red-500 [&_[data-slot=select-trigger]]:focus-visible:ring-red-500",
+        )}
+      >
         {fieldControl}
       </div>
 

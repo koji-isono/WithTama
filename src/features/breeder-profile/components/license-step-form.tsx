@@ -29,7 +29,6 @@ import { hasValidationErrors, validateLicenseProfile } from "../validation";
 import { ProfileFormField } from "./profile-form-field";
 
 const inputClassName = "h-11 rounded-xl border-[var(--border)] bg-white";
-const selectTriggerClassName = "h-11 rounded-xl border-[var(--border)] bg-white";
 const locationPath = getBreederProfileStepBySlug("location").path;
 const introductionPath = getBreederProfileStepBySlug("introduction").path;
 
@@ -126,11 +125,8 @@ export function LicenseStepForm({
             >
               <SelectTrigger
                 id="business_registration_type"
+                error={Boolean(fieldErrors.businessRegistrationType)}
                 aria-invalid={Boolean(fieldErrors.businessRegistrationType)}
-                className={cn(
-                  selectTriggerClassName,
-                  fieldErrors.businessRegistrationType && "border-red-400",
-                )}
               >
                 <SelectValue placeholder="登録種別を選択" />
               </SelectTrigger>
