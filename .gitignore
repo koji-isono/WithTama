@@ -9,3 +9,17 @@ out
 *.log
 coverage
 .vercel
+
+# TypeScript build cache
+tsconfig.tsbuildinfo
+
+# Obsidian local workspace (team sharing TBD — see docs/10_運用手順/Obsidian運用ルール.md)
+.obsidian/workspace.json
+.obsidian/graph.json
+
+# Partial git staging helpers (visit/inquiry commit workflow)
+.git-staged-temp-file
+.git-stage-*.mts
+
+# Obsidian canvas (local notes)
+*.canvas
