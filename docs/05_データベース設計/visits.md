@@ -97,15 +97,17 @@
 
 ## 見学業務ルール
 
-- 見学希望が作成された時点で `visits` を 1 件作成し、`inquiries.status` を `visit_requested` へ変更する。
+- 見学希望が作成された時点で `visits` を 1 件作成し、`inquiries.status` を `visit_requested` へ変更する（Decision No.56, No.119）。
 - ブリーダーが日時確定した時点で `scheduled_at` を設定し、`visits.status` を `scheduled`、`inquiries.status` を `visit_scheduled` へ変更する。
+- 見学完了時は `completed_at` を設定し、`visits.status` を `completed`、`inquiries.status` を `completed` へ変更する（Decision No.119）。
+- 見学キャンセル時は `visits.status` を `canceled`、`inquiries.status` を `replied` へ変更する。問い合わせ自体は終了させず、メッセージのやり取りを継続可能とする（Decision No.119）。
 - 日程変更は同一 `visits` レコードを更新する（Decision No.57）。
 - 第1期では日程変更履歴を保持しない。第2期以降に `visit_histories` テーブルとして検討する。
 - 現物確認は `animal_confirmed` で管理する（Decision No.58）。
 - 対面説明は `explanation_completed` で管理する（Decision No.58）。
 - 第1期では実施日時、担当者、電子署名は保持しない。
 - 見学完了時は `completed_at` を設定する。
-- 成約時は `result` を `contracted` へ変更する。
+- 成約時は `result` を `contracted` へ変更する。`contracted` は **サイト上で契約した意味ではなく**、ブリーダーと購入希望者間で別途行われた結果の記録とする（Decision No.122）。
 - 成約処理や犬猫売買契約はサイト内では完結させない。
 - 法的判断が必要な運用は、弁護士または管轄自治体への確認が必要。
 
@@ -121,16 +123,16 @@ RLS を有効化する。
 | ------ | -------------------------- |
 | SELECT | 可                         |
 | INSERT | 見学希望作成               |
-| UPDATE | 希望日時の変更、キャンセル |
+| UPDATE | 希望日時の変更、キャンセル | `requested_at*`、`status`（→ `canceled`）、`canceled_at`、`cancellation_reason` のみ（Decision No.123） |
 
 ### ブリーダー
 
 | 操作   | 許可内容                                                                     |
 | ------ | ---------------------------------------------------------------------------- |
 | SELECT | 可                                                                           |
-| UPDATE | 確定日時設定、見学承認、現物確認記録、対面説明記録、見学結果更新、キャンセル |
+| UPDATE | 確定日時設定、見学承認、現物確認記録、対面説明記録、見学結果更新、キャンセル | `scheduled_at`、`confirmed_by_breeder_at`、`animal_confirmed`、`explanation_completed`、`result`、`completed_at`、`status`、`breeder_note`、キャンセル関連（Decision No.123） |
 
-カラム単位の更新制限は RLS だけでは複雑になるため、Server Action または DB 関数で制御する。
+- 複数テーブル更新（見学希望・日時確定・完了・キャンセル）は **SECURITY DEFINER RPC** を基本方針とする。RPC 内で `auth.uid()` による本人確認を行い、EXECUTE 権限は必要最小限とする（Decision No.121）。
 
 ### 管理者
 
@@ -147,11 +149,26 @@ RLS を有効化する。
 | `visits_scheduled_at_idx` | `scheduled_at`                           |
 | `visits_active_idx`       | `deleted_at IS NULL`（部分インデックス） |
 
+## RPC（Decision No.121）
+
+複数テーブル更新は SECURITY DEFINER RPC とする。Migration: `20260824120000_create_visit_rpcs.sql`
+
+| 関数                                                                                                     | 戻り値 | 呼び出し元      | 用途                                                           |
+| -------------------------------------------------------------------------------------------------------- | ------ | --------------- | -------------------------------------------------------------- |
+| `request_visit(p_inquiry_id, p_requested_at, p_requested_at_second?, p_requested_at_third?, p_message?)` | `uuid` | buyer           | visits INSERT + inquiries + optional message                   |
+| `schedule_visit(p_visit_id, p_scheduled_at)`                                                             | `void` | breeder         | 日時確定                                                       |
+| `complete_visit(p_visit_id, p_animal_confirmed, p_explanation_completed, p_result)`                      | `void` | breeder         | 実施記録 + 完了（`scheduled_at` 到達後のみ — Decision No.124） |
+| `cancel_visit(p_visit_id, p_cancellation_reason?)`                                                       | `void` | buyer / breeder | キャンセル + inquiries → replied                               |
+
+`auth.uid()` で本人確認。`REVOKE ALL FROM PUBLIC` / `GRANT EXECUTE TO authenticated` のみ。Service Role **不使用**。
+
 ## マイグレーション
 
-| ファイル                                              | 内容                 |
-| ----------------------------------------------------- | -------------------- |
-| `20260804163239_create_inquiries_messages_visits.sql` | Version 1.0 新規作成 |
+| ファイル                                                          | 内容                                                     |
+| ----------------------------------------------------------------- | -------------------------------------------------------- |
+| `20260804163239_create_inquiries_messages_visits.sql`             | Version 1.0 新規作成                                     |
+| `20260824120000_create_visit_rpcs.sql`                            | 見学 RPC 4 関数（Decision No.121）                       |
+| `20260824183000_complete_visit_requires_scheduled_at_elapsed.sql` | `complete_visit` に確定日時前完了拒否（Decision No.124） |
 
 ## 関連テーブル
 
@@ -166,6 +183,12 @@ RLS を有効化する。
 - [Decision No.56](../01_設計変更管理/DecisionLog.md#decision-no56) — 見学希望時に visits レコードを作成
 - [Decision No.57](../01_設計変更管理/DecisionLog.md#decision-no57) — 1 問い合わせにつき 1 見学
 - [Decision No.58](../01_設計変更管理/DecisionLog.md#decision-no58) — 現物確認・対面説明を boolean で管理
+- [Decision No.117](../01_設計変更管理/DecisionLog.md#decision-no117) — 見学画面 ID
+- [Decision No.119](../01_設計変更管理/DecisionLog.md#decision-no119) — inquiries ステータス連動
+- [Decision No.121](../01_設計変更管理/DecisionLog.md#decision-no121) — RPC 方針
+- [Decision No.122](../01_設計変更管理/DecisionLog.md#decision-no122) — contracted の意味
+- [Decision No.123](../01_設計変更管理/DecisionLog.md#decision-no123) — 更新項目分離
+- [Decision No.124](../01_設計変更管理/DecisionLog.md#decision-no124) — 確定日時前の見学完了拒否
 
 ## 関連ドキュメント
 

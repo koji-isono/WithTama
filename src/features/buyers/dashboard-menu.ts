@@ -40,6 +40,7 @@ export const BUYER_DASHBOARD_MENU_ITEMS: BuyerDashboardMenuItem[] = [
     id: "visits",
     title: "見学予定",
     description: "見学希望や予定を確認できます。",
-    comingSoon: true,
+    href: "/buyer/visits",
+    buttonLabel: "見学予定を見る",
   },
 ];

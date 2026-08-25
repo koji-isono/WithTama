@@ -86,15 +86,19 @@ function main(): void {
     inquiriesMenuBlock.includes('href: "/buyer/inquiries"') &&
       !inquiriesMenuBlock.includes("comingSoon"),
   );
+  const visitsMenuBlock = dashboardMenu.match(/id: "visits"[\s\S]*?\n  },/)?.[0] ?? "";
+
   record(
     checks,
-    "12. visits marked as coming soon",
-    dashboardMenu.includes('id: "visits"') && dashboardMenu.includes("comingSoon: true"),
+    "12. visits menu linked to /buyer/visits",
+    visitsMenuBlock.includes('href: "/buyer/visits"') &&
+      visitsMenuBlock.includes("見学予定を見る") &&
+      !visitsMenuBlock.includes("comingSoon"),
   );
   record(
     checks,
-    "13. coming soon badge rendered",
-    dashboardView.includes("準備中") && dashboardView.includes("comingSoon"),
+    "13. coming soon badge conditional in view",
+    dashboardView.includes("準備中") && dashboardView.includes("item.comingSoon"),
   );
   record(
     checks,

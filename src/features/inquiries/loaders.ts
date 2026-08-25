@@ -52,6 +52,8 @@ import type {
   InquiryRow,
   InquiryStartUiState,
 } from "./types";
+import { getVisitIdByInquiryId } from "@/features/visits/repository";
+import { resolveInquiryVisitNavigation } from "@/features/visits/constants";
 import { isValidInquiryId, isValidInquiryPetId } from "./validation";
 
 export {
@@ -224,13 +226,19 @@ export async function loadInquiryDetailPage(
     }
   }
 
-  const [petSummary, messageRows] = await Promise.all([
+  const [petSummary, messageRows, visitId] = await Promise.all([
     loadInquiryPetSummaryForDetail(inquiry),
     listInquiryMessages(inquiry.id),
+    getVisitIdByInquiryId(inquiry.id),
   ]);
 
   const canSendMessage = canBuyerSendInquiryMessage(inquiry.status);
   const closedNotice = getInquiryClosedNotice(inquiry.status);
+  const visitNavigation = resolveInquiryVisitNavigation({
+    inquiryId: inquiry.id,
+    inquiryStatus: inquiry.status,
+    visitId,
+  });
 
   return {
     success: true,
@@ -259,6 +267,7 @@ export async function loadInquiryDetailPage(
       })),
       canSendMessage,
       closedNotice,
+      visitNavigation,
     },
   };
 }

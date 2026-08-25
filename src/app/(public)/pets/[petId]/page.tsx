@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { loadPetFavoriteUiState } from "@/features/favorites/loaders";
 import { loadInquiryStartUiState } from "@/features/inquiries/loaders";
+import { loadVisitStartUiState } from "@/features/visits/loaders";
 import { loadPublicPetDetailPage, PublicPetDetailView } from "@/features/pets";
 
 export const dynamic = "force-dynamic";
@@ -25,10 +26,11 @@ export async function generateMetadata({ params }: PetDetailPageProps) {
 
 export default async function PetDetailPage({ params }: PetDetailPageProps) {
   const { petId } = await params;
-  const [result, favoriteState, inquiryStartState] = await Promise.all([
+  const [result, favoriteState, inquiryStartState, visitStartState] = await Promise.all([
     loadPublicPetDetailPage(petId),
     loadPetFavoriteUiState(petId),
     loadInquiryStartUiState(petId),
+    loadVisitStartUiState(petId),
   ]);
 
   if (!result.success && "notFound" in result && result.notFound) {
@@ -40,6 +42,7 @@ export default async function PetDetailPage({ params }: PetDetailPageProps) {
       result={result}
       favoriteState={favoriteState}
       inquiryStartState={inquiryStartState}
+      visitStartState={visitStartState}
     />
   );
 }

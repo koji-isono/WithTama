@@ -89,6 +89,10 @@ export type InquiryDetailPageData = {
   messages: InquiryDetailMessage[];
   canSendMessage: boolean;
   closedNotice: string | null;
+  visitNavigation:
+    | { kind: "none" }
+    | { kind: "request"; href: string; label: "見学を希望する" }
+    | { kind: "detail"; href: string; label: "見学詳細を見る" };
 };
 
 export type SendInquiryMessageActionResult =

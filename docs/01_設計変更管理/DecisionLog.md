@@ -978,6 +978,141 @@ _*管理者画面は AD-* で採番する_*
 
 ---
 
+
+---
+
+## Decision No.117
+
+**見学機能の画面 ID を BY-07〜BY-09 / BR-14・BR-15 とし、BR-11 との重複を解消する**
+
+- **決定内容:** 購入希望者見学 — BY-07（見学希望入力）、BY-08（見学予定一覧）、BY-09（見学詳細）。ブリーダー見学 — BR-14（見学管理一覧）、BR-15（見学詳細）。**BR-11 は犬猫編集（`/breeder/pets/[petId]/edit`）専用** とし、見学管理 URL `/breeder/visits` から BR-11 ID を外す。
+- **理由:** [画面設計 README](../04_画面設計/README.md) 上で BR-11 が犬猫編集と見学管理に二重定義されており、実装・ドキュメントの混乱を防ぐため。
+- **影響範囲:** 画面設計 README、App Router パスコメント、`src/features/visits/`（将来）
+- **決定日:** 2026-08-24
+- **参照:** [BY-07](../04_画面設計/BY-07_見学希望入力.md) / [BR-14](../04_画面設計/BR-14_見学管理一覧.md)
+
+---
+
+## Decision No.118
+
+**見学希望には有効 inquiry 必須。PU-02 / BY-06 からの導線を定義する**
+
+- **決定内容:** 見学希望（`visits` INSERT）には **有効な `inquiries` レコードが必須**（`visits.inquiry_id` UNIQUE — 1 inquiry 1 visit）。PU-02「見学を希望する」押下時: **有効 inquiry なし → BY-04**、**inquiry あり visit なし → BY-07**、**visit あり → BY-09**。BY-06 にも visit 未作成時「見学を希望する」導線を追加する。
+- **理由:** Decision No.53, 56, 57 との整合。問い合わせなしの見学希望を DB 上許容しないため。
+- **影響範囲:** PU-02 CTA、BY-06、BY-07 URL、Loader 分岐
+- **決定日:** 2026-08-24
+- **参照:** [PU-02](../04_画面設計/PU-02_公開犬猫詳細.md) / [BY-07](../04_画面設計/BY-07_見学希望入力.md)
+
+---
+
+## Decision No.119
+
+**見学操作に連動する `inquiries.status` 遷移を確定する**
+
+- **決定内容:**
+  - 見学希望 → `visit_requested`
+  - 日時確定 → `visit_scheduled`
+  - 見学完了 → `completed`（メッセージ送信不可）
+  - 見学キャンセル → `replied`（**問い合わせは終了させない**。購入希望者とブリーダーは引き続きメッセージ可能）
+- **理由:** キャンセル後も問い合わせスレッドを維持し、再調整や追加質問を可能にするため。完了時は問い合わせ対応完了としてメッセージを止める。
+- **影響範囲:** 見学 RPC、`inquiries.status` 更新、BY-06 / BR-12 メッセージ送信可否
+- **決定日:** 2026-08-24
+- **参照:** [inquiries テーブル](../05_データベース設計/inquiries.md) / [visits テーブル](../05_データベース設計/visits.md)
+
+---
+
+## Decision No.120
+
+**見学希望時のメッセージは `inquiry_messages` に保存する**
+
+- **決定内容:** 見学希望フォーム（BY-07）のメッセージ本文は **`inquiry_messages` に `sender_type = buyer` で INSERT** する。`visits` テーブルにメッセージ列は **追加しない**。
+- **理由:** Decision No.54, 55（問い合わせメッセージ分離・テキストのみ）との整合。
+- **影響範囲:** BY-07、`request_visit` RPC、`inquiry_messages`
+- **決定日:** 2026-08-24
+- **参照:** [BY-07](../04_画面設計/BY-07_見学希望入力.md) / [inquiry_messages テーブル](../05_データベース設計/inquiry_messages.md)
+
+---
+
+## Decision No.121
+
+**見学の複数テーブル更新は SECURITY DEFINER RPC を基本方針とする**
+
+- **決定内容:** 見学希望作成、日時確定、見学完了、キャンセルなど **`visits` + `inquiries`（+ `inquiry_messages`）を更新する処理** は、原子性確保のため **SECURITY DEFINER RPC** を基本とする。RPC 内で **`auth.uid()` による本人確認・権限確認を必須** とし、EXECUTE 権限は **authenticated の必要ロールに限定**（必要最小限）。**Service Role クライアントは使用しない**。`visits` テーブル構造は第1期では **変更しない**。
+- **理由:** RLS を弱めずにトランザクション整合性を担保する。inquiries の `get_inquiry_buyer_display_name` RPC と同方針。
+- **影響範囲:** `supabase/migrations/`（将来）、`src/features/visits/service.ts`
+- **決定日:** 2026-08-24
+- **参照:** [visits テーブル](../05_データベース設計/visits.md) / [Decision No.112](#decision-no112)
+
+---
+
+## Decision No.122
+
+**`visits.result = contracted` はサイト外成約の記録である**
+
+- **決定内容:** 見学完了時に設定する `result = contracted` は、**WithTama サイト上で犬猫売買契約を完結した意味ではない**。ブリーダーと購入希望者間で **別途** 行われた結果の記録とする。サイト内売買契約・犬猫代金のオンライン決済は第1期対象外。
+- **理由:** 運営会社は販売主体にならない方針（第1期要件）との整合。
+- **影響範囲:** BR-15 見学完了 UI、購入希望者向け result 表示文言
+- **決定日:** 2026-08-24
+- **参照:** [BR-15](../04_画面設計/BR-15_見学詳細.md) / [visits テーブル](../05_データベース設計/visits.md)
+
+---
+
+## Decision No.123
+
+**見学更新は buyer / breeder で更新可能項目を分離する**
+
+- **決定内容:**
+  - **buyer** … `requested_at` / `requested_at_second` / `requested_at_third` の変更、キャンセル（`status → canceled` 等）のみ
+  - **breeder** … 日時確定・調整（`scheduled_at`）、実施記録（`animal_confirmed`, `explanation_completed`）、完了（`result`, `completed_at`）、キャンセル、`breeder_note` のみ
+- **RLS:** 既存 party UPDATE ポリシーは **変更しない**。カラム制限は **RPC / Server Action 内** で強制する。
+- **理由:** visits.md の RLS 方針（カラム単位制限は RLS だけでは複雑）に沿う。
+- **影響範囲:** 見学 RPC 群、BY-09、BR-15
+- **決定日:** 2026-08-24
+- **参照:** [visits テーブル](../05_データベース設計/visits.md) / [BY-09](../04_画面設計/BY-09_見学詳細.md) / [BR-15](../04_画面設計/BR-15_見学詳細.md)
+
+---
+
+## Decision No.124
+
+**確定した見学日時より前に見学完了（`complete_visit`）させない**
+
+- **決定内容:** `visits.status = scheduled` の見学について、**現在日時が `scheduled_at` より前の場合は `complete_visit` RPC を成功させない**。フロントエンドでも `scheduled_at` が未来の間は「見学を完了する」を disabled にし、補足「見学完了は確定した見学日時以降に記録できます。」を表示する。**DB/RPC 側のチェックを正**とする（クライアント迂回防止）。現物確認・対面説明の両方 true は引き続き必須。
+- **理由:** 2026-08-24 総合 E2E で、確定日時前に見学完了が記録できた。誤操作・虚偽記録防止のため。WithTama 方針（現物確認・対面説明はブリーダー事業所で実施）との整合。
+- **影響範囲:** `complete_visit` RPC（Migration `20260824183000_complete_visit_requires_scheduled_at_elapsed.sql`）、BR-15 見学完了フォーム、`mapCompleteVisitRpcError`
+- **決定日:** 2026-08-24
+- **参照:** [BR-15](../04_画面設計/BR-15_見学詳細.md) / [visits テーブル](../05_データベース設計/visits.md)
+
+---
+
+## Decision No.125
+
+**管理者ブリーダー審査画面は AD-01（一覧）・AD-02（詳細）とする**
+
+- **決定内容:** ブリーダー審査の管理者画面 ID を AD-01 / AD-02 とする。URL は `/admin/breeders/reviews`（一覧）、`/admin/breeders/reviews/[breederId]`（詳細）とする。AD-00 から導線を設ける。
+- **理由:** Decision No.99 の AD 採番体系に従い、犬猫掲載審査（AD-10/11）と責務を分離するため。
+- **影響範囲:** `docs/04_画面設計/`、`src/app/(admin)/admin/`（将来）
+- **決定日:** 2026-08-25
+- **参照:** [AD-01](../04_画面設計/AD-01_ブリーダー審査一覧.md) / [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [Decision No.99](#decision-no99)
+
+| 画面 ID | URL                                   | 画面名           |
+| ------- | ------------------------------------- | ---------------- |
+| AD-01   | `/admin/breeders/reviews`             | ブリーダー審査一覧 |
+| AD-02   | `/admin/breeders/reviews/[breederId]` | ブリーダー審査詳細 |
+
+---
+
+## Decision No.126
+
+**ブリーダー審査の `under_review` 遷移は管理者の明示操作のみとする**
+
+- **決定内容:** `review_status` を `submitted`（または `resubmission_required`）から `under_review` へ変更するのは、管理者が AD-02 で「審査開始」ボタンを押したときのみとする。画面表示・一覧表示だけでは自動的に `under_review` へ変更しない。RPC `start_breeder_review` で `action = review_started` を記録する。
+- **理由:** 審査着手の意図を明確にし、誤って審査中状態にしないため。
+- **影響範囲:** AD-02、`start_breeder_review` RPC、`breeder_review_logs`
+- **決定日:** 2026-08-25
+- **参照:** [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [業務フロー](../03_業務フロー/README.md)
+
+---
+
 ## Decision No.127
 
 **ブリーダー審査の差戻しは `resubmission_required` とし、verification status は原則 `submitted` を維持する**

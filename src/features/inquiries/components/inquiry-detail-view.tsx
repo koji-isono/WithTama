@@ -3,6 +3,8 @@ import { ArrowLeft } from "lucide-react";
 
 import { getPublicPetDetailPath } from "@/features/pets/constants";
 
+import { VisitNavigationButton } from "@/features/visits/components/visit-navigation-button";
+
 import { BUYER_INQUIRY_DETAIL_SCREEN_ID, BUYER_INQUIRY_LIST_PATH } from "../constants";
 import type { InquiryDetailPageData } from "../types";
 import { InquiryDetailSummary } from "./inquiry-detail-summary";
@@ -16,6 +18,7 @@ export function InquiryDetailView({
   messages,
   canSendMessage,
   closedNotice,
+  visitNavigation,
 }: InquiryDetailViewProps) {
   return (
     <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl flex-col px-4 py-8 pb-12 sm:py-10">
@@ -51,6 +54,12 @@ export function InquiryDetailView({
 
       <div className="space-y-6">
         <InquiryDetailSummary summary={summary} />
+
+        {visitNavigation.kind !== "none" ? (
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <VisitNavigationButton navigation={visitNavigation} />
+          </div>
+        ) : null}
 
         <section className="space-y-4" aria-labelledby="inquiry-message-history-heading">
           <h2

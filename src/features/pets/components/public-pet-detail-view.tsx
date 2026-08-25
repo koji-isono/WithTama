@@ -7,6 +7,8 @@ import { FavoriteToggleButton } from "@/features/favorites/components/favorite-t
 import type { PetFavoriteUiState } from "@/features/favorites/types";
 import { InquiryStartButton } from "@/features/inquiries/components/inquiry-start-button";
 import type { InquiryStartUiState } from "@/features/inquiries/types";
+import { VisitStartButton } from "@/features/visits/components/visit-start-button";
+import type { VisitStartUiState } from "@/features/visits/types";
 
 import { PUBLIC_PET_DETAIL_SCREEN_ID, PUBLIC_PETS_PATH } from "../constants";
 import {
@@ -21,6 +23,7 @@ type PublicPetDetailViewProps = {
   result: LoadPublicPetDetailPageResult;
   favoriteState?: PetFavoriteUiState;
   inquiryStartState?: InquiryStartUiState;
+  visitStartState?: VisitStartUiState;
 };
 
 function TextSection({ title, children }: { title: string; children: React.ReactNode }) {
@@ -67,10 +70,12 @@ function PublicPetDetailContent({
   detail,
   favoriteState,
   inquiryStartState,
+  visitStartState,
 }: {
   detail: PublicPetDetail;
   favoriteState?: PetFavoriteUiState;
   inquiryStartState?: InquiryStartUiState;
+  visitStartState?: VisitStartUiState;
 }) {
   const attributeLine = formatPublicPetAttributeLine({
     species: detail.species,
@@ -126,13 +131,18 @@ function PublicPetDetailContent({
             <p className="text-sm leading-relaxed text-neutral-600">{detail.priceComment}</p>
           ) : null}
 
-          {favoriteState || (inquiryStartState && inquiryStartState.status !== "hidden") ? (
+          {favoriteState ||
+          (inquiryStartState && inquiryStartState.status !== "hidden") ||
+          (visitStartState && visitStartState.status !== "hidden") ? (
             <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:flex-wrap">
               {favoriteState ? (
                 <FavoriteToggleButton petId={detail.id} initialState={favoriteState} />
               ) : null}
               {inquiryStartState && inquiryStartState.status !== "hidden" ? (
                 <InquiryStartButton state={inquiryStartState} />
+              ) : null}
+              {visitStartState && visitStartState.status !== "hidden" ? (
+                <VisitStartButton state={visitStartState} />
               ) : null}
             </div>
           ) : null}
@@ -195,6 +205,7 @@ export function PublicPetDetailView({
   result,
   favoriteState,
   inquiryStartState,
+  visitStartState,
 }: PublicPetDetailViewProps) {
   if (!result.success) {
     if ("notFound" in result && result.notFound) {
@@ -220,6 +231,7 @@ export function PublicPetDetailView({
       detail={result.detail}
       favoriteState={favoriteState}
       inquiryStartState={inquiryStartState}
+      visitStartState={visitStartState}
     />
   );
 }

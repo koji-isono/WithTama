@@ -38,7 +38,19 @@
     "test:admin-breeder-review-detail-page": "npx tsx scripts/test-admin-breeder-review-detail-page.mts",
     "test:admin-breeder-review-start": "npx tsx scripts/test-admin-breeder-review-start.mts",
     "test:admin-breeder-review-actions": "npx tsx scripts/test-admin-breeder-review-actions.mts",
-    "test:select-ui": "npx tsx scripts/test-select-ui.mts"
+    "test:select-ui": "npx tsx scripts/test-select-ui.mts",
+    "test:visit-rpcs": "npx tsx scripts/test-visit-rpcs.mts",
+    "test:buyer-visit-request-validation": "npx tsx scripts/test-buyer-visit-request-validation.mts",
+    "test:buyer-visit-request-page": "npx tsx scripts/test-buyer-visit-request-page.mts",
+    "test:buyer-visit-request-e2e": "npx tsx scripts/test-buyer-visit-request-e2e.mts",
+    "test:buyer-visit-detail-page": "npx tsx scripts/test-buyer-visit-detail-page.mts",
+    "test:buyer-visit-detail-e2e": "npx tsx scripts/test-buyer-visit-detail-e2e.mts",
+    "test:buyer-visits-page": "npx tsx scripts/test-buyer-visits-page.mts",
+    "test:buyer-visits-e2e": "npx tsx scripts/test-buyer-visits-e2e.mts",
+    "test:visit-navigation": "npx tsx scripts/test-visit-navigation.mts",
+    "test:breeder-visits-page": "npx tsx scripts/test-breeder-visits-page.mts",
+    "test:breeder-visits-e2e": "npx tsx scripts/test-breeder-visits-e2e.mts",
+    "test:breeder-visit-detail-page": "npx tsx scripts/test-breeder-visit-detail-page.mts"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.7",
