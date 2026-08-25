@@ -227,7 +227,7 @@
 - authenticated ユーザーのみ
 - `breeders/{auth.uid()}/...` 配下のみ INSERT / SELECT / UPDATE
 - 一般ユーザーの DELETE は第1期では不可
-- 管理者閲覧は管理画面から Signed URL を発行（別途ポリシー追加）
+- 管理者閲覧は AD-02 から Signed URL を発行（Decision No.132）。Migration で admin SELECT RLS を追加予定
 
 ### 本人確認書類の法的判断
 
@@ -356,6 +356,9 @@ Foreign Key 設定
 
 - [BR-06 ブリーダーダッシュボード](../04_画面設計/BR-06_ブリーダーダッシュボード.md)
 - [BR-09 ブリーダープロフィール](../04_画面設計/BR-09_ブリーダープロフィール.md)
+- [AD-01 ブリーダー審査一覧](../04_画面設計/AD-01_ブリーダー審査一覧.md)
+- [AD-02 ブリーダー審査詳細](../04_画面設計/AD-02_ブリーダー審査詳細.md)
+- [breeder_review_logs テーブル](./breeder_review_logs.md)
 
 ## アプリケーション更新（Step 1 基本情報）
 

@@ -975,3 +975,119 @@ _*管理者画面は AD-* で採番する_*
 - **影響範囲:** BY-06、BR-12 Loader / Server Action、`inquiry_messages`
 - **決定日:** 2026-08-21
 - **参照:** [BY-06](../04_画面設計/BY-06_購入希望者問い合わせ詳細.md) / [inquiry_messages テーブル](../05_データベース設計/inquiry_messages.md)
+
+---
+
+## Decision No.127
+
+**ブリーダー審査の差戻しは `resubmission_required` とし、verification status は原則 `submitted` を維持する**
+
+- **決定内容:** 管理者差戻し時、`review_status` を `under_review` から `resubmission_required` へ変更する。差戻し理由（`comment`）は必須。`identity_verification_status` / `business_verification_status` は第1期では原則 `submitted` を維持し、プロフィール差戻しのみで `unverified` へ自動戻ししない。
+- **理由:** 書類提出済み状態を維持し、修正・再提出の UX を単純化するため。
+- **影響範囲:** `return_breeder_review` RPC、AD-02、BR-09 再提出フロー（将来）
+- **決定日:** 2026-08-25
+- **参照:** [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [breeders テーブル](../05_データベース設計/breeders.md)
+
+---
+
+## Decision No.128
+
+**ブリーダー審査の却下は `rejected` とし、第1期では再申請不可とする**
+
+- **決定内容:** 管理者却下時、`review_status` を `under_review` から `rejected` へ変更する。却下理由（`comment`）は必須。第1期では `rejected` からの再申請は不可とする。
+- **理由:** 却下と差戻しの責務を分離し、運用を明確にするため。
+- **影響範囲:** `reject_breeder_review` RPC、AD-02
+- **決定日:** 2026-08-25
+- **参照:** [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md)
+
+---
+
+## Decision No.129
+
+**ブリーダー審査承認時は verification を `verified` にし、`membership_status` は変更しない**
+
+- **決定内容:** 管理者承認時、`review_status = approved`、`identity_verification_status = verified`、`business_verification_status = verified`、`approved_at = now()` を同一操作で設定する。`membership_status` は変更しない（承認後も `pending` のまま）。
+- **理由:** 審査承認と利用開始（課金）を分離するため（Decision No.130 参照）。
+- **影響範囲:** `approve_breeder_review` RPC、`breeders` テーブル
+- **決定日:** 2026-08-25
+- **参照:** [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [breeders テーブル](../05_データベース設計/breeders.md)
+
+---
+
+## Decision No.130
+
+**ブリーダー審査承認と Stripe 月額課金（`membership_status = active`）を分離する**
+
+- **決定内容:** ブリーダー管理者審査の承認（`review_status = approved`）と、月額課金開始後の `membership_status = active` 化は別工程とする。承認時点では `membership_status = pending` のままとする。将来 Stripe 月額課金開始後に `membership_status = active` へ変更する。したがって審査承認だけでは PU-01/02 の一般公開条件（`review_status = approved` **かつ** `membership_status = active`）を満たさない。
+- **理由:** Decision No.43 / No.45 の状態分離に沿い、未審査・未課金ブリーダーの公開を防ぐため。
+- **影響範囲:** ブリーダー審査 RPC、公開 View、Stripe 連携（将来）
+- **決定日:** 2026-08-25
+- **参照:** [Decision No.43](#decision-no43) / [Decision No.45](#decision-no45) / [breeders テーブル](../05_データベース設計/breeders.md)
+
+---
+
+## Decision No.131
+
+**第1期から `breeder_review_logs` でブリーダー審査履歴を管理する**
+
+- **決定内容:** ブリーダー審査のイベント履歴を `public.breeder_review_logs` で管理する。第1期の `action` は `submitted` / `review_started` / `approved` / `returned` / `rejected` とする。`returned` / `rejected` 時は `comment` 必須。履歴は追記のみ（UPDATE / DELETE 禁止）。
+- **理由:** 差戻し・却下理由の監査、申請日時の取得（AD-01 ソート）、`pet_review_logs` との設計対称のため。
+- **影響範囲:** DB Migration、`breeders` 審査 RPC 群、AD-01 / AD-02、BR-09 提出処理（`submitted` log 追記）
+- **決定日:** 2026-08-25
+- **参照:** [breeder_review_logs](../05_データベース設計/breeder_review_logs.md) / [AD-01](../04_画面設計/AD-01_ブリーダー審査一覧.md)
+
+---
+
+## Decision No.132
+
+**`breeder-documents` は private のまま admin SELECT RLS と Signed URL で管理者閲覧する**
+
+- **決定内容:** `breeder-documents` バケットは private を維持する。管理者向け Storage SELECT RLS を追加し、AD-02 では `requireAdmin()` 確認後に Server 側から admin セッション JWT で短時間 Signed URL を発行する。Service Role Key は使用しない。
+- **理由:** Decision No.100 に基づき書類原本確認を AD-02 で行うため。`pet-photos` admin 閲覧（Decision No.104）と同パターンのため。
+- **影響範囲:** Storage Migration、AD-02、`src/features/admin/`（将来）
+- **決定日:** 2026-08-25
+- **参照:** [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [権限設計](../07_権限設計/README.md) / [Decision No.100](#decision-no100)
+
+---
+
+## Decision No.133
+
+**ブリーダー審査操作は 4 つの専用 RPC で実装する**
+
+- **決定内容:** ブリーダー審査の状態変更は以下の PostgreSQL RPC のみから実行する。いずれも `SECURITY DEFINER`、`SET search_path = public`、関数内で `auth.uid()` / `public.is_admin()` を再検証する。Service Role Key 不要。
+
+| RPC | 概要 |
+| --- | ---- |
+| `start_breeder_review(p_breeder_id uuid)` | 審査開始 |
+| `approve_breeder_review(p_breeder_id uuid)` | 承認 |
+| `return_breeder_review(p_breeder_id uuid, p_comment text)` | 差戻し |
+| `reject_breeder_review(p_breeder_id uuid, p_comment text)` | 却下 |
+
+- **理由:** 多カラム原子更新、監査ログ追記、任意 UPDATE 防止（犬猫審査 RPC と同パターン）のため。
+- **影響範囲:** Supabase Migration、AD-02 Server Action、`breeder_review_logs`
+- **決定日:** 2026-08-25
+- **参照:** [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [Decision No.96](#decision-no96)（犬猫審査 RPC 思想）
+
+---
+
+## Decision No.134
+
+**`approve_breeder_review` は書類存在・登録期限内を RPC 側で検証する（内容の法的適否は自動判定しない）**
+
+- **決定内容:** `approve_breeder_review` は以下を **すべて** 満たす場合のみ成功させる。
+
+| 条件 | 判定 |
+| ---- | ---- |
+| 審査状態 | `review_status = 'under_review'` |
+| 本人確認書類 | `identity_document_path IS NOT NULL`（Storage 上の存在も確認） |
+| 登録証 | `business_license_path IS NOT NULL`（Storage 上の存在も確認） |
+| 登録有効期限 | `registration_expires_at IS NOT NULL` |
+| 登録期限内 | `registration_expires_at >= CURRENT_DATE` |
+
+書類内容の法的適否・登録種別の適否は **システムで自動判定しない**。弁護士または管轄自治体への確認が必要な事項として扱う。
+
+- **理由:** Decision No.107（犬猫公開）と整合する最低限の機械チェックを担保しつつ、法的判断をシステムに委ねないため。
+- **影響範囲:** `approve_breeder_review` RPC、AD-02
+- **決定日:** 2026-08-25
+- **参照:** [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [Decision No.107](#decision-no107) / [breeders テーブル](../05_データベース設計/breeders.md)
+
