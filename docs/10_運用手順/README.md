@@ -35,6 +35,8 @@ npm run format:check
 - 機能変更時は `docs/` 内の該当設計書を更新
 - 設計判断は [DecisionLog](../01_設計変更管理/DecisionLog.md) に追記
 - 開発ログは [09_開発履歴](../09_開発履歴/2026-08.md) に月次で記録
+- 機能単位の完了報告・Obsidian 運用: [Obsidian運用ルール](./Obsidian運用ルール.md) / [WithTamaホーム](../00_WithTamaホーム.md)
+- 機能単位の完了報告・Obsidian 運用: [Obsidian運用ルール](./Obsidian運用ルール.md) / [WithTamaホーム](../00_WithTamaホーム.md)
 
 ## Supabase Storage（ブリーダー書類）
 
