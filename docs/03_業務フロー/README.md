@@ -52,12 +52,12 @@ flowchart TD
   br15 -->|見学完了 RPC| br15
 ```
 
-| 段階 | 操作者 | visits.status | inquiries.status |
-| ---- | ------ | ------------- | ---------------- |
-| 見学希望送信 | 購入希望者 | `requested` | `visit_requested` |
-| 日時確定 | ブリーダー | `scheduled` | `visit_scheduled` |
-| 見学完了 | ブリーダー | `completed` | `completed` |
-| キャンセル | 購入希望者 / ブリーダー | `canceled` | `replied`（メッセージ継続可） |
+| 段階         | 操作者                  | visits.status | inquiries.status              |
+| ------------ | ----------------------- | ------------- | ----------------------------- |
+| 見学希望送信 | 購入希望者              | `requested`   | `visit_requested`             |
+| 日時確定     | ブリーダー              | `scheduled`   | `visit_scheduled`             |
+| 見学完了     | ブリーダー              | `completed`   | `completed`                   |
+| キャンセル   | 購入希望者 / ブリーダー | `canceled`    | `replied`（メッセージ継続可） |
 
 **第1期で含まない:** 予約カレンダー、空き時間管理、サイト内売買契約、オンライン決済、詳細住所自動開示、電子署名。
 
@@ -101,14 +101,14 @@ flowchart TD
   under -->|"却下 RPC rejected\ncomment 必須"| rejected
 ```
 
-| 段階 | 操作者 | review_status | verification status（第1期） | ログ action |
-| ---- | ------ | ------------- | ---------------------------- | ----------- |
-| 初回提出 | ブリーダー | `submitted` | `submitted` | `submitted` |
-| 審査開始 | 管理者 | `under_review` | `submitted` 維持 | `review_started` |
-| 承認 | 管理者 | `approved` | `verified` | `approved` |
-| 差戻し | 管理者 | `resubmission_required` | **`submitted` 維持** | `returned` |
-| 却下 | 管理者 | `rejected` | 変更なし（第1期） | `rejected` |
-| 再提出 | ブリーダー | `submitted` | `submitted` | `submitted` |
+| 段階     | 操作者     | review_status           | verification status（第1期） | ログ action      |
+| -------- | ---------- | ----------------------- | ---------------------------- | ---------------- |
+| 初回提出 | ブリーダー | `submitted`             | `submitted`                  | `submitted`      |
+| 審査開始 | 管理者     | `under_review`          | `submitted` 維持             | `review_started` |
+| 承認     | 管理者     | `approved`              | `verified`                   | `approved`       |
+| 差戻し   | 管理者     | `resubmission_required` | **`submitted` 維持**         | `returned`       |
+| 却下     | 管理者     | `rejected`              | 変更なし（第1期）            | `rejected`       |
+| 再提出   | ブリーダー | `submitted`             | `submitted`                  | `submitted`      |
 
 **第1期で含まない:** `rejected` からの再申請、メール通知、Stripe 連携、登録期限の自動監視。
 

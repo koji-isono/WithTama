@@ -978,7 +978,6 @@ _*管理者画面は AD-* で採番する_*
 
 ---
 
-
 ---
 
 ## Decision No.117
@@ -1094,8 +1093,8 @@ _*管理者画面は AD-* で採番する_*
 - **決定日:** 2026-08-25
 - **参照:** [AD-01](../04_画面設計/AD-01_ブリーダー審査一覧.md) / [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [Decision No.99](#decision-no99)
 
-| 画面 ID | URL                                   | 画面名           |
-| ------- | ------------------------------------- | ---------------- |
+| 画面 ID | URL                                   | 画面名             |
+| ------- | ------------------------------------- | ------------------ |
 | AD-01   | `/admin/breeders/reviews`             | ブリーダー審査一覧 |
 | AD-02   | `/admin/breeders/reviews/[breederId]` | ブリーダー審査詳細 |
 
@@ -1191,12 +1190,12 @@ _*管理者画面は AD-* で採番する_*
 
 - **決定内容:** ブリーダー審査の状態変更は以下の PostgreSQL RPC のみから実行する。いずれも `SECURITY DEFINER`、`SET search_path = public`、関数内で `auth.uid()` / `public.is_admin()` を再検証する。Service Role Key 不要。
 
-| RPC | 概要 |
-| --- | ---- |
-| `start_breeder_review(p_breeder_id uuid)` | 審査開始 |
-| `approve_breeder_review(p_breeder_id uuid)` | 承認 |
-| `return_breeder_review(p_breeder_id uuid, p_comment text)` | 差戻し |
-| `reject_breeder_review(p_breeder_id uuid, p_comment text)` | 却下 |
+| RPC                                                        | 概要     |
+| ---------------------------------------------------------- | -------- |
+| `start_breeder_review(p_breeder_id uuid)`                  | 審査開始 |
+| `approve_breeder_review(p_breeder_id uuid)`                | 承認     |
+| `return_breeder_review(p_breeder_id uuid, p_comment text)` | 差戻し   |
+| `reject_breeder_review(p_breeder_id uuid, p_comment text)` | 却下     |
 
 - **理由:** 多カラム原子更新、監査ログ追記、任意 UPDATE 防止（犬猫審査 RPC と同パターン）のため。
 - **影響範囲:** Supabase Migration、AD-02 Server Action、`breeder_review_logs`
@@ -1211,13 +1210,13 @@ _*管理者画面は AD-* で採番する_*
 
 - **決定内容:** `approve_breeder_review` は以下を **すべて** 満たす場合のみ成功させる。
 
-| 条件 | 判定 |
-| ---- | ---- |
-| 審査状態 | `review_status = 'under_review'` |
+| 条件         | 判定                                                           |
+| ------------ | -------------------------------------------------------------- |
+| 審査状態     | `review_status = 'under_review'`                               |
 | 本人確認書類 | `identity_document_path IS NOT NULL`（Storage 上の存在も確認） |
-| 登録証 | `business_license_path IS NOT NULL`（Storage 上の存在も確認） |
-| 登録有効期限 | `registration_expires_at IS NOT NULL` |
-| 登録期限内 | `registration_expires_at >= CURRENT_DATE` |
+| 登録証       | `business_license_path IS NOT NULL`（Storage 上の存在も確認）  |
+| 登録有効期限 | `registration_expires_at IS NOT NULL`                          |
+| 登録期限内   | `registration_expires_at >= CURRENT_DATE`                      |
 
 書類内容の法的適否・登録種別の適否は **システムで自動判定しない**。弁護士または管轄自治体への確認が必要な事項として扱う。
 
@@ -1225,4 +1224,3 @@ _*管理者画面は AD-* で採番する_*
 - **影響範囲:** `approve_breeder_review` RPC、AD-02
 - **決定日:** 2026-08-25
 - **参照:** [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [Decision No.107](#decision-no107) / [breeders テーブル](../05_データベース設計/breeders.md)
-

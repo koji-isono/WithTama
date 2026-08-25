@@ -487,7 +487,12 @@ async function main(): Promise<void> {
   );
 
   if ("error" in completeSuccessInquiryResult) {
-    record(checks, "create complete success test inquiry", "fail", completeSuccessInquiryResult.error);
+    record(
+      checks,
+      "create complete success test inquiry",
+      "fail",
+      completeSuccessInquiryResult.error,
+    );
     finish(checks);
     return;
   }
