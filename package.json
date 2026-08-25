@@ -18,6 +18,8 @@
     "test:pet-review-rpcs": "npm run prepare:sec-test-review-pets && node --env-file=.env.local --experimental-strip-types scripts/test-pet-review-rpcs.mts",
     "test:submit-pet-for-review": "npm run prepare:sec-test-submit-pet && node --env-file=.env.local --experimental-strip-types scripts/test-submit-pet-for-review.mts",
     "prepare:sec-test-review-breeder": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-review-breeder.mts",
+    "prepare:sec-test-breeder-review": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-breeder-review.mts",
+    "test:breeder-review-rpcs": "npm run prepare:sec-test-breeder-review && node --env-file=.env.local --experimental-strip-types scripts/test-breeder-review-rpcs.mts",
     "prepare:sec-test-review-pets": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-review-pets.mts",
     "prepare:sec-test-submit-pet": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-submit-pet.mts",
     "prepare:sec-test-public-read": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-public-read.mts",
@@ -32,6 +34,10 @@
     "test:buyer-inquiry-new-page": "npx tsx scripts/test-buyer-inquiry-new-page.mts",
     "test:buyer-inquiry-detail-page": "npx tsx scripts/test-buyer-inquiry-detail-page.mts",
     "test:buyer-inquiries-page": "npx tsx scripts/test-buyer-inquiries-page.mts",
+    "test:admin-breeder-reviews-page": "npx tsx scripts/test-admin-breeder-reviews-page.mts",
+    "test:admin-breeder-review-detail-page": "npx tsx scripts/test-admin-breeder-review-detail-page.mts",
+    "test:admin-breeder-review-start": "npx tsx scripts/test-admin-breeder-review-start.mts",
+    "test:admin-breeder-review-actions": "npx tsx scripts/test-admin-breeder-review-actions.mts",
     "test:select-ui": "npx tsx scripts/test-select-ui.mts"
   },
   "dependencies": {

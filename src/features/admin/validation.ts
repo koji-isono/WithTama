@@ -21,3 +21,28 @@ export function validateReturnReviewComment(comment: string): string | null {
 
   return null;
 }
+
+export function validateBreederReviewActionComment(
+  comment: string,
+  fieldLabel: string,
+): string | null {
+  if (comment.trim().length === 0) {
+    return `${fieldLabel}を入力してください。`;
+  }
+
+  return null;
+}
+
+export function validateBreederIdForAdminReview(breederId: string): string | null {
+  const trimmed = breederId.trim();
+
+  if (!trimmed) {
+    return "対象のブリーダーが指定されていません。";
+  }
+
+  if (!UUID_REGEX.test(trimmed)) {
+    return "対象のブリーダー ID が不正です。";
+  }
+
+  return null;
+}

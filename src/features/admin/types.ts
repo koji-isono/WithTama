@@ -13,6 +13,74 @@ export type AdminPetReviewListPageData = {
   items: AdminPetReviewListItem[];
 };
 
+export type AdminBreederReviewListItem = {
+  id: string;
+  displayName: string;
+  representativeNameLabel: string;
+  prefectureLabel: string;
+  reviewStatus: string;
+  reviewStatusLabel: string;
+  identityVerificationStatusLabel: string;
+  businessVerificationStatusLabel: string;
+  registrationExpiresAt: string | null;
+  registrationExpiresAtLabel: string;
+  registrationExpiryWarning: "expired" | "soon" | null;
+  submittedAt: string | null;
+  submittedAtLabel: string;
+};
+
+export type AdminBreederReviewListPageData = {
+  items: AdminBreederReviewListItem[];
+};
+
+export type AdminBreederReviewDocumentPreview = {
+  statusLabel: string;
+  signedUrl: string | null;
+  previewKind: "image" | "pdf" | null;
+  message: string | null;
+};
+
+export type AdminBreederReviewDetailLogItem = {
+  id: string;
+  createdAtLabel: string;
+  actionLabel: string;
+  comment: string | null;
+};
+
+export type AdminBreederReviewDetailPageData = {
+  id: string;
+  reviewStatus: string;
+  displayName: string;
+  businessNameLabel: string;
+  representativeNameLabel: string;
+  phoneLabel: string;
+  publicEmailLabel: string;
+  websiteUrl: string | null;
+  websiteUrlLabel: string;
+  postalCodeLabel: string;
+  prefectureLabel: string;
+  cityLabel: string;
+  addressLineLabel: string;
+  businessRegistrationTypeLabel: string;
+  businessRegistrationNumberLabel: string;
+  registrationAuthorityLabel: string;
+  registrationExpiresAtLabel: string;
+  registrationExpiryWarning: "expired" | "soon" | null;
+  profileTextLabel: string;
+  breedingPolicyLabel: string;
+  healthPolicyLabel: string;
+  breedingEnvironmentLabel: string;
+  reviewStatusLabel: string;
+  identityVerificationStatusLabel: string;
+  businessVerificationStatusLabel: string;
+  membershipStatusLabel: string;
+  approvedAtLabel: string;
+  subscriptionStatusLabel: string;
+  identityDocument: AdminBreederReviewDocumentPreview;
+  businessLicense: AdminBreederReviewDocumentPreview;
+  reviewLogs: AdminBreederReviewDetailLogItem[];
+};
+
 export type AdminPetReviewDetailPet = {
   id: string;
   managementName: string;
