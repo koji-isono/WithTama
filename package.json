@@ -31,6 +31,7 @@
     "test:buyer-profile-validation": "npx tsx scripts/test-buyer-profile-validation.mts",
     "test:buyer-profile-page": "npx tsx scripts/test-buyer-profile-page.mts",
     "test:buyer-dashboard-page": "npx tsx scripts/test-buyer-dashboard-page.mts",
+    "test:breeder-dashboard-page": "npx tsx scripts/test-breeder-dashboard-page.mts",
     "test:buyer-favorites-page": "npx tsx scripts/test-buyer-favorites-page.mts",
     "test:buyer-inquiry-validation": "npx tsx scripts/test-buyer-inquiry-validation.mts",
     "test:buyer-inquiry-new-page": "npx tsx scripts/test-buyer-inquiry-new-page.mts",
