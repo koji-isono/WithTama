@@ -55,6 +55,7 @@ flowchart TB
     petsNew["/breeder/pets/new"]
     petsEdit["/breeder/pets/[petId]/edit"]
     inquiryDetail["/breeder/inquiries/[inquiryId]"]
+    visitDetail["/breeder/visits/[visitId]"]
     settings["/breeder/settings/*"]
   end
 
@@ -71,29 +72,31 @@ flowchart TB
   petsList --> petsNew
   petsList --> petsEdit
   inquiriesList --> inquiryDetail
+  visitsList --> visitDetail
 ```
 
 ## ブリーダー画面 — 最終構成
 
 ### URL 一覧
 
-| 種別 | URL                              | 画面 ID | 画面名                               | 状態                 |
-| ---- | -------------------------------- | ------- | ------------------------------------ | -------------------- |
-| 入口 | `/breeder`                       | —       | ブリーダー入口                       | リダイレクト         |
-| 表示 | `/breeder/dashboard`             | BR-06   | ブリーダーダッシュボード             | **実装済み**         |
-| 表示 | `/breeder/pets`                  | BR-07   | 犬猫管理一覧                         | Phase 7 基盤         |
-| 編集 | `/breeder/pets/new`              | BR-10   | 犬猫登録                             | 基本情報実装済み     |
-| 編集 | `/breeder/pets/[petId]/edit`     | BR-11   | 犬猫情報編集                         | 基本情報実装済み     |
-| 表示 | `/breeder/visits`                | BR-11   | 見学管理                             | 未実装               |
-| 表示 | `/breeder/inquiries`             | BR-12   | 問い合わせ一覧                       | **設計確定・未実装** |
-| 編集 | `/breeder/inquiries/[inquiryId]` | BR-12   | 問い合わせ詳細・返信                 | **設計確定・未実装** |
-| 入口 | `/breeder/profile`               | BR-09   | プロフィール入口                     | リダイレクト         |
-| 編集 | `/breeder/profile/basic`         | BR-09   | プロフィール Step 1 基本情報         | **実装済み**         |
-| 編集 | `/breeder/profile/location`      | BR-10   | プロフィール Step 2 所在地           | **実装済み**         |
-| 編集 | `/breeder/profile/license`       | BR-09   | プロフィール Step 3 第一種動物取扱業 | 実装済み             |
-| 編集 | `/breeder/profile/introduction`  | BR-09   | プロフィール Step 4 ブリーダー紹介   | 実装済み             |
-| 編集 | `/breeder/profile/verification`  | BR-09   | プロフィール Step 5 本人確認         | 実装済み             |
-| 編集 | `/breeder/settings`              | BR-13   | 設定                                 | 未実装               |
+| 種別 | URL                              | 画面 ID | 画面名                               | 状態             |
+| ---- | -------------------------------- | ------- | ------------------------------------ | ---------------- |
+| 入口 | `/breeder`                       | —       | ブリーダー入口                       | リダイレクト     |
+| 表示 | `/breeder/dashboard`             | BR-06   | ブリーダーダッシュボード             | **実装済み**     |
+| 表示 | `/breeder/pets`                  | BR-07   | 犬猫管理一覧                         | Phase 7 基盤     |
+| 編集 | `/breeder/pets/new`              | BR-10   | 犬猫登録                             | 基本情報実装済み |
+| 編集 | `/breeder/pets/[petId]/edit`     | BR-11   | 犬猫情報編集                         | 基本情報実装済み |
+| 表示 | `/breeder/visits`                | BR-14   | 見学管理一覧                         | **実装済み**     |
+| 編集 | `/breeder/visits/[visitId]`      | BR-15   | 見学詳細                             | **実装済み**     |
+| 表示 | `/breeder/inquiries`             | BR-12   | 問い合わせ一覧                       | **実装済み**     |
+| 編集 | `/breeder/inquiries/[inquiryId]` | BR-12   | 問い合わせ詳細・返信                 | **実装済み**     |
+| 入口 | `/breeder/profile`               | BR-09   | プロフィール入口                     | リダイレクト     |
+| 編集 | `/breeder/profile/basic`         | BR-09   | プロフィール Step 1 基本情報         | **実装済み**     |
+| 編集 | `/breeder/profile/location`      | BR-10   | プロフィール Step 2 所在地           | **実装済み**     |
+| 編集 | `/breeder/profile/license`       | BR-09   | プロフィール Step 3 第一種動物取扱業 | 実装済み         |
+| 編集 | `/breeder/profile/introduction`  | BR-09   | プロフィール Step 4 ブリーダー紹介   | 実装済み         |
+| 編集 | `/breeder/profile/verification`  | BR-09   | プロフィール Step 5 本人確認         | 実装済み         |
+| 編集 | `/breeder/settings`              | BR-13   | 設定                                 | 未実装           |
 
 ### プロフィール遷移（Decision No.67）
 
@@ -118,15 +121,16 @@ flowchart LR
 
 一覧（BR-07）は表示専用。新規登録・編集は個別 URL。
 
-### 問い合わせ・設定（Decision No.72）
+### 見学・問い合わせ（Decision No.72）
 
 ```mermaid
 flowchart LR
   inquiriesList["/breeder/inquiries"] --> inquiryDetail["/breeder/inquiries/[inquiryId]"]
+  visitsList["/breeder/visits"] --> visitDetail["/breeder/visits/[visitId]"]
   settingsRoot["/breeder/settings"] --> settingsSub["/breeder/settings/*"]
 ```
 
-問い合わせ返信・設定変更は一覧 URL 上では行わず、詳細 URL / 設定 URL で編集する。
+見学の確定・実施記録は一覧 URL 上では行わず、BR-15 詳細 URL で編集する。
 
 ### App Router ディレクトリ構成
 
@@ -150,24 +154,27 @@ src/app/breeder/
 │   └── [petId]/
 │       └── edit/page.tsx      # BR-11 編集（未実装）
 ├── visits/
-│   └── page.tsx               # BR-11（未実装）
+│   ├── page.tsx               # BR-14 一覧（実装済み）
+│   └── [visitId]/
+│       └── page.tsx           # BR-15 詳細（実装済み）
 ├── inquiries/
-│   ├── page.tsx               # BR-12 一覧（未実装）
+│   ├── page.tsx               # BR-12 一覧（実装済み）
 │   └── [inquiryId]/
-│       └── page.tsx           # BR-12 詳細・返信（未実装）
+│       └── page.tsx           # BR-12 詳細・返信（実装済み）
 └── settings/
     └── page.tsx               # BR-13（未実装）
 ```
 
 ### 機能モジュール対応（Decision No.73）
 
-| 機能                       | Feature モジュール                          | 主な App パス                                |
-| -------------------------- | ------------------------------------------- | -------------------------------------------- |
-| 認証・初回プロフィール作成 | `src/features/auth/`                        | `/login`, `/signup`, 入口リダイレクト        |
-| ブリーダープロフィール編集 | `src/features/breeder-profile/`             | `/breeder/profile/*`                         |
-| 犬猫管理                   | `src/features/pets/`                        | `/breeder/pets/*`                            |
-| 問い合わせ                 | 未実装（`src/features/inquiries/`）         | `/buyer/inquiries/*`, `/breeder/inquiries/*` |
-| 設定                       | 未実装（将来 `features/breeder-settings/`） | `/breeder/settings/*`                        |
+| 機能                       | Feature モジュール                                   | 主な App パス                                              |
+| -------------------------- | ---------------------------------------------------- | ---------------------------------------------------------- |
+| 認証・初回プロフィール作成 | `src/features/auth/`                                 | `/login`, `/signup`, 入口リダイレクト                      |
+| ブリーダープロフィール編集 | `src/features/breeder-profile/`                      | `/breeder/profile/*`                                       |
+| 犬猫管理                   | `src/features/pets/`                                 | `/breeder/pets/*`                                          |
+| 問い合わせ                 | `src/features/inquiries/`（実装済み）                | `/buyer/inquiries/*`, `/breeder/inquiries/*`               |
+| 見学                       | `src/features/visits/`（BY-07/BY-08/BY-09 実装済み） | `/buyer/visits/*`（ブリーダー `/breeder/visits/*` 未実装） |
+| 設定                       | 未実装（将来 `features/breeder-settings/`）          | `/breeder/settings/*`                                      |
 
 詳細: [src/features/README.md](../../src/features/README.md)
 
@@ -182,6 +189,8 @@ src/app/breeder/
 | BR-10   | 所在地（プロフィール Step 2） | [BR-10_所在地](./BR-10_所在地.md)                                     |
 | BR-11   | 犬猫編集                      | [BR-11_犬猫編集](./BR-11_犬猫編集.md)                                 |
 | BR-12   | ブリーダー問い合わせ          | [BR-12_ブリーダー問い合わせ](./BR-12_ブリーダー問い合わせ.md)         |
+| BR-14   | 見学管理一覧                  | [BR-14_見学管理一覧](./BR-14_見学管理一覧.md)                         |
+| BR-15   | 見学詳細                      | [BR-15_見学詳細](./BR-15_見学詳細.md)                                 |
 
 ## 購入希望者画面
 
@@ -191,11 +200,14 @@ src/app/breeder/
 | BY-01   | 購入希望者プロフィール   | `/buyer/profile`                     | **実装済み**（データ層 + UI） |
 | BY-02   | 購入希望者ダッシュボード | `/buyer/dashboard`                   | **実装済み**                  |
 | BY-03   | お気に入り               | `/buyer/favorites`                   | **実装済み**                  |
-| BY-04   | 問い合わせ入力           | `/buyer/inquiries/new?petId={petId}` | **設計確定・未実装**          |
-| BY-05   | 問い合わせ履歴           | `/buyer/inquiries`                   | **設計確定・未実装**          |
-| BY-06   | 問い合わせ詳細           | `/buyer/inquiries/[inquiryId]`       | **設計確定・未実装**          |
+| BY-04   | 問い合わせ入力           | `/buyer/inquiries/new?petId={petId}` | **実装済み**                  |
+| BY-05   | 問い合わせ履歴           | `/buyer/inquiries`                   | **実装済み**                  |
+| BY-06   | 問い合わせ詳細           | `/buyer/inquiries/[inquiryId]`       | **実装済み**                  |
+| BY-07   | 見学希望入力             | `/buyer/visits/new?inquiryId={id}`   | **実装済み**                  |
+| BY-08   | 見学予定一覧             | `/buyer/visits`                      | **実装済み**                  |
+| BY-09   | 見学詳細                 | `/buyer/visits/[visitId]`            | **実装済み**                  |
 
-### 購入希望者 — 問い合わせ遷移
+### 購入希望者 — 問い合わせ・見学遷移
 
 ```mermaid
 flowchart TD
@@ -205,15 +217,25 @@ flowchart TD
   by04["BY-04 問い合わせ入力"]
   by05["BY-05 問い合わせ履歴"]
   by06["BY-06 問い合わせ詳細"]
+  by07["BY-07 見学希望入力"]
+  by08["BY-08 見学予定一覧"]
+  by09["BY-09 見学詳細"]
   by02["BY-02 ダッシュボード"]
 
   pu02 -->|問い合わせする| login
   pu02 --> by01
   pu02 --> by04
   pu02 -->|既存 inquiry| by06
+  pu02 -->|見学を希望する| by04
+  pu02 -->|inquiry あり visit なし| by07
+  pu02 -->|visit あり| by09
   by04 -->|送信成功| by06
+  by06 -->|見学を希望する| by07
+  by07 -->|送信成功| by09
   by02 -->|問い合わせ履歴| by05
+  by02 -->|見学予定| by08
   by05 --> by06
+  by08 --> by09
 ```
 
 | 画面 ID | 設計書                                                                |
@@ -223,39 +245,76 @@ flowchart TD
 | BY-04   | [BY-04_購入希望者問い合わせ入力](./BY-04_購入希望者問い合わせ入力.md) |
 | BY-05   | [BY-05_購入希望者問い合わせ履歴](./BY-05_購入希望者問い合わせ履歴.md) |
 | BY-06   | [BY-06_購入希望者問い合わせ詳細](./BY-06_購入希望者問い合わせ詳細.md) |
+| BY-07   | [BY-07_見学希望入力](./BY-07_見学希望入力.md)                         |
+| BY-08   | [BY-08_見学予定一覧](./BY-08_見学予定一覧.md)                         |
+| BY-09   | [BY-09_見学詳細](./BY-09_見学詳細.md)                                 |
 
 ## 問い合わせ status 表示定義
 
 DB 値（`inquiries.status`）は変更しない。UI 表示名は以下とする。
 
-| DB 値             | 画面表示名   | 第1期 UI での主な扱い                                      |
-| ----------------- | ------------ | ---------------------------------------------------------- |
-| `open`            | 問い合わせ中 | 一覧・詳細表示。メッセージ送信可                           |
-| `replied`         | 返信あり     | 同上                                                       |
-| `visit_requested` | 見学希望     | 表示のみ（見学機能で設定。問い合わせ UI からは設定しない） |
-| `visit_scheduled` | 見学予定     | 同上                                                       |
-| `completed`       | 完了         | 表示のみ。メッセージ送信 **不可**                          |
-| `closed`          | 終了         | 表示のみ。メッセージ送信 **不可**                          |
+| DB 値             | 画面表示名   | 第1期 UI での主な扱い                                        |
+| ----------------- | ------------ | ------------------------------------------------------------ |
+| `open`            | 問い合わせ中 | 一覧・詳細表示。メッセージ送信可                             |
+| `replied`         | 返信あり     | 同上                                                         |
+| `visit_requested` | 見学希望     | 表示のみ。メッセージ送信可。見学 RPC が設定                  |
+| `visit_scheduled` | 見学予定     | 同上                                                         |
+| `completed`       | 完了         | 表示のみ。メッセージ送信 **不可**（見学完了時に RPC が設定） |
+| `closed`          | 終了         | 表示のみ。メッセージ送信 **不可**                            |
 
-## 管理者画面（Decision No.99）
+**見学キャンセル時:** `inquiries.status` は `replied` に戻る（Decision No.119）。問い合わせは終了せずメッセージ送信を継続可能。
 
-| 画面 ID | 画面名               | URL                           | 状態                                     |
-| ------- | -------------------- | ----------------------------- | ---------------------------------------- |
-| AD-00   | 管理者ダッシュボード | `/admin`                      | プレースホルダー（admin ガード実装済み） |
-| AD-10   | 犬猫掲載審査一覧     | `/admin/pets/reviews`         | **実装済み**                             |
-| AD-11   | 犬猫掲載審査詳細     | `/admin/pets/reviews/[petId]` | **実装済み**（承認・差戻し含む）         |
+## 見学 status 表示定義
+
+DB 値（`visits.status`）は変更しない。UI 表示名は以下とする。
+
+| DB 値       | 画面表示名 | 備考                          |
+| ----------- | ---------- | ----------------------------- |
+| `requested` | 見学希望   | ブリーダー対応待ち            |
+| `scheduled` | 見学予定   | 確定日時表示                  |
+| `completed` | 見学完了   | 実施記録・result 表示         |
+| `canceled`  | キャンセル | 問い合わせは `replied` で継続 |
+
+### visits.result 表示定義
+
+| DB 値         | 画面表示名 | 備考                                    |
+| ------------- | ---------- | --------------------------------------- |
+| `pending`     | 未決定     | 完了前                                  |
+| `contracted`  | 成約       | サイト外での結果記録（Decision No.122） |
+| `declined`    | 見送り     |                                         |
+| `considering` | 検討中     |                                         |
+
+## 管理者画面（Decision No.99 / No.125）
+
+| 画面 ID | 画面名               | URL                                   | 状態                                  |
+| ------- | -------------------- | ------------------------------------- | ------------------------------------- |
+| AD-00   | 管理者ダッシュボード | `/admin`                              | 部分実装（admin ガード + AD-10 導線） |
+| AD-01   | ブリーダー審査一覧   | `/admin/breeders/reviews`             | **実装済み**（一覧）                  |
+| AD-02   | ブリーダー審査詳細   | `/admin/breeders/reviews/[breederId]` | **部分実装**（閲覧 + 書類確認）       |
+| AD-10   | 犬猫掲載審査一覧     | `/admin/pets/reviews`                 | **実装済み**                          |
+| AD-11   | 犬猫掲載審査詳細     | `/admin/pets/reviews/[petId]`         | **実装済み**（承認・差戻し含む）      |
 
 ### 管理者画面遷移
 
 ```mermaid
 flowchart LR
-  adminRoot["/admin (AD-00)"] --> reviewList["/admin/pets/reviews (AD-10)"]
-  reviewList --> reviewDetail["/admin/pets/reviews/[petId] (AD-11)"]
+  adminRoot["/admin (AD-00)"]
+  breederReviewList["/admin/breeders/reviews (AD-01)"]
+  breederReviewDetail["/admin/breeders/reviews/[breederId] (AD-02)"]
+  reviewList["/admin/pets/reviews (AD-10)"]
+  reviewDetail["/admin/pets/reviews/[petId] (AD-11)"]
+
+  adminRoot --> breederReviewList
+  breederReviewList --> breederReviewDetail
+  adminRoot --> reviewList
+  reviewList --> reviewDetail
 ```
 
 | 画面 ID | 設計書                                                        |
 | ------- | ------------------------------------------------------------- |
 | AD-00   | [AD-00_管理者ダッシュボード](./AD-00_管理者ダッシュボード.md) |
+| AD-01   | [AD-01_ブリーダー審査一覧](./AD-01_ブリーダー審査一覧.md)     |
+| AD-02   | [AD-02_ブリーダー審査詳細](./AD-02_ブリーダー審査詳細.md)     |
 | AD-10   | [AD-10_犬猫掲載審査一覧](./AD-10_犬猫掲載審査一覧.md)         |
 | AD-11   | [AD-11_犬猫掲載審査詳細](./AD-11_犬猫掲載審査詳細.md)         |
 

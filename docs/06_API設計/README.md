@@ -34,8 +34,23 @@ WithTama の API は Next.js App Router の Route Handlers および Supabase �
 | ---------------------------- | -------------- | -------------------------------------------------------------- |
 | 審査待ち一覧取得             | Server 関数    | AD-10。`under_review` pets + breeder JOIN                      |
 | `submit_pet_for_review`      | PostgreSQL RPC | breeder 公開申請（`draft` → `under_review` + `submitted` log） | 実装済み |
-| `approvePetForPublishAction` | Server Action  | AD-11。`under_review` → `published` + `pet_review_logs`        |
-| `returnPetReviewAction`      | Server Action  | AD-11。`under_review` → `draft` + 差戻し理由                   |
+| `approvePetForPublishAction` | Server Action  | AD-11。`under_review` → `published` + `pet_review_logs`        | 実装済み |
+| `returnPetReviewAction`      | Server Action  | AD-11。`under_review` → `draft` + 差戻し理由                   | 実装済み |
+
+## 今後追加予定 — 管理者ブリーダー審査（Decision No.125〜134）
+
+| エンドポイント / アクション  | 種別           | 説明                                                          |
+| ---------------------------- | -------------- | ------------------------------------------------------------- |
+| 審査待ち一覧取得             | Server 関数    | AD-01。`submitted` / `under_review` / `resubmission_required` |
+| 審査詳細取得                 | Server 関数    | AD-02。breeders + Signed URL                                  |
+| `start_breeder_review`       | PostgreSQL RPC | 審査開始 + `breeder_review_logs(review_started)`              |
+| `approve_breeder_review`     | PostgreSQL RPC | 承認 + verification verified + `approved_at`                  |
+| `return_breeder_review`      | PostgreSQL RPC | 差戻し → `resubmission_required` + comment 必須               |
+| `reject_breeder_review`      | PostgreSQL RPC | 却下 → `rejected` + comment 必須                              |
+| `startBreederReviewAction`   | Server Action  | AD-02（将来）                                                 |
+| `approveBreederReviewAction` | Server Action  | AD-02（将来）                                                 |
+| `returnBreederReviewAction`  | Server Action  | AD-02（将来）                                                 |
+| `rejectBreederReviewAction`  | Server Action  | AD-02（将来）                                                 |
 
 ## 今後追加予定 — その他
 

@@ -199,12 +199,12 @@ app/layout.tsx
 
 ### 未作成ルート（設計済み）
 
-| URL                                                    | 用途              |
-| ------------------------------------------------------ | ----------------- |
-| `/breeder/pets/[petId]/edit`                           | 犬猫編集（BR-10） |
-| `/breeder/visits`                                      | 見学管理          |
-| `/breeder/inquiries`, `/breeder/inquiries/[inquiryId]` | 問い合わせ        |
-| `/breeder/settings/*`                                  | 設定              |
+| URL                                                    | 用途                      |
+| ------------------------------------------------------ | ------------------------- |
+| `/breeder/pets/[petId]/edit`                           | 犬猫編集（BR-11）         |
+| `/breeder/visits`, `/breeder/visits/[visitId]`         | 見学管理（BR-14 / BR-15） |
+| `/breeder/inquiries`, `/breeder/inquiries/[inquiryId]` | 問い合わせ（BR-12）       |
+| `/breeder/settings/*`                                  | 設定                      |
 
 詳細: [04_画面設計 — ブリーダー最終構成](../04_画面設計/README.md#ブリーダー画面--最終構成)
 
@@ -327,11 +327,11 @@ supabase/
 
 ### ドキュメント（Version 0.2）
 
-| 項目                 | 内容                                          |
-| -------------------- | --------------------------------------------- |
-| 本ドキュメントの維持 | 機能追加時に Tree・Repository 表を更新        |
-| 画面 ID 付与         | BR-11 見学、BR-12 問い合わせ、BR-13 設定      |
-| ER 図                | pets.breeder_id → breeders.id FK 移行後の更新 |
+| 項目                 | 内容                                                                 |
+| -------------------- | -------------------------------------------------------------------- |
+| 本ドキュメントの維持 | 機能追加時に Tree・Repository 表を更新                               |
+| 画面 ID 付与         | BR-14 / BR-15 見学、BR-12 問い合わせ、BR-13 設定（BR-11 は犬猫編集） |
+| ER 図                | pets.breeder_id → breeders.id FK 移行後の更新                        |
 
 ### インフラ
 

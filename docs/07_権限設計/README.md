@@ -123,6 +123,23 @@ WithTama ではロールベースアクセス制御（RBAC）を採用します�
 
 **差戻し（`return_pet_review`）:** `p_comment` 必須（`btrim` 後非空）。`published_at IS NOT NULL` の `under_review` pet は拒否（データ不整合）。
 
+### ブリーダー審査専用 RPC（Decision No.133 / No.134）
+
+| 関数                                             | 遷移                                                           | 戻り値 |
+| ------------------------------------------------ | -------------------------------------------------------------- | ------ |
+| `start_breeder_review(p_breeder_id uuid)`        | `submitted` / `resubmission_required` → `under_review` + log   | `void` |
+| `approve_breeder_review(p_breeder_id uuid)`      | → `approved` + verification `verified` + `approved_at` + log   | `void` |
+| `return_breeder_review(p_breeder_id, p_comment)` | `under_review` → `resubmission_required` + log（comment 必須） | `void` |
+| `reject_breeder_review(p_breeder_id, p_comment)` | `under_review` → `rejected` + log（comment 必須）              | `void` |
+
+- **SECURITY DEFINER** + `SET search_path = public`
+- 関数内で `auth.uid()` / `public.is_admin()` を再検証
+- `membership_status` は承認 RPC では **更新しない**（Decision No.129 / No.130）
+- Service Role Key 不要
+- Migration: **未作成**
+
+**承認条件（`approve_breeder_review` 内部・No.134）:** `review_status = under_review`、書類パス非 NULL（Storage 存在確認）、`registration_expires_at >= CURRENT_DATE`
+
 ### status 遷移トリガー（`pets_enforce_status_transition`）
 
 Migration:
@@ -156,18 +173,19 @@ Migration:
 - `submit_pet_for_review` RPC 化（breeder `submitted` log 原子化）
 - `paused` / `family_decided` / `closed` 関連の status 遷移
 
-## Storage 権限（`breeder-documents`）
+## Storage 権限（`breeder-documents`）（Decision No.132）
 
 | 操作                       | buyer | breeder（本人）               | admin                            |
 | -------------------------- | ----- | ----------------------------- | -------------------------------- |
 | 書類アップロード（INSERT） | —     | ✅ 自分の `{userId}` 配下のみ | —                                |
-| 書類閲覧（SELECT）         | —     | ✅ 自分の配下のみ             | 別途（ブリーダー審査画面・将来） |
+| 書類閲覧（SELECT）         | —     | ✅ 自分の配下のみ             | ✅ **SELECT のみ**（Signed URL） |
 | 書類更新（UPDATE）         | —     | ✅ 自分の配下のみ             | —                                |
 | 書類削除（DELETE）         | —     | —（第1期）                    | —                                |
 
 - バケットは **private**。公開 URL は発行しない
 - AD-11（犬猫掲載審査）では書類画像を表示しない（Decision No.100）
-- Migration: `20260805140000_create_breeder_documents_storage.sql`
+- AD-02（ブリーダー審査詳細）で admin セッション JWT により Signed URL を発行（Service Role 不要）
+- Migration: `20260805140000_create_breeder_documents_storage.sql`（本人 RLS）、admin SELECT RLS は **未作成**
 
 ## Storage 権限（`pet-photos`）（Decision No.104）
 
