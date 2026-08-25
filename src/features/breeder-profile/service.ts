@@ -11,8 +11,8 @@ import {
   updateIntroductionProfile,
   updateLicenseProfile,
   updateLocationProfile,
-  updateVerificationProfile,
   uploadBreederDocument as uploadBreederDocumentToStorage,
+  submitBreederApplication,
 } from "./repository";
 import { validateProfileCompletion } from "./profile-completion";
 import type {
@@ -283,15 +283,45 @@ export async function completeBreederProfile(): Promise<CompleteBreederProfileRe
       };
     }
 
-    await updateVerificationProfile(user.id, {
-      identity_verification_status: "submitted",
-      business_verification_status: "submitted",
-      review_status: "submitted",
-      profile_completed: true,
-    });
+    if (profile.review_status !== "draft") {
+      return {
+        success: false,
+        error: "現在の審査状態では提出できません。",
+      };
+    }
+
+    await submitBreederApplication();
 
     return { success: true };
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+
+    if (message.includes("authentication required")) {
+      return { success: false, error: "ログインが必要です。" };
+    }
+
+    if (message.includes("invalid review status")) {
+      return {
+        success: false,
+        error: "現在の審査状態では提出できません。",
+      };
+    }
+
+    if (message.includes("documents required")) {
+      return {
+        success: false,
+        error: "プロフィールの必須項目が不足しています。未入力のステップを確認してください。",
+      };
+    }
+
+    if (message.includes("breeder not found")) {
+      return {
+        success: false,
+        error: "プロフィールが見つかりません。",
+      };
+    }
+
     return {
       success: false,
       error: formatProfileSaveError(error),

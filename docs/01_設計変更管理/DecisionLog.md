@@ -1224,3 +1224,81 @@ _*管理者画面は AD-* で採番する_*
 - **影響範囲:** `approve_breeder_review` RPC、AD-02
 - **決定日:** 2026-08-25
 - **参照:** [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [Decision No.107](#decision-no107) / [breeders テーブル](../05_データベース設計/breeders.md)
+
+---
+
+## Decision No.135
+
+**BR-09 差戻し理由は BR-06 ダッシュボードに表示し、専用申請状況画面は第1期で作らない**
+
+- **決定内容:** `review_status = resubmission_required` のブリーダーに対し、[BR-06](../04_画面設計/BR-06_ブリーダーダッシュボード.md) で警告バナーを表示する。
+  - 文言例:「申請内容に修正が必要です」
+  - 差戻し理由: 対象 `breeder_id` の `breeder_review_logs` における **最新** `action = returned` の `comment`
+  - 「申請内容を修正する」ボタン → 既存 [BR-09](../04_画面設計/BR-09_ブリーダープロフィール.md) プロフィール編集へ遷移
+  - 専用「申請状況」画面は **第1期では作成しない**
+  - BR-09 側にも、差戻し状態が分かる **最小表示** を行う（例: Step 5 またはウィザードシェルでの注意表示）
+- **理由:** 既存画面を最大限再利用し、第1期 UI を最小化するため。
+- **影響範囲:** BR-06、BR-09、`src/features/breeder-profile/`（将来）
+- **決定日:** 2026-08-25
+- **参照:** [BR-09 実装前調査](../09_開発履歴/2026-08-25_BR-09差戻し再提出再審査_実装前調査報告.md) / [Decision No.127](#decision-no127)
+
+---
+
+## Decision No.136
+
+**ブリーダープロフィール編集は `draft` と `resubmission_required` のみ許可する**
+
+- **決定内容:** ブリーダーによるプロフィール各 Step の保存・書類アップロード・提出操作は、以下の `review_status` のみ許可する。
+
+| `review_status`         | 編集 |
+| ----------------------- | ---- |
+| `draft`                 | ✅   |
+| `resubmission_required` | ✅   |
+| `submitted`             | ❌   |
+| `under_review`          | ❌   |
+| `approved`              | ❌   |
+| `rejected`              | ❌   |
+
+- UI でボタンを非表示にするだけでなく、**Server Action / service 側でも status を検証**する。可能なら DB/RPC 側でも防御する（実装時）。
+- **目的:** 提出後・審査中にブリーダーが内容を書き換え、管理者が確認した内容と実データが乖離することを防ぐ。
+- **影響範囲:** BR-09 全 Step、`save*Profile` / `uploadBreederDocument` / 提出処理（将来）
+- **決定日:** 2026-08-25
+- **参照:** [BR-09](../04_画面設計/BR-09_ブリーダープロフィール.md) / [Decision No.127](#decision-no127)
+
+---
+
+## Decision No.137
+
+**ブリーダー再提出は専用 RPC `resubmit_breeder_application` とし、初回・再提出とも `submitted` log を原子的に記録する**
+
+- **決定内容:**
+  - 再提出は PostgreSQL RPC **`resubmit_breeder_application`**（名称は既存命名 `*_breeder_*` に準拠）で実装する。
+  - **実行者:** ログイン中のブリーダー本人のみ（`auth.uid()` = 対象 `breeders.user_id`）。
+  - **前提:** `review_status = resubmission_required`。
+  - **処理（同一トランザクション）:**
+    1. `breeders.review_status`: `resubmission_required` → **`submitted`**
+    2. `breeder_review_logs`: `action = submitted` を INSERT（`comment` NULL 可）
+  - **`under_review` へは変更しない**（審査開始は管理者 `start_breeder_review` の責務 — Decision No.126）。
+  - `membership_status` は **変更しない**（Decision No.129 / No.130）。
+  - `identity_verification_status` / `business_verification_status` は **原則 `submitted` を維持**（Decision No.127 整合）。
+  - **初回提出:** 現状 `completeBreederProfile` は `submitted` log を INSERT していない（設計不整合）。初回 `draft` → `submitted` でも **`submitted` log を原子的に記録**する方針とする。実装方式（初回提出 RPC 新設 / `completeBreederProfile` 改修 / 共通 RPC 化）は **実装工程で既存コードを確認して決定**する。
+- **セキュリティ要件（BR-09）:** 本人のみ差戻し理由閲覧・プロフィール修正・再提出可。他ブリーダー・buyer・非ログイン不可。管理者審査 RPC を breeder から実行不可。private 書類を公開しない。Signed URL をログに保存しない。
+- **理由:** 犬猫審査・管理者ブリーダー審査と同様、状態更新と監査ログを RPC で原子化するため。
+- **影響範囲:** Supabase Migration（将来）、`breeder_review_logs`、BR-09 Step 5、`completeBreederProfile`（将来是正）
+- **決定日:** 2026-08-25
+- **参照:** [breeder_review_logs](../05_データベース設計/breeder_review_logs.md) / [Decision No.131](#decision-no131) / [業務フロー](../03_業務フロー/README.md)
+
+---
+
+## Decision No.138
+
+**BR-09 第1期では差戻し・再提出のメール通知を実装しない**
+
+- **決定内容:** 第1期 BR-09 では以下のみとする。
+  - 管理者差戻し → ブリーダーへ **サイト内表示**（Decision No.135）
+  - ブリーダー再提出 → **サイト内状態更新**（`review_status` 等）
+  - Resend による差戻しメール・再提出通知メールは **別工程**
+- **理由:** `src/lib/resend/` 未整備。第1期はサイト内 UX を優先するため（AD-02 も差戻し通知メールは第1期対象外）。
+- **影響範囲:** BR-06、BR-09、通知基盤（将来）
+- **決定日:** 2026-08-25
+- **参照:** [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [BR-09 実装前調査](../09_開発履歴/2026-08-25_BR-09差戻し再提出再審査_実装前調査報告.md)

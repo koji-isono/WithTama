@@ -93,7 +93,8 @@ flowchart TD
   resubmit["review_status: resubmission_required"]
   rejected["review_status: rejected"]
 
-  draft -->|"BR-09 completeBreederProfile\nbreeder_review_logs: submitted"| submitted
+  draft -->|"BR-09 submit_breeder_application\nbreeder_review_logs: submitted"| submitted
+  resubmission_required -->|"BR-09 resubmit_breeder_application\nbreeder_review_logs: submitted"| submitted
   submitted -->|"AD-02 審査開始 RPC\nreview_started"| under
   resubmit -->|"BR-09 再提出\nsubmitted log 追記"| submitted
   under -->|"承認 RPC approved"| approved
@@ -110,8 +111,9 @@ flowchart TD
 | 却下     | 管理者     | `rejected`              | 変更なし（第1期）            | `rejected`       |
 | 再提出   | ブリーダー | `submitted`             | `submitted`                  | `submitted`      |
 
-**第1期で含まない:** `rejected` からの再申請、メール通知、Stripe 連携、登録期限の自動監視。
+**第1期で含まない:** `rejected` からの再申請、**メール通知**（Decision No.138）、Stripe 連携、登録期限の自動監視。
 
+**BR-09 差戻し・再提出（Decision No.135〜138）:** 差戻し理由は BR-06 で表示。再提出は `resubmit_breeder_application` RPC。プロフィール編集は `draft` / `resubmission_required` のみ。
 **Stripe 境界（Decision No.130）:** 審査承認だけでは `membership_status = active` にならず、PU-01/02 の一般公開条件を満たさない。
 
 ## 管理者：ブリーダー審査

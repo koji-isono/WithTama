@@ -140,6 +140,35 @@ WithTama ではロールベースアクセス制御（RBAC）を採用します�
 
 **承認条件（`approve_breeder_review` 内部・No.134）:** `review_status = under_review`、書類パス非 NULL（Storage 存在確認）、`registration_expires_at >= CURRENT_DATE`
 
+### ブリーダー提出 RPC（Decision No.137）
+
+| 関数                           | 遷移                                                             | 実行者         |
+| ------------------------------ | ---------------------------------------------------------------- | -------------- |
+| `submit_breeder_application`   | `draft` → `submitted` + verification submitted + `submitted` log | ブリーダー本人 |
+| `resubmit_breeder_application` | `resubmission_required` → `submitted` + `submitted` log          | ブリーダー本人 |
+
+- **SECURITY DEFINER** + `SET search_path = public`
+- 引数なし — `auth.uid()` から対象 `breeders` を特定（他ブリーダー指定不可）
+- 再提出時: `membership_status` / verification status は **変更しない**（No.127 整合）
+- 初回提出時: verification status を `submitted` に更新（既存 `completeBreederProfile` 仕様準拠）
+- **`under_review` へは変更しない**（No.126 — 管理者 `start_breeder_review` と分離）
+- Migration: `20260825130000_create_breeder_application_submit_rpcs.sql`
+
+### ブリーダープロフィール編集（Decision No.136）
+
+| `review_status`         | プロフィール Step 保存     |
+| ----------------------- | -------------------------- |
+| `draft`                 | ✅                         |
+| `resubmission_required` | ✅                         |
+| 上記以外                | ❌（Server Action で拒否） |
+
+### BR-09 セキュリティ要件（Decision No.137）
+
+- 本人のみ: 差戻し理由閲覧、プロフィール修正、再提出
+- 他ブリーダー・buyer・非ログイン: 不可
+- 管理者審査 RPC: breeder から実行不可
+- `breeder-documents`: private のまま。Signed URL をログに保存しない
+
 ### status 遷移トリガー（`pets_enforce_status_transition`）
 
 Migration:

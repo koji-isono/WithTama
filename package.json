@@ -20,6 +20,8 @@
     "prepare:sec-test-review-breeder": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-review-breeder.mts",
     "prepare:sec-test-breeder-review": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-breeder-review.mts",
     "test:breeder-review-rpcs": "npm run prepare:sec-test-breeder-review && node --env-file=.env.local --experimental-strip-types scripts/test-breeder-review-rpcs.mts",
+    "prepare:sec-test-breeder-application-submit": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-breeder-application-submit.mts",
+    "test:breeder-application-submit-rpcs": "npm run prepare:sec-test-breeder-application-submit && node --env-file=.env.local --experimental-strip-types scripts/test-breeder-application-submit-rpcs.mts",
     "prepare:sec-test-review-pets": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-review-pets.mts",
     "prepare:sec-test-submit-pet": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-submit-pet.mts",
     "prepare:sec-test-public-read": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-public-read.mts",

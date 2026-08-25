@@ -6,25 +6,25 @@ WithTama の API は Next.js App Router の Route Handlers および Supabase �
 
 ## 現状
 
-| エンドポイント / アクション | メソッド      | 説明                                                   | 状態     |
-| --------------------------- | ------------- | ------------------------------------------------------ | -------- |
-| `/api/health`               | GET           | ヘルスチェック                                         | 実装済み |
-| `saveBasicProfile`          | Server Action | ブリーダープロフィール Step 1 基本情報保存             | 実装済み |
-| `saveLocationProfile`       | Server Action | ブリーダープロフィール Step 2 所在地保存               | 実装済み |
-| `saveLicenseProfile`        | Server Action | ブリーダープロフィール Step 3 第一種動物取扱業情報保存 | 実装済み |
-| `saveIntroductionProfile`   | Server Action | ブリーダープロフィール Step 4 ブリーダー紹介保存       | 実装済み |
-| `uploadBreederDocument`     | Server Action | ブリーダープロフィール Step 5 書類アップロード         | 実装済み |
-| `completeBreederProfile`    | Server Action | ブリーダープロフィール Step 5 提出完了                 | 実装済み |
-| `createPetDraft`            | Server Action | 犬猫登録（下書き保存）                                 | 実装済み |
-| `updatePetDraftAction`      | Server Action | 犬猫情報編集（基本情報更新）                           | 実装済み |
-| `uploadPetPhotoAction`      | Server Action | 犬猫写真アップロード                                   | 実装済み |
-| `setMainPetPhotoAction`     | Server Action | 犬猫メイン写真設定                                     | 実装済み |
-| `deletePetPhotoAction`      | Server Action | 犬猫写真削除                                           | 実装済み |
-| `loadBreederPets`           | Server 関数   | ブリーダー犬猫一覧取得                                 | 実装済み |
-| `submitPetForReviewAction`  | Server Action | 犬猫公開申請（RPC `submit_pet_for_review`）            | 実装済み |
-| `isAdminUser`               | 関数          | 管理者判定（`app_metadata.role`）                      | 実装済み |
-| `getCurrentAdmin`           | Server 関数   | 現在の admin ユーザー取得                              | 実装済み |
-| `requireAdmin`              | Server 関数   | admin 必須ガード（redirect）                           | 実装済み |
+| エンドポイント / アクション | メソッド      | 説明                                                                            | 状態     |
+| --------------------------- | ------------- | ------------------------------------------------------------------------------- | -------- |
+| `/api/health`               | GET           | ヘルスチェック                                                                  | 実装済み |
+| `saveBasicProfile`          | Server Action | ブリーダープロフィール Step 1 基本情報保存                                      | 実装済み |
+| `saveLocationProfile`       | Server Action | ブリーダープロフィール Step 2 所在地保存                                        | 実装済み |
+| `saveLicenseProfile`        | Server Action | ブリーダープロフィール Step 3 第一種動物取扱業情報保存                          | 実装済み |
+| `saveIntroductionProfile`   | Server Action | ブリーダープロフィール Step 4 ブリーダー紹介保存                                | 実装済み |
+| `uploadBreederDocument`     | Server Action | ブリーダープロフィール Step 5 書類アップロード                                  | 実装済み |
+| `completeBreederProfile`    | Server Action | ブリーダープロフィール Step 5 提出完了（`submit_breeder_application` RPC 呼出） | 実装済み |
+| `createPetDraft`            | Server Action | 犬猫登録（下書き保存）                                                          | 実装済み |
+| `updatePetDraftAction`      | Server Action | 犬猫情報編集（基本情報更新）                                                    | 実装済み |
+| `uploadPetPhotoAction`      | Server Action | 犬猫写真アップロード                                                            | 実装済み |
+| `setMainPetPhotoAction`     | Server Action | 犬猫メイン写真設定                                                              | 実装済み |
+| `deletePetPhotoAction`      | Server Action | 犬猫写真削除                                                                    | 実装済み |
+| `loadBreederPets`           | Server 関数   | ブリーダー犬猫一覧取得                                                          | 実装済み |
+| `submitPetForReviewAction`  | Server Action | 犬猫公開申請（RPC `submit_pet_for_review`）                                     | 実装済み |
+| `isAdminUser`               | 関数          | 管理者判定（`app_metadata.role`）                                               | 実装済み |
+| `getCurrentAdmin`           | Server 関数   | 現在の admin ユーザー取得                                                       | 実装済み |
+| `requireAdmin`              | Server 関数   | admin 必須ガード（redirect）                                                    | 実装済み |
 
 詳細: [ブリーダープロフィール API](./breeder-profile.md) / [犬猫管理 API](./pets.md) / [認証](./auth.md)
 
@@ -47,10 +47,21 @@ WithTama の API は Next.js App Router の Route Handlers および Supabase �
 | `approve_breeder_review`     | PostgreSQL RPC | 承認 + verification verified + `approved_at`                  |
 | `return_breeder_review`      | PostgreSQL RPC | 差戻し → `resubmission_required` + comment 必須               |
 | `reject_breeder_review`      | PostgreSQL RPC | 却下 → `rejected` + comment 必須                              |
-| `startBreederReviewAction`   | Server Action  | AD-02（将来）                                                 |
-| `approveBreederReviewAction` | Server Action  | AD-02（将来）                                                 |
-| `returnBreederReviewAction`  | Server Action  | AD-02（将来）                                                 |
-| `rejectBreederReviewAction`  | Server Action  | AD-02（将来）                                                 |
+| `startBreederReviewAction`   | Server Action  | AD-02（実装済み）                                             |
+| `approveBreederReviewAction` | Server Action  | AD-02（実装済み）                                             |
+| `returnBreederReviewAction`  | Server Action  | AD-02（実装済み）                                             |
+| `rejectBreederReviewAction`  | Server Action  | AD-02（実装済み）                                             |
+
+## ブリーダー提出 RPC（Decision No.137）
+
+| エンドポイント / アクション        | 種別           | 説明                                                                       |
+| ---------------------------------- | -------------- | -------------------------------------------------------------------------- |
+| `submit_breeder_application`       | PostgreSQL RPC | 初回提出: `draft` → `submitted` + verification submitted + `submitted` log |
+| `resubmit_breeder_application`     | PostgreSQL RPC | 再提出: `resubmission_required` → `submitted` + `submitted` log            |
+| `resubmitBreederApplicationAction` | Server Action  | BR-09 Step 5 再提出 UI（将来）                                             |
+
+**Migration:** `20260825130000_create_breeder_application_submit_rpcs.sql`
+**Server Action:** `completeBreederProfile` → validation 後 `submit_breeder_application` RPC 呼出（実装済み）
 
 ## 今後追加予定 — その他
 

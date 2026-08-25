@@ -61,7 +61,8 @@ DB 制約（実装時）:
 
 - 審査履歴は **追記のみ**。通常の UPDATE / DELETE は禁止する（Decision No.131、`pet_review_logs` と同様）。
 - `actor_user_id` はサーバー側で `auth.uid()` から取得し、クライアント指定値を信用しない。
-- **申請時:** `completeBreederProfile`（または将来 RPC）で `review_status` を `submitted` に更新すると同時に `action = submitted` を INSERT する。再提出（`resubmission_required` → `submitted`）時も `submitted` を追記する。
+- **初回提出:** RPC `submit_breeder_application`（Decision No.137）で `review_status` を `submitted` に更新すると同時に `action = submitted` を INSERT。
+- **再提出:** RPC `resubmit_breeder_application`（Decision No.137）で `review_status` を `submitted` に更新すると同時に `action = submitted` を INSERT。
 - **審査開始:** RPC `start_breeder_review` で `submitted` / `resubmission_required` → `under_review` と同時に `action = review_started` を INSERT。
 - **承認:** RPC `approve_breeder_review` で breeders 更新と同時に `action = approved` を INSERT。
 - **差戻し:** RPC `return_breeder_review` で `under_review` → `resubmission_required` と差戻し理由を INSERT。
@@ -114,19 +115,21 @@ LIMIT 1;
 
 ## マイグレーション
 
-| ファイル                                                    | 内容                                 |
-| ----------------------------------------------------------- | ------------------------------------ |
-| `20260825100000_create_breeder_review_logs.sql`             | テーブル・制約・インデックス・RLS    |
-| `20260825110000_add_admin_breeder_documents_select_rls.sql` | 管理者 SELECT（`breeder-documents`） |
-| `20260825120000_create_breeder_review_admin_rpcs.sql`       | 審査 RPC 4 種                        |
+| ファイル                                                    | 内容                                     |
+| ----------------------------------------------------------- | ---------------------------------------- |
+| `20260825100000_create_breeder_review_logs.sql`             | テーブル・制約・インデックス・RLS        |
+| `20260825110000_add_admin_breeder_documents_select_rls.sql` | 管理者 SELECT（`breeder-documents`）     |
+| `20260825120000_create_breeder_review_admin_rpcs.sql`       | 審査 RPC 4 種                            |
+| `20260825130000_create_breeder_application_submit_rpcs.sql` | 初回提出 / 再提出 RPC（Decision No.137） |
 
-**Supabase への適用は未実施**（2026-08-25 時点）。
+**Supabase への適用:** Migration ファイル作成済み。適用後 `npm run test:breeder-application-submit-rpcs` で検証。
 
 ## 関連 Decision
 
 - [Decision No.98](../01_設計変更管理/DecisionLog.md#decision-no98) — 申請日時はログ `created_at`（思想準拠）
 - [Decision No.105](../01_設計変更管理/DecisionLog.md#decision-no105) — pet_review_logs 設計（対称）
 - [Decision No.131](../01_設計変更管理/DecisionLog.md#decision-no131) — 本テーブル採用
+- [Decision No.137](../01_設計変更管理/DecisionLog.md#decision-no137) — 再提出 RPC・初回 submitted log
 
 ## 関連画面
 

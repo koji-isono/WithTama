@@ -280,3 +280,23 @@ export async function saveBreederDocumentPath(
     business_license_path: storagePath,
   });
 }
+
+export async function submitBreederApplication(): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("submit_breeder_application");
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function resubmitBreederApplication(): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("resubmit_breeder_application");
+
+  if (error) {
+    throw error;
+  }
+}
