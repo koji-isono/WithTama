@@ -2,11 +2,15 @@
 
 import { isAdminUser, parseMemberUserRole } from "@/features/auth";
 import { getBuyerProfileByUserId } from "@/features/buyers/repository";
+import { getBreederIdByUserId } from "@/features/pets/repository";
 import { createClient } from "@/lib/supabase/server";
 
 import {
   buildInquirySubject,
+  canBreederSendInquiryMessage,
   canBuyerSendInquiryMessage,
+  INQUIRY_BREEDER_FORBIDDEN_MESSAGE,
+  INQUIRY_BREEDER_NOT_FOUND_MESSAGE,
   INQUIRY_BUYER_NOT_FOUND_MESSAGE,
   INQUIRY_FORBIDDEN_ROLE_MESSAGE,
   INQUIRY_INQUIRY_CREATE_ERROR_MESSAGE,
@@ -21,6 +25,7 @@ import {
 import {
   findActiveInquiriesByBuyerAndPet,
   findActiveInquiryByBuyerAndPet,
+  getInquiryByIdForBreeder,
   getInquiryByIdForBuyer,
   getPublishedPetInquiryContext,
   insertInquiry,
@@ -28,8 +33,13 @@ import {
   isPublishedPetListable,
   softDeleteInquiry,
   updateInquiryLastMessageAt,
+  updateInquiryStatusToReplied,
 } from "./repository";
-import type { CreateInquiryActionResult, SendInquiryMessageActionResult } from "./types";
+import type {
+  CreateInquiryActionResult,
+  SendBreederInquiryMessageActionResult,
+  SendInquiryMessageActionResult,
+} from "./types";
 import {
   hasInquiryMessageValidationErrors,
   isValidInquiryId,
@@ -174,6 +184,7 @@ export async function createInquiryAction(
     await insertInquiryMessage({
       inquiryId: inquiry.id,
       senderUserId: buyerContext.userId,
+      senderType: "buyer",
       message: normalizedMessage,
     });
   } catch (error) {
@@ -268,6 +279,7 @@ export async function sendInquiryMessageAction(
     await insertInquiryMessage({
       inquiryId: inquiry.id,
       senderUserId: buyerContext.userId,
+      senderType: "buyer",
       message: normalizedMessage,
     });
   } catch (error) {
@@ -286,6 +298,121 @@ export async function sendInquiryMessageAction(
     }
 
     return { success: false, error: INQUIRY_SUBMIT_ERROR_MESSAGE };
+  }
+
+  return { success: true };
+}
+
+type ResolvedBreederContext =
+  { success: true; breederId: string; userId: string } | { success: false; error: string };
+
+async function resolveBreederContextForInquiry(): Promise<ResolvedBreederContext> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: INQUIRY_UNAUTHORIZED_MESSAGE };
+  }
+
+  if (isAdminUser(user)) {
+    return { success: false, error: INQUIRY_BREEDER_FORBIDDEN_MESSAGE };
+  }
+
+  const role = parseMemberUserRole(user);
+
+  if (role !== "breeder") {
+    return { success: false, error: INQUIRY_BREEDER_FORBIDDEN_MESSAGE };
+  }
+
+  const breederId = await getBreederIdByUserId(user.id);
+
+  if (!breederId) {
+    return { success: false, error: INQUIRY_BREEDER_NOT_FOUND_MESSAGE };
+  }
+
+  return {
+    success: true,
+    breederId,
+    userId: user.id,
+  };
+}
+
+export async function sendBreederInquiryMessageAction(
+  inquiryId: string,
+  message: string,
+): Promise<SendBreederInquiryMessageActionResult> {
+  const normalizedInquiryId = inquiryId.trim();
+
+  if (!isValidInquiryId(normalizedInquiryId)) {
+    return { success: false, error: INQUIRY_NOT_FOUND_MESSAGE };
+  }
+
+  const fieldErrors = validateInquiryMessage(message);
+
+  if (hasInquiryMessageValidationErrors(fieldErrors)) {
+    return {
+      success: false,
+      error: fieldErrors.message ?? INQUIRY_SUBMIT_ERROR_MESSAGE,
+      fieldErrors,
+    };
+  }
+
+  const breederContext = await resolveBreederContextForInquiry();
+
+  if (!breederContext.success) {
+    return { success: false, error: breederContext.error };
+  }
+
+  const inquiry = await getInquiryByIdForBreeder(normalizedInquiryId, breederContext.breederId);
+
+  if (!inquiry) {
+    return { success: false, error: INQUIRY_NOT_FOUND_MESSAGE };
+  }
+
+  if (!canBreederSendInquiryMessage(inquiry.status)) {
+    return { success: false, error: INQUIRY_REPLY_NOT_ALLOWED_MESSAGE };
+  }
+
+  const normalizedMessage = normalizeInquiryMessage(message);
+
+  try {
+    await insertInquiryMessage({
+      inquiryId: inquiry.id,
+      senderUserId: breederContext.userId,
+      senderType: "breeder",
+      message: normalizedMessage,
+    });
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("sendBreederInquiryMessageAction insert failed", error);
+    }
+
+    return { success: false, error: INQUIRY_MESSAGE_CREATE_ERROR_MESSAGE };
+  }
+
+  try {
+    await updateInquiryLastMessageAt(inquiry.id);
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("sendBreederInquiryMessageAction last_message_at update failed", error);
+    }
+
+    return { success: false, error: INQUIRY_SUBMIT_ERROR_MESSAGE };
+  }
+
+  if (inquiry.status === "open") {
+    try {
+      await updateInquiryStatusToReplied(inquiry.id);
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("sendBreederInquiryMessageAction status update failed", error);
+      }
+
+      return { success: false, error: INQUIRY_SUBMIT_ERROR_MESSAGE };
+    }
   }
 
   return { success: true };

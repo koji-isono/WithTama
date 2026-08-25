@@ -50,7 +50,9 @@
     "test:visit-navigation": "npx tsx scripts/test-visit-navigation.mts",
     "test:breeder-visits-page": "npx tsx scripts/test-breeder-visits-page.mts",
     "test:breeder-visits-e2e": "npx tsx scripts/test-breeder-visits-e2e.mts",
-    "test:breeder-visit-detail-page": "npx tsx scripts/test-breeder-visit-detail-page.mts"
+    "test:breeder-visit-detail-page": "npx tsx scripts/test-breeder-visit-detail-page.mts",
+    "test:breeder-inquiries-page": "npx tsx scripts/test-breeder-inquiries-page.mts",
+    "test:inquiry-e2e": "npx tsx scripts/test-inquiry-e2e.mts"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.7",

@@ -3,6 +3,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
 import { formatPetPhotoDeleteError, logPetPhotoOperationFailure } from "./format-pet-photo-error";
+import { formatPublicPetAttributeLine } from "./list-format";
 import { PET_PHOTOS_BUCKET, PET_PHOTO_SIGNED_URL_EXPIRES_SECONDS } from "./photo-constants";
 import { isValidPetPhotoStoragePath } from "./photo-utils";
 import type {
@@ -12,6 +13,8 @@ import type {
   PetListWithMainPhotoRow,
   PetPhotoRow,
   PetRow,
+  PetSex,
+  PetSpecies,
   UpdatePetDraftData,
 } from "./types";
 
@@ -157,6 +160,102 @@ export async function listPetsWithMainPhotoByBreederUserId(
       main_photo_signed_url: storagePath ? (signedUrlByPath.get(storagePath) ?? null) : null,
     };
   });
+}
+
+export type BreederPetCardSummary = {
+  petId: string;
+  publicDisplayName: string;
+  attributeLine: string | null;
+  mainPhotoUrl: string | null;
+};
+
+export async function listPetCardSummariesForBreeder(
+  breederId: string,
+  petIds: string[],
+): Promise<Map<string, BreederPetCardSummary>> {
+  const summaries = new Map<string, BreederPetCardSummary>();
+
+  if (petIds.length === 0) {
+    return summaries;
+  }
+
+  const supabase = await createClient();
+
+  const { data: pets, error: petsError } = await supabase
+    .from("pets")
+    .select("id, public_display_name, management_name, species, breed, sex, birthday")
+    .eq("breeder_id", breederId)
+    .in("id", petIds);
+
+  if (petsError) {
+    throw petsError;
+  }
+
+  const petRows = pets ?? [];
+
+  if (petRows.length === 0) {
+    return summaries;
+  }
+
+  const foundPetIds = petRows.map((pet) => pet.id as string);
+
+  const { data: mainPhotos, error: photosError } = await supabase
+    .from("pet_photos")
+    .select("pet_id, storage_path")
+    .in("pet_id", foundPetIds)
+    .eq("is_main", true);
+
+  if (photosError) {
+    throw photosError;
+  }
+
+  const mainPhotoPathByPetId = new Map<string, string>();
+
+  for (const photo of mainPhotos ?? []) {
+    mainPhotoPathByPetId.set(photo.pet_id as string, photo.storage_path as string);
+  }
+
+  const storagePaths = [...new Set(mainPhotoPathByPetId.values())];
+  const signedUrlByPath = new Map<string, string>();
+
+  if (storagePaths.length > 0) {
+    const { data: signedUrls, error: signedUrlError } = await supabase.storage
+      .from(PET_PHOTOS_BUCKET)
+      .createSignedUrls(storagePaths, PET_PHOTO_SIGNED_URL_EXPIRES_SECONDS);
+
+    if (signedUrlError) {
+      throw signedUrlError;
+    }
+
+    for (const item of signedUrls ?? []) {
+      if (item.path && item.signedUrl) {
+        signedUrlByPath.set(item.path, item.signedUrl);
+      }
+    }
+  }
+
+  for (const pet of petRows) {
+    const petId = pet.id as string;
+    const publicDisplayName =
+      (pet.public_display_name as string | null)?.trim() ||
+      (pet.management_name as string | null)?.trim() ||
+      "名称未設定";
+    const storagePath = mainPhotoPathByPetId.get(petId) ?? null;
+
+    summaries.set(petId, {
+      petId,
+      publicDisplayName,
+      attributeLine: formatPublicPetAttributeLine({
+        species: pet.species as PetSpecies,
+        breed: (pet.breed as string | null) ?? "",
+        sex: pet.sex as PetSex,
+        birthday: pet.birthday as string | null,
+      }),
+      mainPhotoUrl: storagePath ? (signedUrlByPath.get(storagePath) ?? null) : null,
+    });
+  }
+
+  return summaries;
 }
 
 export async function listPetsForCurrentBreeder(): Promise<PetRow[]> {

@@ -9,6 +9,7 @@ import {
   INQUIRY_MESSAGE_MAX_LENGTH,
   buildInquirySubject,
 } from "../src/features/inquiries/constants";
+import { getInquiryMessageSenderLabel } from "../src/features/inquiries/format";
 import {
   hasInquiryMessageValidationErrors,
   isValidInquiryId,
@@ -47,6 +48,29 @@ function main(): void {
   record("8. max length constant", INQUIRY_MESSAGE_MAX_LENGTH === 2000);
   record("9. valid inquiry uuid", isValidInquiryId("550e8400-e29b-41d4-a716-446655440000"));
   record("10. invalid inquiry uuid", !isValidInquiryId("not-a-uuid"));
+  record(
+    "11. buyer view: own message label",
+    getInquiryMessageSenderLabel("buyer", { viewerRole: "buyer" }) === "あなた",
+  );
+  record(
+    "12. buyer view: breeder message label",
+    getInquiryMessageSenderLabel("breeder", { viewerRole: "buyer" }) === "ブリーダー",
+  );
+  record(
+    "13. breeder view: buyer message with display_name",
+    getInquiryMessageSenderLabel("buyer", {
+      viewerRole: "breeder",
+      buyerDisplayName: "テスト太郎",
+    }) === "テスト太郎",
+  );
+  record(
+    "14. breeder view: buyer message fallback",
+    getInquiryMessageSenderLabel("buyer", { viewerRole: "breeder" }) === "購入希望者",
+  );
+  record(
+    "15. breeder view: own message label",
+    getInquiryMessageSenderLabel("breeder", { viewerRole: "breeder" }) === "あなた",
+  );
 
   const failed = checks.filter((check) => !check.passed);
 

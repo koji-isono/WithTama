@@ -108,6 +108,13 @@ function main(): void {
   );
   record(
     checks,
+    "27b. BY-06 buyer message labels use buyer viewerRole",
+    loaders.match(
+      /loadInquiryDetailPage[\s\S]*getInquiryMessageSenderLabel\(row\.sender_type, \{ viewerRole: "buyer" \}\)/,
+    ) != null,
+  );
+  record(
+    checks,
     "28. refresh after reply (no Realtime)",
     replyForm.includes("router.refresh()") && !detailView.includes("Realtime"),
   );

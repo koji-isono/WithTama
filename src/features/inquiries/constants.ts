@@ -40,6 +40,18 @@ export const INQUIRY_LIST_LOAD_ERROR_MESSAGE =
 
 export const BUYER_INQUIRY_DETAIL_SCREEN_ID = "BY-06";
 
+export const BREEDER_INQUIRY_LIST_PATH = "/breeder/inquiries";
+export const BREEDER_INQUIRY_LIST_SCREEN_ID = "BR-12";
+
+export const INQUIRY_BREEDER_FORBIDDEN_MESSAGE =
+  "ブリーダーアカウントでのみ問い合わせを確認できます。";
+export const INQUIRY_BREEDER_NOT_FOUND_MESSAGE =
+  "ブリーダープロフィールが見つかりません。再度ログインしてください。";
+export const INQUIRY_BREEDER_LIST_LOAD_ERROR_MESSAGE =
+  "問い合わせ一覧の取得に失敗しました。時間をおいて再度お試しください。";
+
+export const INQUIRY_BUYER_DISPLAY_NAME_FALLBACK = "購入希望者";
+
 export const INQUIRY_MESSAGE_SENDABLE_STATUSES = [...ACTIVE_INQUIRY_STATUSES] as const;
 
 export function canBuyerSendInquiryMessage(status: string): boolean {
@@ -64,6 +76,14 @@ export function getBuyerInquiryNewPath(petId: string): string {
 
 export function getBuyerInquiryDetailPath(inquiryId: string): string {
   return `/buyer/inquiries/${inquiryId}`;
+}
+
+export function getBreederInquiryDetailPath(inquiryId: string): string {
+  return `/breeder/inquiries/${inquiryId}`;
+}
+
+export function canBreederSendInquiryMessage(status: string): boolean {
+  return canBuyerSendInquiryMessage(status);
 }
 
 export function buildInquirySubject(publicDisplayName: string | null | undefined): string {

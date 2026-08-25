@@ -3,6 +3,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { getPublishedPetDetailForPublic } from "@/features/pets/public-repository";
 import { formatPublicPetAttributeLine, formatPublicPetPhotoAlt } from "@/features/pets/list-format";
+import type { PetSex, PetSpecies } from "@/features/pets/types";
 
 import { ACTIVE_INQUIRY_STATUSES, INQUIRY_LIST_MAX_ITEMS } from "./constants";
 import { extractPetNameFromInquirySubject } from "./format";
@@ -109,13 +110,14 @@ export async function insertInquiry(input: {
 export async function insertInquiryMessage(input: {
   inquiryId: string;
   senderUserId: string;
+  senderType: "buyer" | "breeder";
   message: string;
 }): Promise<void> {
   const supabase = await createClient();
 
   const { error } = await supabase.from("inquiry_messages").insert({
     inquiry_id: input.inquiryId,
-    sender_type: "buyer",
+    sender_type: input.senderType,
     sender_user_id: input.senderUserId,
     message: input.message,
   });
@@ -172,6 +174,27 @@ export async function getInquiryByIdForBuyer(
   return data as InquiryRow | null;
 }
 
+export async function getInquiryByIdForBreeder(
+  inquiryId: string,
+  breederId: string,
+): Promise<InquiryRow | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("inquiries")
+    .select(inquiryIdSelect)
+    .eq("id", inquiryId)
+    .eq("breeder_id", breederId)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as InquiryRow | null;
+}
+
 export async function listInquiryMessages(inquiryId: string): Promise<InquiryMessageRow[]> {
   const supabase = await createClient();
 
@@ -201,6 +224,39 @@ export async function markBreederMessagesAsReadForBuyer(inquiryId: string): Prom
     .eq("inquiry_id", inquiryId)
     .eq("sender_type", "breeder")
     .eq("is_read", false);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function markBuyerMessagesAsReadForBreeder(inquiryId: string): Promise<void> {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const { error } = await supabase
+    .from("inquiry_messages")
+    .update({
+      is_read: true,
+      read_at: now,
+    })
+    .eq("inquiry_id", inquiryId)
+    .eq("sender_type", "buyer")
+    .eq("is_read", false);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function updateInquiryStatusToReplied(inquiryId: string): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("inquiries")
+    .update({ status: "replied" })
+    .eq("id", inquiryId)
+    .eq("status", "open");
 
   if (error) {
     throw error;
@@ -277,6 +333,54 @@ export async function listInquiriesForBuyer(
     .order("last_message_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
     .limit(limit);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []) as InquiryRow[];
+}
+
+export async function listInquiriesByIdsForBuyer(
+  buyerId: string,
+  inquiryIds: string[],
+): Promise<InquiryRow[]> {
+  if (inquiryIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("inquiries")
+    .select(inquiryIdSelect)
+    .eq("buyer_id", buyerId)
+    .in("id", inquiryIds)
+    .is("deleted_at", null);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []) as InquiryRow[];
+}
+
+export async function listInquiriesByIdsForBreeder(
+  breederId: string,
+  inquiryIds: string[],
+): Promise<InquiryRow[]> {
+  if (inquiryIds.length === 0) {
+    return [];
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("inquiries")
+    .select(inquiryIdSelect)
+    .eq("breeder_id", breederId)
+    .in("id", inquiryIds)
+    .is("deleted_at", null);
 
   if (error) {
     throw error;
@@ -372,6 +476,188 @@ export async function listBreederPublicNamesByIds(
 
     if (businessName?.trim()) {
       names.set(row.id as string, businessName.trim());
+    }
+  }
+
+  return names;
+}
+
+export async function listInquiriesForBreeder(
+  breederId: string,
+  limit = INQUIRY_LIST_MAX_ITEMS,
+): Promise<InquiryRow[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("inquiries")
+    .select(inquiryIdSelect)
+    .eq("breeder_id", breederId)
+    .is("deleted_at", null)
+    .order("last_message_at", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data ?? []) as InquiryRow[];
+}
+
+export async function countUnreadBuyerMessagesByInquiry(
+  inquiryIds: string[],
+): Promise<Map<string, number>> {
+  if (inquiryIds.length === 0) {
+    return new Map();
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("inquiry_messages")
+    .select("inquiry_id")
+    .in("inquiry_id", inquiryIds)
+    .eq("sender_type", "buyer")
+    .eq("is_read", false);
+
+  if (error) {
+    throw error;
+  }
+
+  const counts = new Map<string, number>();
+
+  for (const row of data ?? []) {
+    const inquiryId = row.inquiry_id as string;
+    counts.set(inquiryId, (counts.get(inquiryId) ?? 0) + 1);
+  }
+
+  return counts;
+}
+
+export async function getInquiryBuyerDisplayName(inquiryId: string): Promise<string | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc("get_inquiry_buyer_display_name", {
+    p_inquiry_id: inquiryId,
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  if (typeof data !== "string") {
+    return null;
+  }
+
+  const trimmed = data.trim();
+
+  return trimmed || null;
+}
+
+export async function getInquiryBuyerDisplayNamesByIds(
+  inquiryIds: string[],
+): Promise<Map<string, string>> {
+  if (inquiryIds.length === 0) {
+    return new Map();
+  }
+
+  const entries = await Promise.all(
+    inquiryIds.map(async (inquiryId) => {
+      const displayName = await getInquiryBuyerDisplayName(inquiryId);
+      return [inquiryId, displayName] as const;
+    }),
+  );
+
+  const names = new Map<string, string>();
+
+  for (const [inquiryId, displayName] of entries) {
+    if (displayName) {
+      names.set(inquiryId, displayName);
+    }
+  }
+
+  return names;
+}
+
+export type InquiryPetSummaryForBreeder = {
+  petId: string;
+  publicDisplayName: string;
+  attributeLine: string | null;
+};
+
+export async function loadInquiryPetSummaryForBreeder(
+  inquiry: InquiryRow,
+  breederId: string,
+): Promise<InquiryPetSummaryForBreeder> {
+  const supabase = await createClient();
+
+  const { data: petRow, error } = await supabase
+    .from("pets")
+    .select("id, public_display_name, management_name, species, breed, sex, birthday")
+    .eq("id", inquiry.pet_id)
+    .eq("breeder_id", breederId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (petRow) {
+    const publicDisplayName =
+      (petRow.public_display_name as string | null)?.trim() ||
+      (petRow.management_name as string | null)?.trim() ||
+      "名称未設定";
+
+    return {
+      petId: inquiry.pet_id,
+      publicDisplayName,
+      attributeLine: formatPublicPetAttributeLine({
+        species: petRow.species as PetSpecies,
+        breed: (petRow.breed as string | null) ?? "",
+        sex: petRow.sex as PetSex,
+        birthday: petRow.birthday as string | null,
+      }),
+    };
+  }
+
+  const subjectName = extractPetNameFromInquirySubject(inquiry.subject);
+
+  return {
+    petId: inquiry.pet_id,
+    publicDisplayName: subjectName ?? "名称未設定",
+    attributeLine: null,
+  };
+}
+
+export async function listPetDisplayNamesForBreeder(
+  breederId: string,
+  petIds: string[],
+): Promise<Map<string, string>> {
+  if (petIds.length === 0) {
+    return new Map();
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("pets")
+    .select("id, public_display_name, management_name")
+    .eq("breeder_id", breederId)
+    .in("id", petIds);
+
+  if (error) {
+    throw error;
+  }
+
+  const names = new Map<string, string>();
+
+  for (const row of data ?? []) {
+    const displayName =
+      (row.public_display_name as string | null)?.trim() ||
+      (row.management_name as string | null)?.trim();
+
+    if (displayName) {
+      names.set(row.id as string, displayName);
     }
   }
 

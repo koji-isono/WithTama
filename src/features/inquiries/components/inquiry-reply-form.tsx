@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 import { INQUIRY_MESSAGE_MAX_LENGTH } from "../constants";
-import { sendInquiryMessageAction } from "../service";
+import { sendBreederInquiryMessageAction, sendInquiryMessageAction } from "../service";
 import type { InquiryMessageFieldErrors } from "../types";
 import { hasInquiryMessageValidationErrors, validateInquiryMessage } from "../validation";
 
@@ -19,12 +19,14 @@ type InquiryReplyFormProps = {
   inquiryId: string;
   canSendMessage: boolean;
   closedNotice: string | null;
+  role?: "buyer" | "breeder";
 };
 
 export function InquiryReplyForm({
   inquiryId,
   canSendMessage,
   closedNotice,
+  role = "buyer",
 }: InquiryReplyFormProps) {
   const router = useRouter();
   const [message, setMessage] = useState("");
@@ -56,7 +58,10 @@ export function InquiryReplyForm({
     setIsSubmitting(true);
 
     try {
-      const result = await sendInquiryMessageAction(inquiryId, message);
+      const result =
+        role === "breeder"
+          ? await sendBreederInquiryMessageAction(inquiryId, message)
+          : await sendInquiryMessageAction(inquiryId, message);
 
       if (!result.success) {
         if (result.fieldErrors) {
@@ -87,7 +92,7 @@ export function InquiryReplyForm({
 
       <div className="space-y-2">
         <Label htmlFor="inquiry-reply-message" className="text-sm font-medium text-neutral-800">
-          お問い合わせ内容
+          {role === "breeder" ? "返信内容" : "お問い合わせ内容"}
           <span className="ml-1 text-red-600" aria-hidden>
             *
           </span>
@@ -120,7 +125,11 @@ export function InquiryReplyForm({
             "min-h-[120px] resize-y rounded-xl border-[var(--border)] bg-white text-base leading-relaxed",
             fieldErrors.message && "border-red-500 focus-visible:ring-red-500",
           )}
-          placeholder="追加の質問や返信を入力してください。"
+          placeholder={
+            role === "breeder"
+              ? "購入希望者への返信を入力してください。"
+              : "追加の質問や返信を入力してください。"
+          }
         />
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           {fieldErrors.message ? (
@@ -147,7 +156,7 @@ export function InquiryReplyForm({
           disabled={isSubmitting}
           aria-busy={isSubmitting}
         >
-          {isSubmitting ? "送信中..." : "送信する"}
+          {isSubmitting ? "送信中..." : role === "breeder" ? "返信する" : "送信する"}
         </Button>
       </div>
     </form>

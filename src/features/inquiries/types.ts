@@ -116,3 +116,38 @@ export type InquiryListItem = {
 export type BuyerInquiriesPageData = {
   items: InquiryListItem[];
 };
+
+export type BreederInquiryListItem = {
+  inquiryId: string;
+  petName: string;
+  buyerDisplayName: string;
+  status: string;
+  statusLabel: string;
+  lastActivityAtLabel: string;
+  unreadBuyerCount: number;
+  detailHref: string;
+};
+
+export type BreederInquiriesPageData = {
+  items: BreederInquiryListItem[];
+};
+
+export type BreederInquiryDetailPageSummary = {
+  inquiryId: string;
+  status: string;
+  statusLabel: string;
+  createdAtLabel: string;
+  petName: string;
+  attributeLine: string | null;
+  buyerDisplayName: string;
+};
+
+export type BreederInquiryDetailPageData = {
+  summary: BreederInquiryDetailPageSummary;
+  messages: InquiryDetailMessage[];
+  canSendMessage: boolean;
+  closedNotice: string | null;
+};
+
+export type SendBreederInquiryMessageActionResult =
+  { success: true } | { success: false; error: string; fieldErrors?: InquiryMessageFieldErrors };

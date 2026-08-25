@@ -65,7 +65,13 @@
 
 ```
 open → replied → visit_requested → visit_scheduled → completed → closed
+                      ↑ cancel (visit) → replied（メッセージ継続可）
 ```
+
+- 見学希望作成時: `→ visit_requested`（Decision No.119）
+- 見学日時確定時: `→ visit_scheduled`
+- 見学完了時: `→ completed`（メッセージ送信不可）
+- 見学キャンセル時: `→ replied`（問い合わせは終了させない — Decision No.119）
 
 問い合わせのみで終了する場合は、`open` または `replied` から `completed` または `closed` へ直接遷移可能とする。
 

@@ -27,12 +27,33 @@ export function formatInquiryDateTime(isoString: string): string {
   }).format(new Date(isoString));
 }
 
-export function getInquiryMessageSenderLabel(senderType: string): string {
+export type InquiryMessageViewerRole = "buyer" | "breeder";
+
+export type InquiryMessageSenderLabelOptions = {
+  viewerRole?: InquiryMessageViewerRole;
+  buyerDisplayName?: string | null;
+};
+
+export function getInquiryMessageSenderLabel(
+  senderType: string,
+  options?: InquiryMessageSenderLabelOptions,
+): string {
+  const viewerRole = options?.viewerRole ?? "buyer";
+
   if (senderType === "buyer") {
+    if (viewerRole === "breeder") {
+      const name = options?.buyerDisplayName?.trim();
+      return name || "購入希望者";
+    }
+
     return "あなた";
   }
 
   if (senderType === "breeder") {
+    if (viewerRole === "breeder") {
+      return "あなた";
+    }
+
     return "ブリーダー";
   }
 

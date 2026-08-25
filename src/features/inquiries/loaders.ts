@@ -3,8 +3,10 @@ import "server-only";
 import { redirect } from "next/navigation";
 
 import { isAdminUser, parseMemberUserRole } from "@/features/auth";
+import { requireBreeder } from "@/features/auth/breeder-auth";
 import { getCurrentBuyer, requireBuyer } from "@/features/auth/buyer-auth";
 import { getBuyerProfileByUserId } from "@/features/buyers/repository";
+import { getBreederIdByUserId } from "@/features/pets/repository";
 import { formatPublicPetAttributeLine, formatPublicPetPhotoAlt } from "@/features/pets/list-format";
 import {
   getPublishedPetDetailForPublic,
@@ -16,13 +18,17 @@ import {
   BUYER_INQUIRY_DETAIL_SCREEN_ID,
   BUYER_INQUIRY_LIST_SCREEN_ID,
   BUYER_INQUIRY_NEW_SCREEN_ID,
+  getBreederInquiryDetailPath,
   getBuyerInquiryDetailPath,
   getBuyerInquiryNewPath,
+  INQUIRY_BREEDER_LIST_LOAD_ERROR_MESSAGE,
+  INQUIRY_BUYER_DISPLAY_NAME_FALLBACK,
   INQUIRY_LIST_LOAD_ERROR_MESSAGE,
   INQUIRY_MESSAGE_PREVIEW_MAX_LENGTH,
   INQUIRY_PET_ID_REQUIRED_MESSAGE,
   INQUIRY_PET_NOT_AVAILABLE_MESSAGE,
   INQUIRY_PET_NOT_FOUND_MESSAGE,
+  canBreederSendInquiryMessage,
   canBuyerSendInquiryMessage,
   getInquiryClosedNotice,
 } from "./constants";
@@ -35,16 +41,26 @@ import {
 } from "./format";
 import {
   countUnreadBreederMessagesByInquiry,
+  countUnreadBuyerMessagesByInquiry,
   findActiveInquiryByBuyerAndPet,
+  getInquiryByIdForBreeder,
   getInquiryByIdForBuyer,
+  getInquiryBuyerDisplayNamesByIds,
   listBreederPublicNamesByIds,
+  listInquiriesForBreeder,
   listInquiriesForBuyer,
   listInquiryMessages,
   listLatestMessagesForInquiries,
+  listPetDisplayNamesForBreeder,
+  loadInquiryPetSummaryForBreeder,
   loadInquiryPetSummaryForDetail,
   markBreederMessagesAsReadForBuyer,
+  markBuyerMessagesAsReadForBreeder,
 } from "./repository";
 import type {
+  BreederInquiriesPageData,
+  BreederInquiryDetailPageData,
+  BreederInquiryListItem,
   BuyerInquiriesPageData,
   InquiryDetailPageData,
   InquiryListItem,
@@ -258,7 +274,7 @@ export async function loadInquiryDetailPage(
       },
       messages: messageRows.map((row) => ({
         id: row.id,
-        senderLabel: getInquiryMessageSenderLabel(row.sender_type),
+        senderLabel: getInquiryMessageSenderLabel(row.sender_type, { viewerRole: "buyer" }),
         senderType: row.sender_type,
         message: row.message,
         createdAt: row.created_at,
@@ -368,4 +384,145 @@ export async function loadBuyerInquiriesPageData(): Promise<BuyerInquiriesPageDa
 
     throw new Error(INQUIRY_LIST_LOAD_ERROR_MESSAGE);
   }
+}
+
+function buildBreederInquiryListItem(input: {
+  inquiry: InquiryRow;
+  petNameById: Map<string, string>;
+  buyerDisplayNameById: Map<string, string>;
+  unreadCountByInquiryId: Map<string, number>;
+}): BreederInquiryListItem {
+  const { inquiry, petNameById, buyerDisplayNameById, unreadCountByInquiryId } = input;
+  const subjectName = extractPetNameFromInquirySubject(inquiry.subject);
+  const petName = petNameById.get(inquiry.pet_id) ?? subjectName ?? "名称未設定";
+  const buyerDisplayName =
+    buyerDisplayNameById.get(inquiry.id) ?? INQUIRY_BUYER_DISPLAY_NAME_FALLBACK;
+  const lastActivityAt = inquiry.last_message_at ?? inquiry.created_at;
+
+  return {
+    inquiryId: inquiry.id,
+    petName,
+    buyerDisplayName,
+    status: inquiry.status,
+    statusLabel: getInquiryStatusLabel(inquiry.status),
+    lastActivityAtLabel: formatInquiryDateTime(lastActivityAt),
+    unreadBuyerCount: unreadCountByInquiryId.get(inquiry.id) ?? 0,
+    detailHref: getBreederInquiryDetailPath(inquiry.id),
+  };
+}
+
+export async function loadBreederInquiriesPageData(): Promise<BreederInquiriesPageData> {
+  const user = await requireBreeder();
+  const breederId = await getBreederIdByUserId(user.id);
+
+  if (!breederId) {
+    return { items: [] };
+  }
+
+  try {
+    const inquiries = await listInquiriesForBreeder(breederId);
+
+    if (inquiries.length === 0) {
+      return { items: [] };
+    }
+
+    const inquiryIds = inquiries.map((inquiry) => inquiry.id);
+    const petIds = [...new Set(inquiries.map((inquiry) => inquiry.pet_id))];
+
+    const [unreadCounts, petNames, buyerDisplayNames] = await Promise.all([
+      countUnreadBuyerMessagesByInquiry(inquiryIds),
+      listPetDisplayNamesForBreeder(breederId, petIds),
+      getInquiryBuyerDisplayNamesByIds(inquiryIds),
+    ]);
+
+    const items = inquiries.map((inquiry) =>
+      buildBreederInquiryListItem({
+        inquiry,
+        petNameById: petNames,
+        buyerDisplayNameById: buyerDisplayNames,
+        unreadCountByInquiryId: unreadCounts,
+      }),
+    );
+
+    return { items };
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("loadBreederInquiriesPageData failed", error);
+    }
+
+    throw new Error(INQUIRY_BREEDER_LIST_LOAD_ERROR_MESSAGE);
+  }
+}
+
+export type LoadBreederInquiryDetailPageResult =
+  { success: true; data: BreederInquiryDetailPageData } | { success: false; notFound: true };
+
+export async function loadBreederInquiryDetailPage(
+  inquiryId: string,
+): Promise<LoadBreederInquiryDetailPageResult> {
+  const normalizedInquiryId = inquiryId.trim();
+
+  if (!isValidInquiryId(normalizedInquiryId)) {
+    return { success: false, notFound: true };
+  }
+
+  const user = await requireBreeder();
+  const breederId = await getBreederIdByUserId(user.id);
+
+  if (!breederId) {
+    return { success: false, notFound: true };
+  }
+
+  const inquiry = await getInquiryByIdForBreeder(normalizedInquiryId, breederId);
+
+  if (!inquiry) {
+    return { success: false, notFound: true };
+  }
+
+  try {
+    await markBuyerMessagesAsReadForBreeder(inquiry.id);
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("loadBreederInquiryDetailPage mark read failed", error);
+    }
+  }
+
+  const [petSummary, buyerDisplayNames, messageRows] = await Promise.all([
+    loadInquiryPetSummaryForBreeder(inquiry, breederId),
+    getInquiryBuyerDisplayNamesByIds([inquiry.id]),
+    listInquiryMessages(inquiry.id),
+  ]);
+
+  const canSendMessage = canBreederSendInquiryMessage(inquiry.status);
+  const closedNotice = getInquiryClosedNotice(inquiry.status);
+  const buyerDisplayName = buyerDisplayNames.get(inquiry.id) ?? INQUIRY_BUYER_DISPLAY_NAME_FALLBACK;
+
+  return {
+    success: true,
+    data: {
+      summary: {
+        inquiryId: inquiry.id,
+        status: inquiry.status,
+        statusLabel: getInquiryStatusLabel(inquiry.status),
+        createdAtLabel: formatInquiryDateTime(inquiry.created_at),
+        petName: petSummary.publicDisplayName,
+        attributeLine: petSummary.attributeLine,
+        buyerDisplayName,
+      },
+      messages: messageRows.map((row) => ({
+        id: row.id,
+        senderLabel: getInquiryMessageSenderLabel(row.sender_type, {
+          viewerRole: "breeder",
+          buyerDisplayName,
+        }),
+        senderType: row.sender_type,
+        message: row.message,
+        createdAt: row.created_at,
+        createdAtLabel: formatInquiryDateTime(row.created_at),
+        isOwnMessage: row.sender_type === "breeder",
+      })),
+      canSendMessage,
+      closedNotice,
+    },
+  };
 }
