@@ -1,8 +1,13 @@
 import "server-only";
 
-import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
+import { requireBreeder } from "@/features/auth/breeder-auth";
+import { loadLatestReturnedCommentForBreederSafely } from "@/features/breeder-review";
+
+import { isProfileEditable } from "./edit-guard";
 import {
+  getBreederProfileContextByUserId,
   getIntroductionProfileByUserId,
   getLicenseProfileByUserId,
   getVerificationProfile,
@@ -11,10 +16,13 @@ import { getMissingProfileSteps } from "./profile-completion";
 import {
   INITIAL_INTRODUCTION_PROFILE_INPUT,
   INITIAL_LICENSE_PROFILE_INPUT,
+  type BreederProfilePageContext,
   type IntroductionProfileInput,
   type LicenseProfileInput,
   type VerificationStepInitialState,
 } from "./types";
+
+const BREEDER_DASHBOARD_PATH = "/breeder/dashboard";
 
 function mapRowToLicenseProfileInput(
   row: NonNullable<Awaited<ReturnType<typeof getLicenseProfileByUserId>>>,
@@ -38,16 +46,32 @@ function mapRowToIntroductionProfileInput(
   };
 }
 
-export async function loadLicenseProfile(): Promise<LicenseProfileInput> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export async function loadBreederProfilePageContext(): Promise<BreederProfilePageContext> {
+  const user = await requireBreeder();
 
-  if (!user) {
-    return INITIAL_LICENSE_PROFILE_INPUT;
+  const context = await getBreederProfileContextByUserId(user.id);
+
+  if (!context || !isProfileEditable(context.review_status)) {
+    redirect(BREEDER_DASHBOARD_PATH);
   }
 
+  let resubmissionNotice = null;
+
+  if (context.review_status === "resubmission_required") {
+    const comment = await loadLatestReturnedCommentForBreederSafely(context.id);
+    resubmissionNotice = { comment };
+  }
+
+  return {
+    breederId: context.id,
+    reviewStatus: context.review_status,
+    isEditable: true,
+    resubmissionNotice,
+  };
+}
+
+export async function loadLicenseProfile(): Promise<LicenseProfileInput> {
+  const user = await requireBreeder();
   const row = await getLicenseProfileByUserId(user.id);
 
   if (!row) {
@@ -58,15 +82,7 @@ export async function loadLicenseProfile(): Promise<LicenseProfileInput> {
 }
 
 export async function loadIntroductionProfile(): Promise<IntroductionProfileInput> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return INITIAL_INTRODUCTION_PROFILE_INPUT;
-  }
-
+  const user = await requireBreeder();
   const row = await getIntroductionProfileByUserId(user.id);
 
   if (!row) {
@@ -77,23 +93,12 @@ export async function loadIntroductionProfile(): Promise<IntroductionProfileInpu
 }
 
 export async function loadVerificationStepState(): Promise<VerificationStepInitialState> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return {
-      identityDocumentSubmitted: false,
-      businessLicenseSubmitted: false,
-      missingSteps: [],
-    };
-  }
-
+  const user = await requireBreeder();
   const row = await getVerificationProfile(user.id);
 
   if (!row) {
     return {
+      reviewStatus: "draft",
       identityDocumentSubmitted: false,
       businessLicenseSubmitted: false,
       missingSteps: [],
@@ -101,6 +106,7 @@ export async function loadVerificationStepState(): Promise<VerificationStepIniti
   }
 
   return {
+    reviewStatus: row.review_status,
     identityDocumentSubmitted: Boolean(row.identity_document_path?.trim()),
     businessLicenseSubmitted: Boolean(row.business_license_path?.trim()),
     missingSteps: getMissingProfileSteps(row),

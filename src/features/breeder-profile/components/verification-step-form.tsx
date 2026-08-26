@@ -9,13 +9,20 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+import {
+  COMPLETE_SUBMIT_BUTTON_LABEL,
+  COMPLETE_SUBMIT_PENDING_LABEL,
+  RESUBMIT_BUTTON_LABEL,
+  RESUBMIT_CONFIRMATION_MESSAGE,
+  RESUBMIT_PENDING_LABEL,
+} from "../application-submit-constants";
 import { getBreederProfileStepBySlug } from "../constants";
 import {
   BUSINESS_LICENSE_DESCRIPTION,
   IDENTITY_DOCUMENT_DESCRIPTION,
   VERIFICATION_PRIVACY_NOTICE,
 } from "../document-constants";
-import { completeBreederProfile } from "../service";
+import { completeBreederProfile, resubmitBreederProfile } from "../service";
 import type { ProfileMissingStep, VerificationStepInitialState } from "../types";
 import { DocumentUploadField } from "./document-upload-field";
 
@@ -51,11 +58,31 @@ export function VerificationStepForm({ initialState }: VerificationStepFormProps
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isResubmission = initialState.reviewStatus === "resubmission_required";
   const canComplete = identitySubmitted && licenseSubmitted;
 
   const visibleMissingSteps = useMemo(() => dedupeMissingSteps(missingSteps), [missingSteps]);
 
   const priorStepMissing = visibleMissingSteps.some((step) => step.step < 5);
+
+  async function handleApplicationResult(
+    result: Awaited<ReturnType<typeof completeBreederProfile>>,
+  ): Promise<boolean> {
+    if (!result.success) {
+      if (result.missingSteps) {
+        setMissingSteps(result.missingSteps);
+      }
+
+      if (result.error) {
+        setSubmitError(result.error);
+      }
+
+      return false;
+    }
+
+    router.push(dashboardPath);
+    return true;
+  }
 
   async function handleComplete() {
     setSubmitError(null);
@@ -63,20 +90,19 @@ export function VerificationStepForm({ initialState }: VerificationStepFormProps
 
     try {
       const result = await completeBreederProfile();
+      await handleApplicationResult(result);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
-      if (!result.success) {
-        if (result.missingSteps) {
-          setMissingSteps(result.missingSteps);
-        }
+  async function handleResubmit() {
+    setSubmitError(null);
+    setIsSubmitting(true);
 
-        if (result.error) {
-          setSubmitError(result.error);
-        }
-
-        return;
-      }
-
-      router.push(dashboardPath);
+    try {
+      const result = await resubmitBreederProfile();
+      await handleApplicationResult(result);
     } finally {
       setIsSubmitting(false);
     }
@@ -171,24 +197,43 @@ export function VerificationStepForm({ initialState }: VerificationStepFormProps
           </Alert>
         ) : null}
 
-        <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-between">
-          <Button
-            type="button"
-            variant="outline"
-            className="h-11 rounded-full border-[var(--border)] px-6"
-            onClick={handleBack}
-            disabled={isSubmitting}
-          >
-            戻る
-          </Button>
-          <Button
-            type="button"
-            className="h-11 rounded-full bg-[var(--primary)] px-6 hover:bg-[var(--primary)]/90 sm:ml-auto"
-            disabled={!canComplete || isSubmitting}
-            onClick={() => void handleComplete()}
-          >
-            {isSubmitting ? "提出中..." : "提出してプロフィールを完了"}
-          </Button>
+        <div className="space-y-3 pt-2">
+          {isResubmission ? (
+            <p className="text-sm text-[var(--muted-foreground)]">
+              {RESUBMIT_CONFIRMATION_MESSAGE}
+            </p>
+          ) : null}
+
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 rounded-full border-[var(--border)] px-6"
+              onClick={handleBack}
+              disabled={isSubmitting}
+            >
+              戻る
+            </Button>
+            {isResubmission ? (
+              <Button
+                type="button"
+                className="h-11 rounded-full bg-[var(--primary)] px-6 hover:bg-[var(--primary)]/90 sm:ml-auto"
+                disabled={!canComplete || isSubmitting}
+                onClick={() => void handleResubmit()}
+              >
+                {isSubmitting ? RESUBMIT_PENDING_LABEL : RESUBMIT_BUTTON_LABEL}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                className="h-11 rounded-full bg-[var(--primary)] px-6 hover:bg-[var(--primary)]/90 sm:ml-auto"
+                disabled={!canComplete || isSubmitting}
+                onClick={() => void handleComplete()}
+              >
+                {isSubmitting ? COMPLETE_SUBMIT_PENDING_LABEL : COMPLETE_SUBMIT_BUTTON_LABEL}
+              </Button>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

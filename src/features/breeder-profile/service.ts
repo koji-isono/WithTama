@@ -1,7 +1,13 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentBreeder } from "@/features/auth/breeder-auth";
 
+import { formatInitialSubmitError, formatResubmitError } from "./format-application-submit-error";
+import {
+  PROFILE_INCOMPLETE_MESSAGE,
+  RESUBMIT_INVALID_STATUS_MESSAGE,
+  SUBMIT_INVALID_STATUS_MESSAGE,
+} from "./application-submit-constants";
 import { formatProfileSaveError } from "./format-save-error";
 import { formatBreederDocumentUploadError } from "./format-document-upload-error";
 import {
@@ -13,8 +19,10 @@ import {
   updateLocationProfile,
   uploadBreederDocument as uploadBreederDocumentToStorage,
   submitBreederApplication,
+  resubmitBreederApplication,
 } from "./repository";
 import { validateProfileCompletion } from "./profile-completion";
+import { authorizeEditableBreederProfile } from "./service-auth";
 import type {
   BasicProfileInput,
   BreederDocumentType,
@@ -22,6 +30,7 @@ import type {
   IntroductionProfileInput,
   LicenseProfileInput,
   LocationProfileInput,
+  ResubmitBreederProfileResult,
   SaveBasicProfileResult,
   SaveIntroductionProfileResult,
   SaveLicenseProfileResult,
@@ -46,18 +55,14 @@ export async function saveBasicProfile(input: BasicProfileInput): Promise<SaveBa
     return { success: false, fieldErrors };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const auth = await authorizeEditableBreederProfile();
 
-  if (authError || !user) {
-    return { success: false, error: "ログインが必要です。" };
+  if (!auth.ok) {
+    return { success: false, error: auth.error };
   }
 
   try {
-    await updateBasicProfile(user.id, {
+    await updateBasicProfile(auth.userId, {
       business_name: input.businessName.trim(),
       representative_name: input.representativeName.trim(),
       phone: input.phone.trim(),
@@ -69,7 +74,7 @@ export async function saveBasicProfile(input: BasicProfileInput): Promise<SaveBa
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "保存に失敗しました。",
+      error: formatProfileSaveError(error),
     };
   }
 }
@@ -83,18 +88,14 @@ export async function saveLocationProfile(
     return { success: false, fieldErrors };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const auth = await authorizeEditableBreederProfile();
 
-  if (authError || !user) {
-    return { success: false, error: "ログインが必要です。" };
+  if (!auth.ok) {
+    return { success: false, error: auth.error };
   }
 
   try {
-    await updateLocationProfile(user.id, {
+    await updateLocationProfile(auth.userId, {
       postal_code: input.postalCode.trim(),
       prefecture: input.prefecture.trim(),
       city: input.city.trim(),
@@ -105,7 +106,7 @@ export async function saveLocationProfile(
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "保存に失敗しました。",
+      error: formatProfileSaveError(error),
     };
   }
 }
@@ -120,18 +121,14 @@ export async function saveLicenseProfile(
     return { success: false, fieldErrors };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const auth = await authorizeEditableBreederProfile();
 
-  if (authError || !user) {
-    return { success: false, error: "ログインが必要です。" };
+  if (!auth.ok) {
+    return { success: false, error: auth.error };
   }
 
   try {
-    await updateLicenseProfile(user.id, {
+    await updateLicenseProfile(auth.userId, {
       business_registration_type: normalized.businessRegistrationType,
       business_registration_number: normalized.businessRegistrationNumber,
       registration_authority: normalized.registrationAuthority,
@@ -164,18 +161,14 @@ export async function saveIntroductionProfile(
     return { success: false, fieldErrors };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const auth = await authorizeEditableBreederProfile();
 
-  if (authError || !user) {
-    return { success: false, error: "ログインが必要です。" };
+  if (!auth.ok) {
+    return { success: false, error: auth.error };
   }
 
   try {
-    await updateIntroductionProfile(user.id, {
+    await updateIntroductionProfile(auth.userId, {
       profile_text: normalized.profileText,
       breeding_policy: normalized.breedingPolicy,
       health_policy: normalized.healthPolicy,
@@ -211,21 +204,17 @@ export async function uploadBreederDocument(
     return { success: false, error: validationError };
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const auth = await authorizeEditableBreederProfile();
 
-  if (authError || !user) {
-    return { success: false, error: "ログインが必要です。" };
+  if (!auth.ok) {
+    return { success: false, error: auth.error };
   }
 
   const typedDocumentType = documentType as BreederDocumentType;
   let storagePath: string;
 
   try {
-    storagePath = buildBreederDocumentStoragePath(user.id, typedDocumentType, file);
+    storagePath = buildBreederDocumentStoragePath(auth.userId, typedDocumentType, file);
   } catch (error) {
     return {
       success: false,
@@ -234,9 +223,9 @@ export async function uploadBreederDocument(
   }
 
   try {
-    await uploadBreederDocumentToStorage(user.id, typedDocumentType, file, storagePath);
+    await uploadBreederDocumentToStorage(auth.userId, typedDocumentType, file, storagePath);
 
-    await saveBreederDocumentPath(user.id, typedDocumentType, storagePath);
+    await saveBreederDocumentPath(auth.userId, typedDocumentType, storagePath);
 
     return { success: true, documentType: typedDocumentType };
   } catch (error) {
@@ -254,13 +243,9 @@ export async function uploadBreederDocument(
 }
 
 export async function completeBreederProfile(): Promise<CompleteBreederProfileResult> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+  const user = await getCurrentBreeder();
 
-  if (authError || !user) {
+  if (!user) {
     return { success: false, error: "ログインが必要です。" };
   }
 
@@ -271,7 +256,7 @@ export async function completeBreederProfile(): Promise<CompleteBreederProfileRe
     if (missingSteps.length > 0) {
       return {
         success: false,
-        error: "プロフィールの必須項目が不足しています。未入力のステップを確認してください。",
+        error: PROFILE_INCOMPLETE_MESSAGE,
         missingSteps,
       };
     }
@@ -286,7 +271,7 @@ export async function completeBreederProfile(): Promise<CompleteBreederProfileRe
     if (profile.review_status !== "draft") {
       return {
         success: false,
-        error: "現在の審査状態では提出できません。",
+        error: SUBMIT_INVALID_STATUS_MESSAGE,
       };
     }
 
@@ -294,37 +279,54 @@ export async function completeBreederProfile(): Promise<CompleteBreederProfileRe
 
     return { success: true };
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+    return {
+      success: false,
+      error: formatInitialSubmitError(error),
+    };
+  }
+}
 
-    if (message.includes("authentication required")) {
-      return { success: false, error: "ログインが必要です。" };
-    }
+export async function resubmitBreederProfile(): Promise<ResubmitBreederProfileResult> {
+  const user = await getCurrentBreeder();
 
-    if (message.includes("invalid review status")) {
-      return {
-        success: false,
-        error: "現在の審査状態では提出できません。",
-      };
-    }
+  if (!user) {
+    return { success: false, error: "ログインが必要です。" };
+  }
 
-    if (message.includes("documents required")) {
-      return {
-        success: false,
-        error: "プロフィールの必須項目が不足しています。未入力のステップを確認してください。",
-      };
-    }
+  try {
+    const profile = await getVerificationProfile(user.id);
 
-    if (message.includes("breeder not found")) {
+    if (!profile) {
       return {
         success: false,
         error: "プロフィールが見つかりません。",
       };
     }
 
+    const missingSteps = validateProfileCompletion(profile);
+
+    if (missingSteps.length > 0) {
+      return {
+        success: false,
+        error: PROFILE_INCOMPLETE_MESSAGE,
+        missingSteps,
+      };
+    }
+
+    if (profile.review_status !== "resubmission_required") {
+      return {
+        success: false,
+        error: RESUBMIT_INVALID_STATUS_MESSAGE,
+      };
+    }
+
+    await resubmitBreederApplication();
+
+    return { success: true };
+  } catch (error) {
     return {
       success: false,
-      error: formatProfileSaveError(error),
+      error: formatResubmitError(error),
     };
   }
 }

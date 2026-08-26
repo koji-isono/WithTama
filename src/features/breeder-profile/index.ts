@@ -5,8 +5,20 @@ export { LicenseStepForm } from "./components/license-step-form";
 export { LocationStepForm } from "./components/location-step-form";
 export { ProfileFormField } from "./components/profile-form-field";
 export { ProfileStepPlaceholder } from "./components/profile-step-placeholder";
+export { ProfileResubmissionNotice } from "./components/profile-resubmission-notice";
 export { ProfileWizardShell } from "./components/profile-wizard-shell";
 export { VerificationStepForm } from "./components/verification-step-form";
+export {
+  COMPLETE_SUBMIT_BUTTON_LABEL,
+  COMPLETE_SUBMIT_PENDING_LABEL,
+  PROFILE_INCOMPLETE_MESSAGE,
+  RESUBMIT_BUTTON_LABEL,
+  RESUBMIT_CONFIRMATION_MESSAGE,
+  RESUBMIT_GENERIC_ERROR_MESSAGE,
+  RESUBMIT_INVALID_STATUS_MESSAGE,
+  RESUBMIT_PENDING_LABEL,
+  SUBMIT_INVALID_STATUS_MESSAGE,
+} from "./application-submit-constants";
 export {
   BREEDER_PROFILE_BASIC_PATH,
   BREEDER_PROFILE_ENTRY_PATH,
@@ -23,9 +35,21 @@ export {
   IDENTITY_DOCUMENT_DESCRIPTION,
   VERIFICATION_PRIVACY_NOTICE,
 } from "./document-constants";
-export { loadIntroductionProfile, loadLicenseProfile, loadVerificationStepState } from "./loaders";
+export {
+  loadIntroductionProfile,
+  loadLicenseProfile,
+  loadVerificationStepState,
+  loadBreederProfilePageContext,
+} from "./loaders";
+export {
+  assertProfileEditable,
+  isProfileEditable,
+  PROFILE_EDITABLE_REVIEW_STATUSES,
+  PROFILE_NOT_EDITABLE_MESSAGE,
+} from "./edit-guard";
 export {
   getIntroductionProfileByUserId,
+  getBreederProfileContextByUserId,
   getLicenseProfileByUserId,
   getVerificationProfile,
   saveBreederDocumentPath,
@@ -38,6 +62,7 @@ export {
 } from "./repository";
 export {
   completeBreederProfile,
+  resubmitBreederProfile,
   saveBasicProfile,
   saveIntroductionProfile,
   saveLicenseProfile,
@@ -60,6 +85,7 @@ export type {
   BasicProfileInput,
   BreederDocumentType,
   CompleteBreederProfileResult,
+  ResubmitBreederProfileResult,
   IntroductionProfileErrors,
   IntroductionProfileInput,
   IntroductionProfileRow,
@@ -83,6 +109,7 @@ export type {
   UploadBreederDocumentResult,
   VerificationProfileRow,
   VerificationStepInitialState,
+  ProfileResubmissionNoticeData,
 } from "./types";
 export { INTRODUCTION_PROFILE_MAX_LENGTH, INTRODUCTION_PROFILE_MIN_LENGTH } from "./types";
 export {
@@ -94,7 +121,7 @@ export {
   validateLicenseProfile,
   validateLocationProfile,
 } from "./validation";
-export { formatDocumentFileSize, validateBreederDocumentFile } from "./document-utils";
+export { formatInitialSubmitError, formatResubmitError } from "./format-application-submit-error";
 export {
   formatBreederDocumentUploadError,
   logBreederDocumentUploadFailure,

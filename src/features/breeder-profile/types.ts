@@ -174,6 +174,7 @@ export type VerificationProfileRow = {
 };
 
 export type VerificationStepInitialState = {
+  reviewStatus: string;
   identityDocumentSubmitted: boolean;
   businessLicenseSubmitted: boolean;
   missingSteps: ProfileMissingStep[];
@@ -195,3 +196,21 @@ export type UploadBreederDocumentResult =
 
 export type CompleteBreederProfileResult =
   { success: true } | { success: false; error?: string; missingSteps?: ProfileMissingStep[] };
+
+export type ResubmitBreederProfileResult = CompleteBreederProfileResult;
+
+export type BreederProfileContextRow = {
+  id: string;
+  review_status: string;
+};
+
+export type BreederProfilePageContext = {
+  breederId: string;
+  reviewStatus: string;
+  isEditable: true;
+  resubmissionNotice: ProfileResubmissionNoticeData | null;
+};
+
+export type ProfileResubmissionNoticeData = {
+  comment: string | null;
+};

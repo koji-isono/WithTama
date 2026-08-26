@@ -23,21 +23,3 @@ export async function getBreederReviewSummaryByUserId(
 
   return data as BreederReviewSummaryRow | null;
 }
-
-export async function getLatestReturnedComment(): Promise<string | null> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("breeder_review_logs")
-    .select("comment")
-    .eq("action", "returned")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data?.comment ?? null;
-}

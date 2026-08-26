@@ -36,8 +36,9 @@ function main(): void {
   );
   const banner = read("src/features/breeder-dashboard/components/resubmission-required-banner.tsx");
   const loaders = read("src/features/breeder-dashboard/loaders.ts");
-  const repository = read("src/features/breeder-dashboard/repository.ts");
-  const constants = read("src/features/breeder-dashboard/constants.ts");
+  const reviewRepository = read("src/features/breeder-review/repository.ts");
+  const reviewReturnedComment = read("src/features/breeder-review/returned-comment.ts");
+  const constants = read("src/features/breeder-review/constants.ts");
 
   record(
     checks,
@@ -59,18 +60,19 @@ function main(): void {
   record(
     checks,
     "4. latest returned comment query uses action=returned",
-    repository.includes('.eq("action", "returned")'),
+    reviewRepository.includes('.eq("action", "returned")'),
   );
   record(
     checks,
     "5. latest returned comment uses created_at DESC",
-    repository.includes('order("created_at", { ascending: false })'),
+    reviewRepository.includes('order("created_at", { ascending: false })'),
   );
-  record(checks, "6. latest returned comment uses LIMIT 1", repository.includes(".limit(1)"));
+  record(checks, "6. latest returned comment uses LIMIT 1", reviewRepository.includes(".limit(1)"));
   record(
     checks,
     "7. submitted status does not fetch banner (loader guard)",
-    loaders.includes('"resubmission_required"') && !loaders.includes('"submitted"'),
+    loaders.includes('"resubmission_required"') &&
+      loaders.includes("loadLatestReturnedCommentForBreederSafely(summary.id)"),
   );
   record(
     checks,
@@ -80,7 +82,7 @@ function main(): void {
   record(
     checks,
     "9. comment fetch failure uses safe fallback path",
-    loaders.includes("loadLatestReturnedCommentSafely") &&
+    reviewReturnedComment.includes("loadLatestReturnedCommentForBreederSafely") &&
       constants.includes("詳細は管理者へお問い合わせください") &&
       !banner.includes("error.message"),
   );
@@ -92,14 +94,15 @@ function main(): void {
   record(
     checks,
     "11. server client only (no service role)",
-    repository.includes("@/lib/supabase/server") &&
-      !repository.includes("service_role") &&
-      !repository.includes("SERVICE_ROLE"),
+    reviewRepository.includes("@/lib/supabase/server") &&
+      !reviewRepository.includes("service_role") &&
+      !reviewRepository.includes("SERVICE_ROLE"),
   );
   record(
     checks,
-    "12. returned log query relies on RLS (no breeder_id filter in query)",
-    repository.includes("breeder_review_logs") && !repository.includes('.eq("breeder_id"'),
+    "12. returned log query scopes breeder_id",
+    reviewRepository.includes("breeder_review_logs") &&
+      reviewRepository.includes('.eq("breeder_id", breederId)'),
   );
   record(
     checks,

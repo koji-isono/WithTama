@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 import type {
   BreederDocumentType,
+  BreederProfileContextRow,
   IntroductionProfileRow,
   LicenseProfileRow,
   UpdateBasicProfileData,
@@ -17,8 +18,28 @@ import { BREEDER_DOCUMENTS_BUCKET } from "./document-constants";
 import { isValidBreederDocumentStoragePath } from "./document-utils";
 import { logBreederDocumentUploadFailure } from "./format-document-upload-error";
 
+const breederProfileContextSelect = "id, review_status";
+
 const licenseProfileSelect =
   "business_registration_type, business_registration_number, registration_authority, registration_expires_at";
+
+export async function getBreederProfileContextByUserId(
+  userId: string,
+): Promise<BreederProfileContextRow | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("breeders")
+    .select(breederProfileContextSelect)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as BreederProfileContextRow | null;
+}
 
 const introductionProfileSelect =
   "profile_text, breeding_policy, health_policy, breeding_environment";

@@ -1,32 +1,10 @@
 import "server-only";
 
 import { requireBreeder } from "@/features/auth/breeder-auth";
+import { loadLatestReturnedCommentForBreederSafely } from "@/features/breeder-review";
 
-import { getBreederReviewSummaryByUserId, getLatestReturnedComment } from "./repository";
+import { getBreederReviewSummaryByUserId } from "./repository";
 import type { BreederDashboardPageData } from "./types";
-
-function normalizeReturnedComment(comment: string | null): string | null {
-  if (comment === null) {
-    return null;
-  }
-
-  const trimmed = comment.trim();
-
-  if (trimmed.length === 0) {
-    return null;
-  }
-
-  return trimmed;
-}
-
-async function loadLatestReturnedCommentSafely(): Promise<string | null> {
-  try {
-    const comment = await getLatestReturnedComment();
-    return normalizeReturnedComment(comment);
-  } catch {
-    return null;
-  }
-}
 
 export async function loadBreederDashboardPageData(): Promise<BreederDashboardPageData> {
   const user = await requireBreeder();
@@ -37,7 +15,7 @@ export async function loadBreederDashboardPageData(): Promise<BreederDashboardPa
     return { resubmissionBanner: null };
   }
 
-  const comment = await loadLatestReturnedCommentSafely();
+  const comment = await loadLatestReturnedCommentForBreederSafely(summary.id);
 
   return {
     resubmissionBanner: { comment },

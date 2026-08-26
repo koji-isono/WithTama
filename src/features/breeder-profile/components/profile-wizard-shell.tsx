@@ -10,12 +10,18 @@ import {
   getBreederProfileProgressPercent,
   getBreederProfileStepFromPathname,
 } from "../constants";
+import { ProfileResubmissionNotice } from "./profile-resubmission-notice";
+import type { ProfileResubmissionNoticeData } from "../types";
 
 type ProfileWizardShellProps = {
   children: ReactNode;
+  resubmissionNotice?: ProfileResubmissionNoticeData | null;
 };
 
-export function ProfileWizardShell({ children }: ProfileWizardShellProps) {
+export function ProfileWizardShell({
+  children,
+  resubmissionNotice = null,
+}: ProfileWizardShellProps) {
   const pathname = usePathname();
   const currentStep = getBreederProfileStepFromPathname(pathname);
   const progressPercent = getBreederProfileProgressPercent(currentStep.step);
@@ -30,6 +36,8 @@ export function ProfileWizardShell({ children }: ProfileWizardShellProps) {
             掲載に必要な情報を順番に入力してください。
           </p>
         </div>
+
+        {resubmissionNotice ? <ProfileResubmissionNotice {...resubmissionNotice} /> : null}
 
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
