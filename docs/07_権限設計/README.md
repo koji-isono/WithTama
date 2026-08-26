@@ -152,6 +152,13 @@ WithTama ではロールベースアクセス制御（RBAC）を採用します�
 - 再提出時: `membership_status` / verification status は **変更しない**（No.127 整合）
 - 初回提出時: verification status を `submitted` に更新（既存 `completeBreederProfile` 仕様準拠）
 - **`under_review` へは変更しない**（No.126 — 管理者 `start_breeder_review` と分離）
+
+### Stripe 課金列保護（Decision No.147 確定・**実装未着手**）
+
+- `breeders_update_own` により、現状ブリーダー本人が **行全体 UPDATE 可能**（Stripe 列含む）
+- 第1期実装: **BEFORE UPDATE trigger** で課金関連列の直接変更を禁止。Webhook は **service_role** で更新
+- 保護列: `membership_status`, `stripe_*`, `subscription_*`, `last_payment_failed_at`, `suspended_at` 等
+- 参照: [Stripe 第1期実装計画 Step 1](../09_開発履歴/2026-08-26_Stripe第1期実装計画.md)
 - Migration: `20260825130000_create_breeder_application_submit_rpcs.sql`
 
 ### ブリーダープロフィール編集（Decision No.136）

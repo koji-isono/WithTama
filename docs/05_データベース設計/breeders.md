@@ -128,12 +128,12 @@
 
 ### CHECK 制約 — membership_status
 
-| 値          | 説明       |
-| ----------- | ---------- |
-| `pending`   | 利用開始前 |
-| `active`    | 利用中     |
-| `suspended` | 停止中     |
-| `canceled`  | 解約済み   |
+| 値          | 説明（Decision No.144 確定）                           |
+| ----------- | ------------------------------------------------------ |
+| `pending`   | 承認前、または初回課金前                               |
+| `active`    | WithTama 利用可能（公開 View 条件を満たしうる）        |
+| `suspended` | 支払不良等による一時利用停止（例: Stripe `unpaid` 後） |
+| `canceled`  | ブリーダーの明示解約が **期間終了** した状態           |
 
 ### CHECK 制約 — subscription_status
 
@@ -349,6 +349,13 @@ Foreign Key 設定
 - [Decision No.43](../01_設計変更管理/DecisionLog.md#decision-no43) — 審査・登録証・課金状態
 - [Decision No.44](../01_設計変更管理/DecisionLog.md#decision-no44) — 住所公開範囲
 - [Decision No.45](../01_設計変更管理/DecisionLog.md#decision-no45) — Stripe 保持範囲
+- [Decision No.129](../01_設計変更管理/DecisionLog.md#decision-no129) — 承認時 membership 変更なし
+- [Decision No.130](../01_設計変更管理/DecisionLog.md#decision-no130) — 承認と active 分離
+- [Decision No.139](../01_設計変更管理/DecisionLog.md#decision-no139) — Stripe 第1期正式採用
+- [Decision No.143](../01_設計変更管理/DecisionLog.md#decision-no143) — 月額会費・Stripe Price
+- [Decision No.144](../01_設計変更管理/DecisionLog.md#decision-no144) — membership_status・課金ライフサイクル
+- [Decision No.147](../01_設計変更管理/DecisionLog.md#decision-no147) — 課金列 trigger 保護
+- [Decision No.148](../01_設計変更管理/DecisionLog.md#decision-no148) — Webhook 冪等性・DB 追加候補
 - [Decision No.46](../01_設計変更管理/DecisionLog.md#decision-no46) — 仮登録方式
 - [Decision No.61](../01_設計変更管理/DecisionLog.md#decision-no61) — `profile_completed` によるプロフィール完了管理
 
@@ -376,3 +383,21 @@ Foreign Key 設定
 - 実装: `src/features/breeder-profile/repository.ts` — `updateBasicProfile(userId, data)`
 - RLS: `breeders_update_own`（`user_id = auth.uid()`）
 - API 設計: [ブリーダープロフィール API](../06_API設計/breeder-profile.md)
+
+## Stripe 課金（Decision No.139–148 確定・**実装未着手**）
+
+| 項目                     | 状態                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| 設計                     | **確定**（DecisionLog No.139–148）                                                    |
+| Migration / Webhook / UI | **未着手** — [Stripe 第1期実装計画](../09_開発履歴/2026-08-26_Stripe第1期実装計画.md) |
+
+### 実装フェーズで追加予定の列（Decision No.148）
+
+| カラム                            | 分類 |
+| --------------------------------- | ---- |
+| `stripe_price_id`                 | 必須 |
+| `subscription_current_period_end` | 必須 |
+| `last_payment_failed_at`          | 推奨 |
+| `cancel_at_period_end`            | 推奨 |
+
+既存列: `stripe_customer_id`, `stripe_subscription_id`, `subscription_status`, `membership_status`, `suspended_at`

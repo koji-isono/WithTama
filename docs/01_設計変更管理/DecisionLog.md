@@ -1302,3 +1302,183 @@ _*管理者画面は AD-* で採番する_*
 - **影響範囲:** BR-06、BR-09、通知基盤（将来）
 - **決定日:** 2026-08-25
 - **参照:** [AD-02](../04_画面設計/AD-02_ブリーダー審査詳細.md) / [BR-09 実装前調査](../09_開発履歴/2026-08-25_BR-09差戻し再提出再審査_実装前調査報告.md)
+
+---
+
+## Decision No.139
+
+**Stripe を第1期正式スコープに含める（ブリーダー月額会費のみ）**
+
+- **決定内容:** 第1期で Stripe を正式採用する。用途は **ブリーダーの月額会費** のみとする。
+- **第1期で Stripe を使用しないもの:** 犬猫代金決済、犬猫代金の預かり・分配、成約手数料の Stripe 徴収。
+- **参照（重複記載しない）:** 運営会社は犬猫販売主体にならない — [Decision No.122](#decision-no122)。犬猫サイト内決済は第1期対象外。
+- **理由:** 承認済みブリーダーの月額会費徴収と `membership_status = active` 連携を第1期必須機能とするため（[Decision No.130](#decision-no130) の Stripe 部分を第1期で実装）。
+- **影響範囲:** Stripe Checkout / Webhook / BR-13 / BR-06 CTA、`breeders` 課金列、公開 View
+- **決定日:** 2026-08-26
+- **参照:** [Stripe 第1期実装計画](../09_開発履歴/2026-08-26_Stripe第1期実装計画.md) / [Decision No.45](#decision-no45) / [Decision No.130](#decision-no130)
+
+---
+
+## Decision No.140
+
+**WithTama で管理する価格は原則として税抜価格を正本とする**
+
+- **決定内容:** ブリーダー月額会費、`pets.price`、将来の WithTama 有料サービスなど、アプリケーションが正本として保持する価格数値は **税抜** とする。
+- **表示との分離:** 購入希望者向け画面では、表示レイヤーで **税込総額** を算出・表示する（DB 正本を税込にしない）。
+- **専門家確認:** 購入希望者向けの表示方法（総額表示・表記形式等）について **弁護士、税理士または専門家への確認が必要**。
+- **理由:** 事業者向け入力・Stripe Price・DB 保存の一貫性。表示要件は法令・業態により別設計が必要なため。
+- **影響範囲:** `pets.price`、Stripe Price、公開画面（PU-01 / PU-02 / BY-03）、ブリーダー入力（BR-10 / BR-11）
+- **決定日:** 2026-08-26
+- **参照:** [pets テーブル](../05_データベース設計/pets.md) / [Stripe 第1期実装計画](../09_開発履歴/2026-08-26_Stripe第1期実装計画.md)
+
+---
+
+## Decision No.141
+
+**`pets.price` の意味を税込から税抜へ改定する（Decision No.34 の price 意味を更新）**
+
+- **決定内容:** [Decision No.34](#decision-no34) で定義した `pets.price`（integer、円単位）の意味を **税込販売価格** から **税抜販売価格** へ改定する。
+- **維持するもの:** `price` / `price_comment` の分離構造、integer 型、0 以上の CHECK、NULL 許可。
+- **購入希望者向け:** 税込総額は **表示レイヤー** で算出・表示する（[Decision No.140](#decision-no140)）。
+- **No.34 本文:** 直接書き換えない。本 Decision が price の税抜意味の正本とする。
+- **理由:** 価格管理の税抜統一（Decision No.140）。
+- **影響範囲:** `pets` テーブル意味、BR-10 / BR-11、PU-01 / PU-02、AD-11、SEC-TEST データ
+- **決定日:** 2026-08-26
+- **参照:** [Decision No.34](#decision-no34) / [Decision No.140](#decision-no140) / [Decision No.142](#decision-no142)
+
+---
+
+## Decision No.142
+
+**開発環境の `pets.price` 移行は案 C（再投入＋以降税抜統一）を採用する**
+
+- **決定内容:** 第1期リリース前の開発 / SEC-TEST データ（監査: 全 15 件、price あり 13 件）について、`price / 1.10` 等による **税込→税抜の一括変換は行わない**。開発データの **再投入** と、以降の新規データを **税抜** で統一する（案 C）。
+- **本番:** 本番運用開始後に既存 price データの移行が必要になった場合は **別 Decision** とする。本 Decision の案 C を本番にそのまま適用しない。
+- **理由:** 一括換算はテストデータ（`price = 1` 等）で誤変換リスクがあり、現時点は本番利用者データが存在しない開発環境のため。
+- **影響範囲:** SEC-TEST prepare スクリプト、手動登録 pets、Step 9 実装
+- **決定日:** 2026-08-26
+- **参照:** [Stripe Decision 確定前 価格監査](../09_開発履歴/2026-08-26_StripeDecision確定前_価格監査課金ルール整理.md) / [Decision No.141](#decision-no141)
+
+---
+
+## Decision No.143
+
+**ブリーダー月額会費は Stripe Price を正本とし、現在 5,000 円（税抜）を基本料金とする（料金可変）**
+
+- **決定内容:**
+  - 現在の基本料金: **月額 5,000 円（税抜）**
+  - **無料期間（trial）: なし**
+  - **初回課金:** 管理者承認（`review_status = approved`）**後**
+  - **Stripe Price** をブリーダー月額会費の **料金管理正本** とする（[Decision No.45](#decision-no45) と整合）
+  - **5,000 円をコード・DB・Webhook に固定しない**。料金は将来変更可能
+  - 料金改定時は **既存 Stripe Price を書き換えず新 Price を作成** する（例: Price A 5,000 税抜 → Price B 6,000 税抜）
+  - 新規契約は新 Price を使用可能。既存契約者の **旧料金維持 / 新料金移行** は料金改定ごとに **運営判断**
+- **理由:** 料金改定の運用柔軟性と Stripe immutable Price ベストプラクティス。
+- **影響範囲:** `.env`（`STRIPE_BREEDER_PRICE_ID`）、Checkout、Webhook、BR-13
+- **決定日:** 2026-08-26
+- **参照:** [Decision No.45](#decision-no45) / [breeders テーブル](../05_データベース設計/breeders.md)
+
+---
+
+## Decision No.144
+
+**`membership_status` の意味と Stripe 課金ライフサイクル**
+
+- **決定内容 — `membership_status` の意味:**
+
+| 値          | 意味                                            |
+| ----------- | ----------------------------------------------- |
+| `pending`   | 承認前、または初回課金前                        |
+| `active`    | WithTama 利用可能（公開 View 条件を満たしうる） |
+| `suspended` | 支払不良等による **一時利用停止**               |
+| `canceled`  | ブリーダーの **明示解約が期間終了** した状態    |
+
+- **審査と課金の分離（参照）:** [Decision No.129](#decision-no129)、[Decision No.130](#decision-no130)。承認後も `membership_status = pending` のまま → Stripe 初回課金成功で `active` → 公開条件成立。
+- **支払い失敗（Smart Retry）:** アプリ独自の 7 日 / 14 日等の固定猶予日数は **持たない**。Stripe Smart Retry を利用する。
+  - Stripe `past_due` の間: **`membership_status = active` 維持**
+  - Smart Retry 終了後 `unpaid`: **`membership_status = suspended`**（公開 View から除外）
+  - Stripe Dashboard の Smart Retry 設定は **運用開始前に別途確認**
+- **支払い回復:** 正常状態へ回復した場合 **`membership_status = active`** へ復帰可能。`pets.status` は変更しない。
+- **解約:** **期間末解約**（即時解約しない）。`cancel_at_period_end = true` の期間中は **`membership_status = active` 維持**。期間終了後 Stripe `canceled` → **`membership_status = canceled`**。
+- **再契約:** `suspended` / `canceled` から再契約可能。成功後 **`membership_status = active`**。既存犬猫データは削除しない。
+- **`subscription_status`（Stripe 参考値）:** WithTama `membership_status` へ **1:1 コピーしない**。基本マッピング:
+
+| Stripe / 状態 | `membership_status`                      |
+| ------------- | ---------------------------------------- |
+| 未契約        | `pending`                                |
+| `active`      | `active`                                 |
+| `past_due`    | `active`（猶予中）                       |
+| `unpaid`      | `suspended`                              |
+| `canceled`    | `canceled`                               |
+| `trialing`    | 第1期では **発生させない**（trial なし） |
+
+- **課金都合で犬猫状態を変更しない:** 課金停止・解約時に `pets.status` および犬猫審査状態を **変更しない**。公開可否は公開 View が `review_status` / `membership_status` / `pets.status` 等で判定。`membership_status != active` なら公開 View から除外。
+- **公開条件（維持）:** `breeders.review_status = approved` **AND** `breeders.membership_status = active` **AND** `pets.status = published` **AND** `deleted_at IS NULL`。
+- **理由:** 審査・掲載・課金の責務分離と Stripe 標準 retry との整合。
+- **影響範囲:** Webhook、`breeders`、公開 View、BR-06 / BR-13、AD-02
+- **決定日:** 2026-08-26
+- **参照:** [Decision No.96](#decision-no96)（犬猫審査 RPC 思想） / [Decision No.107](#decision-no107) / [Decision No.129](#decision-no129) / [Decision No.130](#decision-no130)
+
+---
+
+## Decision No.145
+
+**第1期で Stripe Customer Portal を利用する**
+
+- **決定内容:** Stripe Customer Portal を第1期で利用する。用途: 支払い方法管理、解約（期間末解約）、請求関連確認。
+- **請求書・領収書:** 可能な範囲で Stripe へ委譲する（[Decision No.45](#decision-no45) と整合）。
+- **理由:** カード変更・解約・請求履歴を Stripe に委譲し PCI・運用負荷を削減。
+- **影響範囲:** BR-13、Stripe Dashboard 設定
+- **決定日:** 2026-08-26
+- **参照:** [Decision No.45](#decision-no45) / [Stripe 第1期実装計画](../09_開発履歴/2026-08-26_Stripe第1期実装計画.md)
+
+---
+
+## Decision No.146
+
+**消費税率をアプリケーションコードに固定せず Stripe Tax 等で対応する**
+
+- **決定内容:** 消費税率をアプリケーションコードへ **固定しない**。Stripe Tax / Tax Rate 等を利用し、税率変更に対応可能な構成とする。
+- **専門家確認:** 税区分、Stripe Tax 設定、インボイス、請求書、領収書、購入希望者向け総額表示について **税理士、弁護士または専門家への確認が必要**。
+- **理由:** 税率変更時のデプロイ回避と Stripe Price `tax_behavior: exclusive` 設計との整合。
+- **影響範囲:** Stripe Price / Checkout、公開価格表示レイヤー
+- **決定日:** 2026-08-26
+- **参照:** [Decision No.140](#decision-no140) / [Decision No.143](#decision-no143)
+
+---
+
+## Decision No.147
+
+**ブリーダー本人による Stripe / 課金関連列の直接 UPDATE を禁止する**
+
+- **決定内容:** 第1期の基本設計として、**BEFORE UPDATE trigger** によりブリーダー本人（および一般 authenticated）が課金関連列を直接変更できないようにする。Stripe Webhook は **service_role** で更新する。
+- **保護対象:** `membership_status`, `stripe_customer_id`, `stripe_subscription_id`, `stripe_price_id`, `subscription_status`, `subscription_current_period_end`, `cancel_at_period_end`, `last_payment_failed_at`, `suspended_at`
+- **実装時:** Supabase / PostgreSQL 権限モデルを再確認する。
+- **理由:** `breeders_update_own` RLS により現状ブリーダーが行全体 UPDATE 可能なセキュリティギャップへの対策。
+- **影響範囲:** Supabase Migration（trigger）、Webhook Route、ブリーダープロフィール Server Action
+- **決定日:** 2026-08-26
+- **参照:** [権限設計](../07_権限設計/README.md) / [Stripe 第1期実装計画](../09_開発履歴/2026-08-26_Stripe第1期実装計画.md)
+
+---
+
+## Decision No.148
+
+**Stripe Webhook は署名検証と event ID による冪等性を必須とする**
+
+- **決定内容:**
+  - Webhook **署名検証を必須** とする（`STRIPE_WEBHOOK_SECRET`）
+  - 再送対応のため **`stripe_webhook_events`**（等）で Stripe event ID を保存し、同一 event の二重処理を禁止
+- **DB 追加候補（実装フェーズで最終確定、本 Decision 時点では Migration 未作成）:**
+
+| オブジェクト                               | 分類     |
+| ------------------------------------------ | -------- |
+| `stripe_webhook_events`                    | **必須** |
+| `breeders.stripe_price_id`                 | **必須** |
+| `breeders.subscription_current_period_end` | **必須** |
+| `breeders.last_payment_failed_at`          | **推奨** |
+| `breeders.cancel_at_period_end`            | **推奨** |
+
+- **理由:** Webhook 再送・順不同・二重 active 化の防止。
+- **影響範囲:** Migration、Webhook Route、`src/lib/stripe/`
+- **決定日:** 2026-08-26
+- **参照:** [Decision No.139](#decision-no139) / [Stripe 第1期実装計画](../09_開発履歴/2026-08-26_Stripe第1期実装計画.md)

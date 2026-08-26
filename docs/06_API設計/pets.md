@@ -41,22 +41,22 @@
 
 `public.pets`
 
-| DB カラム                   | 内容                                           |
-| --------------------------- | ---------------------------------------------- |
-| `breeder_id`                | サーバー側で `getBreederIdByUserId` により解決 |
-| `management_name`           | 管理名                                         |
-| `public_display_name`       | 公開表示名                                     |
-| `species`                   | 犬猫種別                                       |
-| `breed`                     | 犬種・猫種                                     |
-| `sex`                       | 性別                                           |
-| `birthday`                  | 誕生日                                         |
-| `color`                     | 毛色                                           |
-| `temperament`               | 性格                                           |
-| `price`                     | 価格                                           |
-| `price_comment`             | 価格補足                                       |
-| `status`                    | 常に `draft`                                   |
-| `display_order`             | `0`                                            |
-| `created_by` / `updated_by` | `auth.users.id`                                |
+| DB カラム                   | 内容                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------- |
+| `breeder_id`                | サーバー側で `getBreederIdByUserId` により解決                                                    |
+| `management_name`           | 管理名                                                                                            |
+| `public_display_name`       | 公開表示名                                                                                        |
+| `species`                   | 犬猫種別                                                                                          |
+| `breed`                     | 犬種・猫種                                                                                        |
+| `sex`                       | 性別                                                                                              |
+| `birthday`                  | 誕生日                                                                                            |
+| `color`                     | 毛色                                                                                              |
+| `temperament`               | 性格                                                                                              |
+| `price`                     | **税抜**価格（円 integer）（[Decision No.141](../01_設計変更管理/DecisionLog.md#decision-no141)） |
+| `price_comment`             | 価格補足                                                                                          |
+| `status`                    | 常に `draft`                                                                                      |
+| `display_order`             | `0`                                                                                               |
+| `created_by` / `updated_by` | `auth.users.id`                                                                                   |
 
 ### 成功時の画面遷移
 
