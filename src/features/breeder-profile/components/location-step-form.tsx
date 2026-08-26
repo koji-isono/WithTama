@@ -32,9 +32,15 @@ const inputClassName = "h-11 rounded-xl border-[var(--border)] bg-white";
 const basicPath = getBreederProfileStepBySlug("basic").path;
 const licensePath = getBreederProfileStepBySlug("license").path;
 
-export function LocationStepForm() {
+type LocationStepFormProps = {
+  initialInput?: LocationProfileInput;
+};
+
+export function LocationStepForm({
+  initialInput = INITIAL_LOCATION_PROFILE_INPUT,
+}: LocationStepFormProps) {
   const router = useRouter();
-  const [form, setForm] = useState<LocationProfileInput>(INITIAL_LOCATION_PROFILE_INPUT);
+  const [form, setForm] = useState<LocationProfileInput>(initialInput);
   const [fieldErrors, setFieldErrors] = useState<LocationProfileFieldErrors>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

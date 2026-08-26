@@ -36,6 +36,7 @@
     "test:breeder-profile-return-reason": "npx tsx scripts/test-breeder-profile-return-reason.mts",
     "test:breeder-profile-resubmit-ui": "npx tsx scripts/test-breeder-profile-resubmit-ui.mts",
     "test:breeder-profile-resubmit-e2e": "npx tsx scripts/test-breeder-profile-resubmit-e2e.mts",
+    "test:breeder-profile-initial-values": "npx tsx scripts/test-breeder-profile-initial-values.mts",
     "test:buyer-favorites-page": "npx tsx scripts/test-buyer-favorites-page.mts",
     "test:buyer-inquiry-validation": "npx tsx scripts/test-buyer-inquiry-validation.mts",
     "test:buyer-inquiry-new-page": "npx tsx scripts/test-buyer-inquiry-new-page.mts",

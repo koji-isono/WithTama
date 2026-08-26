@@ -30,6 +30,14 @@ export const INITIAL_BASIC_PROFILE_INPUT: BasicProfileInput = {
 /** @deprecated Use INITIAL_BASIC_PROFILE_INPUT */
 export const INITIAL_BASIC_INFO_FORM_STATE = INITIAL_BASIC_PROFILE_INPUT;
 
+export type BasicProfileRow = {
+  business_name: string | null;
+  representative_name: string | null;
+  phone: string | null;
+  public_email: string | null;
+  website_url: string | null;
+};
+
 export type UpdateBasicProfileData = {
   business_name: string;
   representative_name: string;
@@ -57,6 +65,13 @@ export const INITIAL_LOCATION_PROFILE_INPUT: LocationProfileInput = {
   prefecture: "",
   city: "",
   addressLine: "",
+};
+
+export type LocationProfileRow = {
+  postal_code: string | null;
+  prefecture: string | null;
+  city: string | null;
+  address_line: string | null;
 };
 
 export type UpdateLocationProfileData = {

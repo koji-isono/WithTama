@@ -23,9 +23,15 @@ import { ProfileFormField } from "./profile-form-field";
 const inputClassName = "h-11 rounded-xl border-[var(--border)] bg-white";
 const locationPath = getBreederProfileStepBySlug("location").path;
 
-export function BasicInfoStepForm() {
+type BasicInfoStepFormProps = {
+  initialInput?: BasicProfileInput;
+};
+
+export function BasicInfoStepForm({
+  initialInput = INITIAL_BASIC_PROFILE_INPUT,
+}: BasicInfoStepFormProps) {
   const router = useRouter();
-  const [form, setForm] = useState<BasicProfileInput>(INITIAL_BASIC_PROFILE_INPUT);
+  const [form, setForm] = useState<BasicProfileInput>(initialInput);
   const [fieldErrors, setFieldErrors] = useState<BasicProfileFieldErrors>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

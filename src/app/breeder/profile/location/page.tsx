@@ -1,5 +1,7 @@
-import { LocationStepForm } from "@/features/breeder-profile";
+import { LocationStepForm, loadLocationProfile } from "@/features/breeder-profile";
 
-export default function BreederProfileLocationPage() {
-  return <LocationStepForm />;
+export default async function BreederProfileLocationPage() {
+  const initialInput = await loadLocationProfile();
+
+  return <LocationStepForm initialInput={initialInput} />;
 }

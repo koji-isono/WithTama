@@ -36,8 +36,10 @@ export {
   VERIFICATION_PRIVACY_NOTICE,
 } from "./document-constants";
 export {
+  loadBasicProfile,
   loadIntroductionProfile,
   loadLicenseProfile,
+  loadLocationProfile,
   loadVerificationStepState,
   loadBreederProfilePageContext,
 } from "./loaders";
@@ -48,9 +50,11 @@ export {
   PROFILE_NOT_EDITABLE_MESSAGE,
 } from "./edit-guard";
 export {
+  getBasicProfileByUserId,
   getIntroductionProfileByUserId,
   getBreederProfileContextByUserId,
   getLicenseProfileByUserId,
+  getLocationProfileByUserId,
   getVerificationProfile,
   saveBreederDocumentPath,
   updateBasicProfile,
@@ -70,6 +74,12 @@ export {
   uploadBreederDocument,
 } from "./service";
 export { INTRODUCTION_FIELDS } from "./introduction-fields";
+export {
+  mapBasicProfileRowOrEmpty,
+  mapLocationProfileRowOrEmpty,
+  mapRowToBasicProfileInput,
+  mapRowToLocationProfileInput,
+} from "./profile-input-mappers";
 export { getMissingProfileSteps, validateProfileCompletion } from "./profile-completion";
 export { JAPAN_PREFECTURES } from "./prefectures";
 export { BUSINESS_REGISTRATION_TYPES, REGISTRATION_TYPE_GUIDANCE } from "./registration-types";
@@ -83,6 +93,7 @@ export type {
   BasicProfileFieldErrors,
   BasicProfileFieldKey,
   BasicProfileInput,
+  BasicProfileRow,
   BreederDocumentType,
   CompleteBreederProfileResult,
   ResubmitBreederProfileResult,
@@ -96,6 +107,7 @@ export type {
   LocationProfileFieldErrors,
   LocationProfileFieldKey,
   LocationProfileInput,
+  LocationProfileRow,
   ProfileMissingStep,
   SaveBasicProfileResult,
   SaveIntroductionProfileResult,

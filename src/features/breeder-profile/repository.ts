@@ -3,10 +3,12 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
 import type {
+  BasicProfileRow,
   BreederDocumentType,
   BreederProfileContextRow,
   IntroductionProfileRow,
   LicenseProfileRow,
+  LocationProfileRow,
   UpdateBasicProfileData,
   UpdateIntroductionProfileData,
   UpdateLicenseProfileData,
@@ -19,6 +21,10 @@ import { isValidBreederDocumentStoragePath } from "./document-utils";
 import { logBreederDocumentUploadFailure } from "./format-document-upload-error";
 
 const breederProfileContextSelect = "id, review_status";
+
+const basicProfileSelect = "business_name, representative_name, phone, public_email, website_url";
+
+const locationProfileSelect = "postal_code, prefecture, city, address_line";
 
 const licenseProfileSelect =
   "business_registration_type, business_registration_number, registration_authority, registration_expires_at";
@@ -111,6 +117,40 @@ export async function updateLocationProfile(
   if (error) {
     throw error;
   }
+}
+
+export async function getBasicProfileByUserId(userId: string): Promise<BasicProfileRow | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("breeders")
+    .select(basicProfileSelect)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as BasicProfileRow | null;
+}
+
+export async function getLocationProfileByUserId(
+  userId: string,
+): Promise<LocationProfileRow | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("breeders")
+    .select(locationProfileSelect)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data as LocationProfileRow | null;
 }
 
 export async function getLicenseProfileByUserId(userId: string): Promise<LicenseProfileRow | null> {
