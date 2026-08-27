@@ -745,6 +745,24 @@ async function main(): Promise<void> {
     record(checks, "22 buyer cannot SELECT others breeder-documents", false, "no identity path");
   }
 
+  const cleanupBreeder = await loadBreeder(adminClient, primaryBreederId);
+  if (cleanupBreeder) {
+    const cleaned = await resetBreederSubmitted(adminClient, cleanupBreeder);
+    const cleanupOk =
+      cleaned?.review_status === "submitted" &&
+      cleaned?.identity_verification_status === "submitted" &&
+      cleaned?.business_verification_status === "submitted" &&
+      cleaned.membership_status === cleanupBreeder.membership_status;
+    record(
+      checks,
+      "cleanup reset to submitted",
+      cleanupOk,
+      cleaned?.review_status ?? "reset failed",
+    );
+  } else {
+    record(checks, "cleanup reset to submitted", false, "breeder not found");
+  }
+
   finish(checks);
 }
 

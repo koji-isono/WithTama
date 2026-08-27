@@ -153,13 +153,28 @@ WithTama ではロールベースアクセス制御（RBAC）を採用します�
 - 初回提出時: verification status を `submitted` に更新（既存 `completeBreederProfile` 仕様準拠）
 - **`under_review` へは変更しない**（No.126 — 管理者 `start_breeder_review` と分離）
 
-### Stripe 課金列保護（Decision No.147 確定・**実装未着手**）
+### Stripe 課金列保護（Decision No.147 確定・**Step 1 実装済**）
 
-- `breeders_update_own` により、現状ブリーダー本人が **行全体 UPDATE 可能**（Stripe 列含む）
-- 第1期実装: **BEFORE UPDATE trigger** で課金関連列の直接変更を禁止。Webhook は **service_role** で更新
-- 保護列: `membership_status`, `stripe_*`, `subscription_*`, `last_payment_failed_at`, `suspended_at` 等
+- `breeders_update_own` により、ブリーダー本人は行 UPDATE 可能だが、**BEFORE UPDATE trigger** で課金関連列の直接変更を禁止
+- **許可:** `service_role`（Webhook 等の信頼されたサーバー処理）のみ
+- **禁止:** ブリーダー本人・管理者 JWT による課金列の直接 UPDATE（第1期に管理者 UI からの課金列編集要件なし）
+- **管理者審査 RPC:** `review_status` 等の非課金列のみ UPDATE → trigger の `IS DISTINCT FROM` 判定で影響なし（SECURITY DEFINER RPC は維持）
+- **保護列:** `membership_status`, `stripe_customer_id`, `stripe_subscription_id`, `stripe_price_id`, `subscription_status`, `subscription_current_period_end`, `cancel_at_period_end`, `last_payment_failed_at`, `suspended_at`
+- **Function:** `breeders_billing_update_allowed()`（`SECURITY DEFINER`, `search_path = public`）
+- **Trigger:** `breeders_enforce_billing_columns` on `public.breeders`
 - 参照: [Stripe 第1期実装計画 Step 1](../09_開発履歴/2026-08-26_Stripe第1期実装計画.md)
-- Migration: `20260825130000_create_breeder_application_submit_rpcs.sql`
+- Migration: `20260826173000_stripe_step1_billing_columns_and_protection.sql`
+
+### stripe_webhook_events（Decision No.148・**Step 1 実装済**）
+
+| ロール          | SELECT | INSERT | UPDATE | DELETE |
+| --------------- | ------ | ------ | ------ | ------ |
+| `anon`          | ❌     | ❌     | ❌     | ❌     |
+| `authenticated` | ❌     | ❌     | ❌     | ❌     |
+| `service_role`  | ✅     | ✅     | ✅     | ✅     |
+
+- RLS 有効、policy なし（ブラウザユーザー拒否、`service_role` は bypass）
+- `stripe_event_id` UNIQUE で Webhook 冪等性
 
 ### ブリーダープロフィール編集（Decision No.136）
 

@@ -256,7 +256,22 @@ async function main(): Promise<void> {
   if (breederBefore.membership_status === "active") {
     record(checks, "SEC_TEST breeder membership_status active", true, "already active");
   } else if (breederBefore.membership_status === "pending") {
-    const { data: updateRows, error: updateError } = await adminClient
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+    if (!serviceRoleKey) {
+      record(
+        checks,
+        "SEC_TEST breeder membership_status active",
+        false,
+        "pending — set SUPABASE_SERVICE_ROLE_KEY or ensure membership_status is already active (admin direct UPDATE blocked by billing trigger)",
+      );
+      console.log("");
+      console.log("Preparation aborted");
+      process.exitCode = 1;
+      return;
+    }
+
+    const serviceClient = createClientAnon(supabaseUrl, serviceRoleKey);
+    const { data: updateRows, error: updateError } = await serviceClient
       .from("breeders")
       .update({ membership_status: "active" })
       .eq("id", breederId)
@@ -268,7 +283,7 @@ async function main(): Promise<void> {
       checks,
       "SEC_TEST breeder membership_status active",
       updateOk,
-      updateError?.message ?? (updateOk ? undefined : "expected 1 updated row"),
+      updateError?.message ?? (updateOk ? "via service_role" : "expected 1 updated row"),
     );
 
     if (!updateOk) {

@@ -14,77 +14,85 @@
 
 ## カラム定義
 
-| カラム名                       | 型          | NULL     | 初期値              | 説明                                      |
-| ------------------------------ | ----------- | -------- | ------------------- | ----------------------------------------- |
-| `id`                           | uuid        | NOT NULL | `gen_random_uuid()` | ブリーダーID、主キー                      |
-| `user_id`                      | uuid        | NOT NULL | なし                | `auth.users.id` への外部キー              |
-| `business_name`                | text        | NULL     | `null`              | 屋号・事業所名                            |
-| `representative_name`          | text        | NULL     | `null`              | 代表者名                                  |
-| `profile_text`                 | text        | NULL     | `null`              | 自己紹介                                  |
-| `breeding_policy`              | text        | NULL     | `null`              | 繁殖方針                                  |
-| `health_policy`                | text        | NULL     | `null`              | 健康管理方針                              |
-| `breeding_environment`         | text        | NULL     | `null`              | 飼育環境                                  |
-| `postal_code`                  | text        | NULL     | `null`              | 郵便番号                                  |
-| `prefecture`                   | text        | NULL     | `null`              | 都道府県                                  |
-| `city`                         | text        | NULL     | `null`              | 市区町村                                  |
-| `address_line`                 | text        | NULL     | `null`              | 番地・建物名。一般公開しない              |
-| `phone`                        | text        | NULL     | `null`              | 電話番号                                  |
-| `public_email`                 | text        | NULL     | `null`              | 公開用メールアドレス                      |
-| `website_url`                  | text        | NULL     | `null`              | 公式サイト URL                            |
-| `business_registration_number` | text        | NULL     | `null`              | 第一種動物取扱業登録番号                  |
-| `business_registration_type`   | text        | NULL     | `null`              | 登録種別                                  |
-| `registration_authority`       | text        | NULL     | `null`              | 登録自治体                                |
-| `registration_expires_at`      | date        | NULL     | `null`              | 登録有効期限                              |
-| `identity_document_path`       | text        | NULL     | `null`              | 本人確認書類の Storage パス               |
-| `business_license_path`        | text        | NULL     | `null`              | 登録証画像の Storage パス                 |
-| `identity_verification_status` | text        | NOT NULL | `unverified`        | 本人確認状態                              |
-| `business_verification_status` | text        | NOT NULL | `unverified`        | 登録証確認状態                            |
-| `review_status`                | text        | NOT NULL | `draft`             | 審査状態                                  |
-| `membership_status`            | text        | NOT NULL | `pending`           | 利用状態                                  |
-| `profile_completed`            | boolean     | NOT NULL | `false`             | プロフィール入力完了                      |
-| `stripe_customer_id`           | text        | NULL     | `null`              | Stripe 顧客 ID                            |
-| `stripe_subscription_id`       | text        | NULL     | `null`              | Stripe 定期課金 ID                        |
-| `subscription_status`          | text        | NULL     | `null`              | Stripe 課金状態                           |
-| `approved_at`                  | timestamptz | NULL     | `null`              | 承認日時                                  |
-| `suspended_at`                 | timestamptz | NULL     | `null`              | 利用停止日時                              |
-| `deleted_at`                   | timestamptz | NULL     | `null`              | 論理削除日時                              |
-| `created_at`                   | timestamptz | NOT NULL | `now()`             | 作成日時                                  |
-| `updated_at`                   | timestamptz | NOT NULL | `now()`             | 更新日時（UPDATE 時にトリガーで自動更新） |
+| カラム名                          | 型          | NULL     | 初期値              | 説明                                      |
+| --------------------------------- | ----------- | -------- | ------------------- | ----------------------------------------- |
+| `id`                              | uuid        | NOT NULL | `gen_random_uuid()` | ブリーダーID、主キー                      |
+| `user_id`                         | uuid        | NOT NULL | なし                | `auth.users.id` への外部キー              |
+| `business_name`                   | text        | NULL     | `null`              | 屋号・事業所名                            |
+| `representative_name`             | text        | NULL     | `null`              | 代表者名                                  |
+| `profile_text`                    | text        | NULL     | `null`              | 自己紹介                                  |
+| `breeding_policy`                 | text        | NULL     | `null`              | 繁殖方針                                  |
+| `health_policy`                   | text        | NULL     | `null`              | 健康管理方針                              |
+| `breeding_environment`            | text        | NULL     | `null`              | 飼育環境                                  |
+| `postal_code`                     | text        | NULL     | `null`              | 郵便番号                                  |
+| `prefecture`                      | text        | NULL     | `null`              | 都道府県                                  |
+| `city`                            | text        | NULL     | `null`              | 市区町村                                  |
+| `address_line`                    | text        | NULL     | `null`              | 番地・建物名。一般公開しない              |
+| `phone`                           | text        | NULL     | `null`              | 電話番号                                  |
+| `public_email`                    | text        | NULL     | `null`              | 公開用メールアドレス                      |
+| `website_url`                     | text        | NULL     | `null`              | 公式サイト URL                            |
+| `business_registration_number`    | text        | NULL     | `null`              | 第一種動物取扱業登録番号                  |
+| `business_registration_type`      | text        | NULL     | `null`              | 登録種別                                  |
+| `registration_authority`          | text        | NULL     | `null`              | 登録自治体                                |
+| `registration_expires_at`         | date        | NULL     | `null`              | 登録有効期限                              |
+| `identity_document_path`          | text        | NULL     | `null`              | 本人確認書類の Storage パス               |
+| `business_license_path`           | text        | NULL     | `null`              | 登録証画像の Storage パス                 |
+| `identity_verification_status`    | text        | NOT NULL | `unverified`        | 本人確認状態                              |
+| `business_verification_status`    | text        | NOT NULL | `unverified`        | 登録証確認状態                            |
+| `review_status`                   | text        | NOT NULL | `draft`             | 審査状態                                  |
+| `membership_status`               | text        | NOT NULL | `pending`           | 利用状態                                  |
+| `profile_completed`               | boolean     | NOT NULL | `false`             | プロフィール入力完了                      |
+| `stripe_customer_id`              | text        | NULL     | `null`              | Stripe 顧客 ID                            |
+| `stripe_subscription_id`          | text        | NULL     | `null`              | Stripe 定期課金 ID                        |
+| `subscription_status`             | text        | NULL     | `null`              | Stripe 課金状態                           |
+| `stripe_price_id`                 | text        | NULL     | `null`              | 契約時 Stripe Price ID（Decision No.143） |
+| `subscription_current_period_end` | timestamptz | NULL     | `null`              | 現在の課金期間終了（Stripe Subscription） |
+| `cancel_at_period_end`            | boolean     | NOT NULL | `false`             | 期間終了時解約フラグ（Stripe）            |
+| `last_payment_failed_at`          | timestamptz | NULL     | `null`              | 最終 `invoice.payment_failed` 日時        |
+| `approved_at`                     | timestamptz | NULL     | `null`              | 承認日時                                  |
+| `suspended_at`                    | timestamptz | NULL     | `null`              | 利用停止日時                              |
+| `deleted_at`                      | timestamptz | NULL     | `null`              | 論理削除日時                              |
+| `created_at`                      | timestamptz | NOT NULL | `now()`             | 作成日時                                  |
+| `updated_at`                      | timestamptz | NOT NULL | `now()`             | 更新日時（UPDATE 時にトリガーで自動更新） |
 
 ## TypeScript 対応（参考）
 
-| DB カラム（snake_case）        | TypeScript（camelCase）      |
-| ------------------------------ | ---------------------------- |
-| `user_id`                      | `userId`                     |
-| `business_name`                | `businessName`               |
-| `representative_name`          | `representativeName`         |
-| `profile_text`                 | `profileText`                |
-| `breeding_policy`              | `breedingPolicy`             |
-| `health_policy`                | `healthPolicy`               |
-| `breeding_environment`         | `breedingEnvironment`        |
-| `postal_code`                  | `postalCode`                 |
-| `address_line`                 | `addressLine`                |
-| `public_email`                 | `publicEmail`                |
-| `website_url`                  | `websiteUrl`                 |
-| `business_registration_number` | `businessRegistrationNumber` |
-| `business_registration_type`   | `businessRegistrationType`   |
-| `registration_authority`       | `registrationAuthority`      |
-| `registration_expires_at`      | `registrationExpiresAt`      |
-| `identity_document_path`       | `identityDocumentPath`       |
-| `business_license_path`        | `businessLicensePath`        |
-| `identity_verification_status` | `identityVerificationStatus` |
-| `business_verification_status` | `businessVerificationStatus` |
-| `review_status`                | `reviewStatus`               |
-| `membership_status`            | `membershipStatus`           |
-| `profile_completed`            | `profileCompleted`           |
-| `stripe_customer_id`           | `stripeCustomerId`           |
-| `stripe_subscription_id`       | `stripeSubscriptionId`       |
-| `subscription_status`          | `subscriptionStatus`         |
-| `approved_at`                  | `approvedAt`                 |
-| `suspended_at`                 | `suspendedAt`                |
-| `deleted_at`                   | `deletedAt`                  |
-| `created_at`                   | `createdAt`                  |
-| `updated_at`                   | `updatedAt`                  |
+| DB カラム（snake_case）           | TypeScript（camelCase）        |
+| --------------------------------- | ------------------------------ |
+| `user_id`                         | `userId`                       |
+| `business_name`                   | `businessName`                 |
+| `representative_name`             | `representativeName`           |
+| `profile_text`                    | `profileText`                  |
+| `breeding_policy`                 | `breedingPolicy`               |
+| `health_policy`                   | `healthPolicy`                 |
+| `breeding_environment`            | `breedingEnvironment`          |
+| `postal_code`                     | `postalCode`                   |
+| `address_line`                    | `addressLine`                  |
+| `public_email`                    | `publicEmail`                  |
+| `website_url`                     | `websiteUrl`                   |
+| `business_registration_number`    | `businessRegistrationNumber`   |
+| `business_registration_type`      | `businessRegistrationType`     |
+| `registration_authority`          | `registrationAuthority`        |
+| `registration_expires_at`         | `registrationExpiresAt`        |
+| `identity_document_path`          | `identityDocumentPath`         |
+| `business_license_path`           | `businessLicensePath`          |
+| `identity_verification_status`    | `identityVerificationStatus`   |
+| `business_verification_status`    | `businessVerificationStatus`   |
+| `review_status`                   | `reviewStatus`                 |
+| `membership_status`               | `membershipStatus`             |
+| `profile_completed`               | `profileCompleted`             |
+| `stripe_customer_id`              | `stripeCustomerId`             |
+| `stripe_subscription_id`          | `stripeSubscriptionId`         |
+| `subscription_status`             | `subscriptionStatus`           |
+| `stripe_price_id`                 | `stripePriceId`                |
+| `subscription_current_period_end` | `subscriptionCurrentPeriodEnd` |
+| `cancel_at_period_end`            | `cancelAtPeriodEnd`            |
+| `last_payment_failed_at`          | `lastPaymentFailedAt`          |
+| `approved_at`                     | `approvedAt`                   |
+| `suspended_at`                    | `suspendedAt`                  |
+| `deleted_at`                      | `deletedAt`                    |
+| `created_at`                      | `createdAt`                    |
+| `updated_at`                      | `updatedAt`                    |
 
 ## 制約
 
@@ -384,20 +392,46 @@ Foreign Key 設定
 - RLS: `breeders_update_own`（`user_id = auth.uid()`）
 - API 設計: [ブリーダープロフィール API](../06_API設計/breeder-profile.md)
 
-## Stripe 課金（Decision No.139–148 確定・**実装未着手**）
+## Stripe 課金（Decision No.139–148 確定・**Step 1 実装済**）
 
-| 項目                     | 状態                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------- |
-| 設計                     | **確定**（DecisionLog No.139–148）                                                    |
-| Migration / Webhook / UI | **未着手** — [Stripe 第1期実装計画](../09_開発履歴/2026-08-26_Stripe第1期実装計画.md) |
+| 項目                        | 状態                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------- |
+| 設計                        | **確定**（DecisionLog No.139–148）                                                                |
+| DB / Migration / 課金列保護 | **Step 1 実装済** — Migration `20260826173000_stripe_step1_billing_columns_and_protection.sql`    |
+| Webhook API / Checkout / UI | **未着手** — [Stripe 第1期実装計画 Step 2 以降](../09_開発履歴/2026-08-26_Stripe第1期実装計画.md) |
 
-### 実装フェーズで追加予定の列（Decision No.148）
+### Stripe 課金列（Decision No.148）
 
-| カラム                            | 分類 |
-| --------------------------------- | ---- |
-| `stripe_price_id`                 | 必須 |
-| `subscription_current_period_end` | 必須 |
-| `last_payment_failed_at`          | 推奨 |
-| `cancel_at_period_end`            | 推奨 |
+| カラム                            | 分類 | Step 1 |
+| --------------------------------- | ---- | ------ |
+| `stripe_price_id`                 | 必須 | ✅     |
+| `subscription_current_period_end` | 必須 | ✅     |
+| `last_payment_failed_at`          | 推奨 | ✅     |
+| `cancel_at_period_end`            | 推奨 | ✅     |
 
 既存列: `stripe_customer_id`, `stripe_subscription_id`, `subscription_status`, `membership_status`, `suspended_at`
+
+### 課金列保護（Decision No.147）
+
+- **Trigger:** `breeders_enforce_billing_columns`（BEFORE UPDATE）
+- **Function:** `enforce_breeders_billing_columns_update()` — 保護列変更時に `42501` を送出
+- **許可:** `service_role`（Webhook 等の信頼されたサーバー処理）のみ
+- **禁止:** ブリーダー本人・管理者 JWT による課金列の直接 UPDATE
+- **禁止:** ブリーダー本人（`breeders_update_own` 経由でも trigger で拒否）
+
+保護列: `membership_status`, `stripe_customer_id`, `stripe_subscription_id`, `stripe_price_id`, `subscription_status`, `subscription_current_period_end`, `cancel_at_period_end`, `last_payment_failed_at`, `suspended_at`
+
+### stripe_webhook_events（Decision No.148）
+
+Webhook 冪等性用。payload 全文は保存しない（PII 最小化）。
+
+| カラム            | 型          | 制約                      |
+| ----------------- | ----------- | ------------------------- |
+| `id`              | uuid        | PK, `gen_random_uuid()`   |
+| `stripe_event_id` | text        | NOT NULL, **UNIQUE**      |
+| `event_type`      | text        | NOT NULL                  |
+| `processed_at`    | timestamptz | NOT NULL, default `now()` |
+| `created_at`      | timestamptz | NOT NULL, default `now()` |
+
+- **RLS:** 有効。policy なし → anon / authenticated は拒否。`service_role` のみ操作可（RLS bypass）
+- **Migration:** `20260826173000_stripe_step1_billing_columns_and_protection.sql`

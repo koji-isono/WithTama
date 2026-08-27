@@ -60,7 +60,8 @@
     "test:breeder-visits-e2e": "npx tsx scripts/test-breeder-visits-e2e.mts",
     "test:breeder-visit-detail-page": "npx tsx scripts/test-breeder-visit-detail-page.mts",
     "test:breeder-inquiries-page": "npx tsx scripts/test-breeder-inquiries-page.mts",
-    "test:inquiry-e2e": "npx tsx scripts/test-inquiry-e2e.mts"
+    "test:inquiry-e2e": "npx tsx scripts/test-inquiry-e2e.mts",
+    "test:stripe-step1-billing": "node --env-file=.env.local --experimental-strip-types scripts/test-stripe-step1-billing-protection.mts"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.7",

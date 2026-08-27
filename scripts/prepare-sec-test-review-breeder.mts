@@ -147,6 +147,55 @@ function isExpectedPostUpdateState(
   );
 }
 
+function isAlreadyPrepared(breeder: BreederReviewState): boolean {
+  return (
+    breeder.review_status === "approved" &&
+    breeder.identity_verification_status === "verified" &&
+    breeder.business_verification_status === "verified" &&
+    isRegistrationValid(breeder.registration_expires_at)
+  );
+}
+
+function futureRegistrationDate(): string {
+  const date = new Date();
+
+  date.setFullYear(date.getFullYear() + 1);
+
+  return date.toISOString().slice(0, 10);
+}
+
+async function resetBreederToSubmitted(
+  adminClient: SupabaseClient,
+  breeder: BreederReviewState,
+): Promise<BreederReviewState | null> {
+  const expiresAt =
+    breeder.registration_expires_at &&
+    breeder.registration_expires_at >= new Date().toISOString().slice(0, 10)
+      ? breeder.registration_expires_at
+      : futureRegistrationDate();
+
+  const { data, error } = await adminClient
+    .from("breeders")
+    .update({
+      review_status: "submitted",
+      identity_verification_status: "submitted",
+      business_verification_status: "submitted",
+      approved_at: null,
+      registration_expires_at: expiresAt,
+    })
+    .eq("id", breeder.id)
+    .select(
+      "id, user_id, review_status, identity_verification_status, business_verification_status, registration_expires_at",
+    )
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return data as BreederReviewState;
+}
+
 async function authenticateBreeder(
   supabase: SupabaseClient,
 
@@ -443,31 +492,56 @@ async function main(): Promise<void> {
     return;
   }
 
-  const preStateOk = isExpectedPreUpdateState(breederBefore);
+  if (isAlreadyPrepared(breederBefore)) {
+    record(checks, "current review state", true, "already prepared (approved/verified/verified)");
 
-  record(
-    checks,
-
-    "current review state",
-
-    preStateOk,
-
-    preStateOk
-      ? undefined
-      : "expected submitted/submitted/submitted with valid registration_expires_at",
-  );
-
-  if (!preStateOk) {
     console.log("");
 
-    console.log("Preparation aborted");
-
-    process.exitCode = 1;
+    console.log("Preparation completed");
 
     return;
   }
 
-  const registrationExpiresAtBefore = breederBefore.registration_expires_at;
+  let breederForApprove = breederBefore;
+
+  if (!isExpectedPreUpdateState(breederBefore)) {
+    record(
+      checks,
+      "current review state",
+      true,
+      `will reset from review_status=${breederBefore.review_status}`,
+    );
+
+    const resetBreeder = await resetBreederToSubmitted(adminClient, breederBefore);
+
+    record(
+      checks,
+      "reset to submitted for prepare",
+      resetBreeder != null && isExpectedPreUpdateState(resetBreeder),
+      resetBreeder?.review_status ?? "reset failed",
+    );
+
+    if (!resetBreeder || !isExpectedPreUpdateState(resetBreeder)) {
+      console.log("");
+
+      console.log("Preparation aborted");
+
+      process.exitCode = 1;
+
+      return;
+    }
+
+    breederForApprove = resetBreeder;
+  } else {
+    record(
+      checks,
+      "current review state",
+      true,
+      "submitted/submitted/submitted with valid registration_expires_at",
+    );
+  }
+
+  const registrationExpiresAtBefore = breederForApprove.registration_expires_at;
 
   const { data: updateRows, error: updateError } = await adminClient
 
