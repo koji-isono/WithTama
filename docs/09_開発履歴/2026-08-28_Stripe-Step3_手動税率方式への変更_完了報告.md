@@ -2,7 +2,7 @@
 
 **日付:** 2026-08-28  
 **範囲:** Checkout Session の税率適用を Stripe Tax（automatic_tax）から Dashboard 手動 Tax Rate へ変更  
-**commit / push:** 2026-08-28 Step 3 完了コミット予定
+**commit / push:** 完了（`8134cb0` / CI [#47 PASS](https://github.com/koji-isono/WithTama/actions/runs/33140528214)）
 
 **正本:** [Stripe Step 3 Checkout Session 実装報告](./2026-08-28_Stripe-Step3_Checkout-Session_実装報告.md)
 
@@ -169,7 +169,7 @@ Stripe Sandbox / Test Mode。
 
 ## 9. Git
 
-| 項目          | 状態       |
-| ------------- | ---------- |
-| commit / push | **未実施** |
-| Secret 漏洩   | **なし**   |
+| 項目          | 状態                                                                                                  |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| commit / push | **完了** — `8134cb0` / CI [#47 PASS](https://github.com/koji-isono/WithTama/actions/runs/33140528214) |
+| Secret 漏洩   | **なし**                                                                                              |

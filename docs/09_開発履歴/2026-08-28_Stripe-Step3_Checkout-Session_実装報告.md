@@ -2,7 +2,7 @@
 
 **日付:** 2026-08-28  
 **範囲:** 承認済みブリーダー向け Checkout Session 作成 API（Webhook / membership 更新なし）  
-**commit / push:** 実施予定（2026-08-28 Step 3 完了）
+**commit / push:** 完了（`8134cb0` / CI [#47 PASS](https://github.com/koji-isono/WithTama/actions/runs/33140528214)）
 
 **正本:** [Stripe 第1期実装計画 Step 3](./2026-08-26_Stripe第1期実装計画.md) / Decision No.143, No.144, No.146
 
