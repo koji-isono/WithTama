@@ -5,6 +5,7 @@ export {
   getOptionalStripeBreederProductId,
   getOptionalStripeWebhookSecret,
   getStripeBreederPriceId,
+  getStripeBreederTaxRateId,
   getStripeSecretKey,
   getStripeWebhookSecret,
   isStripeServerConfigured,

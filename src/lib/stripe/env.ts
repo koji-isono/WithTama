@@ -32,6 +32,11 @@ export function getStripeBreederPriceId(): string {
   return readRequiredEnv("STRIPE_BREEDER_PRICE_ID");
 }
 
+/** Manual Tax Rate ID for breeder monthly fee (Dashboard-created, exclusive tax). Not a secret; server-only. */
+export function getStripeBreederTaxRateId(): string {
+  return readRequiredEnv("STRIPE_BREEDER_TAX_RATE_ID");
+}
+
 /** Webhook signing secret (Step 4). Optional until webhook route exists. */
 export function getStripeWebhookSecret(): string {
   return readRequiredEnv("STRIPE_WEBHOOK_SECRET");
@@ -49,6 +54,8 @@ export function getOptionalStripeBreederProductId(): string | undefined {
 /** True when core Stripe server env vars needed for billing flows are present. Does not validate key format. */
 export function isStripeServerConfigured(): boolean {
   return Boolean(
-    process.env.STRIPE_SECRET_KEY?.trim() && process.env.STRIPE_BREEDER_PRICE_ID?.trim(),
+    process.env.STRIPE_SECRET_KEY?.trim() &&
+    process.env.STRIPE_BREEDER_PRICE_ID?.trim() &&
+    process.env.STRIPE_BREEDER_TAX_RATE_ID?.trim(),
   );
 }

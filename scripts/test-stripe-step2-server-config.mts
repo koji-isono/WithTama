@@ -6,6 +6,7 @@
  * Requires (for full PASS):
  *   STRIPE_SECRET_KEY
  *   STRIPE_BREEDER_PRICE_ID
+ *   STRIPE_BREEDER_TAX_RATE_ID
  *
  * Usage:
  *   npm run test:stripe-step2-server-config
@@ -150,8 +151,10 @@ async function main(): Promise<void> {
 
   const savedSecret = process.env.STRIPE_SECRET_KEY;
   const savedPriceId = process.env.STRIPE_BREEDER_PRICE_ID;
+  const savedTaxRateId = process.env.STRIPE_BREEDER_TAX_RATE_ID;
   const fakeSecret = "sk_test_step2_fake_secret_for_safe_error_check";
   const fakePriceId = "price_step2_fake_price_id_for_test";
+  const fakeTaxRateId = "txr_step2_fake_tax_rate_for_test";
 
   try {
     // 7. Missing STRIPE_SECRET_KEY
@@ -188,9 +191,32 @@ async function main(): Promise<void> {
     }
     record(checks, "8. missing STRIPE_BREEDER_PRICE_ID fails safely", missingPriceOk);
 
+    // 8b. Missing STRIPE_BREEDER_TAX_RATE_ID
+    process.env.STRIPE_SECRET_KEY = fakeSecret;
+    process.env.STRIPE_BREEDER_PRICE_ID = fakePriceId;
+    delete process.env.STRIPE_BREEDER_TAX_RATE_ID;
+    let missingTaxRateOk = false;
+    try {
+      envMod.getStripeBreederTaxRateId();
+    } catch (error) {
+      if (
+        error instanceof envMod.StripeConfigError &&
+        error.envVar === "STRIPE_BREEDER_TAX_RATE_ID"
+      ) {
+        missingTaxRateOk = assertSafeErrorMessage(error.message, [
+          fakeSecret,
+          fakePriceId,
+          fakeTaxRateId,
+          "sk_test",
+        ]);
+      }
+    }
+    record(checks, "8b. missing STRIPE_BREEDER_TAX_RATE_ID fails safely", missingTaxRateOk);
+
     // 9. isStripeServerConfigured
     delete process.env.STRIPE_SECRET_KEY;
     delete process.env.STRIPE_BREEDER_PRICE_ID;
+    delete process.env.STRIPE_BREEDER_TAX_RATE_ID;
     record(
       checks,
       "9. isStripeServerConfigured false when unset",
@@ -199,6 +225,7 @@ async function main(): Promise<void> {
 
     process.env.STRIPE_SECRET_KEY = fakeSecret;
     process.env.STRIPE_BREEDER_PRICE_ID = fakePriceId;
+    process.env.STRIPE_BREEDER_TAX_RATE_ID = fakeTaxRateId;
     record(checks, "10. isStripeServerConfigured true when set", envMod.isStripeServerConfigured());
 
     // 11. Getters return trimmed values without leaking in errors
@@ -206,7 +233,8 @@ async function main(): Promise<void> {
       checks,
       "11. getters return configured values",
       envMod.getStripeSecretKey() === fakeSecret &&
-        envMod.getStripeBreederPriceId() === fakePriceId,
+        envMod.getStripeBreederPriceId() === fakePriceId &&
+        envMod.getStripeBreederTaxRateId() === fakeTaxRateId,
     );
 
     // 12. Stripe client constructible via same env as server.ts (no API call)
@@ -234,6 +262,11 @@ async function main(): Promise<void> {
       delete process.env.STRIPE_BREEDER_PRICE_ID;
     } else {
       process.env.STRIPE_BREEDER_PRICE_ID = savedPriceId;
+    }
+    if (savedTaxRateId === undefined) {
+      delete process.env.STRIPE_BREEDER_TAX_RATE_ID;
+    } else {
+      process.env.STRIPE_BREEDER_TAX_RATE_ID = savedTaxRateId;
     }
   }
 
