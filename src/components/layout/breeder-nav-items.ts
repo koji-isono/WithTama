@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  CreditCard,
   Home,
   LayoutGrid,
   MessageCircle,
@@ -28,6 +29,12 @@ export const BREEDER_SIDEBAR_ITEMS: BreederNavItem[] = [
   { label: "見学管理", href: "/breeder/visits", icon: CalendarDays, title: "見学管理" },
   { label: "問い合わせ", href: "/breeder/inquiries", icon: MessageCircle, title: "問い合わせ" },
   { label: "プロフィール", href: "/breeder/profile", icon: User, title: "ブリーダープロフィール" },
+  {
+    label: "月額会費",
+    href: "/breeder/billing",
+    icon: CreditCard,
+    title: "月額会費",
+  },
   { label: "設定", href: "/breeder/settings", icon: Settings, title: "設定" },
 ];
 
@@ -47,7 +54,9 @@ export const BREEDER_MOBILE_ITEMS: BreederNavItem[] = [
     icon: LayoutGrid,
     title: "メニュー",
     match: (pathname) =>
-      pathname.startsWith("/breeder/profile") || pathname.startsWith("/breeder/settings"),
+      pathname.startsWith("/breeder/profile") ||
+      pathname.startsWith("/breeder/settings") ||
+      pathname.startsWith("/breeder/billing"),
   },
 ];
 

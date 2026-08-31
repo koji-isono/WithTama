@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckoutResultBanner } from "@/features/billing";
 
 import type { BreederDashboardPageData } from "../types";
 import { ResubmissionRequiredBanner } from "./resubmission-required-banner";
@@ -73,7 +74,10 @@ function petBadgeVariant(status: string) {
   return "outline";
 }
 
-export function BreederDashboardView({ resubmissionBanner }: BreederDashboardViewProps) {
+export function BreederDashboardView({
+  resubmissionBanner,
+  checkoutReturn,
+}: BreederDashboardViewProps) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10">
       <header className="space-y-2">
@@ -81,6 +85,12 @@ export function BreederDashboardView({ resubmissionBanner }: BreederDashboardVie
         <h1 className="text-2xl font-bold sm:text-3xl">ブリーダーダッシュボード</h1>
         <p className="text-base text-neutral-600 sm:text-lg">こんにちは、ブリーダーさん</p>
       </header>
+
+      {checkoutReturn ? (
+        <div className="mt-6">
+          <CheckoutResultBanner variant={checkoutReturn} />
+        </div>
+      ) : null}
 
       {resubmissionBanner ? (
         <div className="mt-6">

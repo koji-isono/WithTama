@@ -4,6 +4,7 @@ export type ResubmissionBannerData = {
 
 export type BreederDashboardPageData = {
   resubmissionBanner: ResubmissionBannerData | null;
+  checkoutReturn: "success" | "cancel" | null;
 };
 
 export type BreederReviewSummaryRow = {

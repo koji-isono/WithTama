@@ -35,7 +35,7 @@ function main(): void {
     "src/features/breeder-dashboard/components/breeder-dashboard-view.tsx",
   );
   const banner = read("src/features/breeder-dashboard/components/resubmission-required-banner.tsx");
-  const loaders = read("src/features/breeder-dashboard/loaders.ts");
+  const dashboardLoaders = read("src/features/breeder-dashboard/loaders.ts");
   const reviewRepository = read("src/features/breeder-review/repository.ts");
   const reviewReturnedComment = read("src/features/breeder-review/returned-comment.ts");
   const constants = read("src/features/breeder-review/constants.ts");
@@ -43,13 +43,14 @@ function main(): void {
   record(
     checks,
     "1. loader uses requireBreeder",
-    loaders.includes("requireBreeder") && loaders.includes("await requireBreeder()"),
+    dashboardLoaders.includes("requireBreeder") &&
+      dashboardLoaders.includes("await requireBreeder()"),
   );
   record(
     checks,
     "2. resubmission_required only shows banner data",
-    loaders.includes('summary.review_status !== "resubmission_required"') &&
-      loaders.includes("resubmissionBanner: null"),
+    dashboardLoaders.includes('summary.review_status !== "resubmission_required"') &&
+      dashboardLoaders.includes("resubmissionBanner: null"),
   );
   record(
     checks,
@@ -71,13 +72,13 @@ function main(): void {
   record(
     checks,
     "7. submitted status does not fetch banner (loader guard)",
-    loaders.includes('"resubmission_required"') &&
-      loaders.includes("loadLatestReturnedCommentForBreederSafely(summary.id)"),
+    dashboardLoaders.includes('"resubmission_required"') &&
+      dashboardLoaders.includes("loadLatestReturnedCommentForBreederSafely(summary.id)"),
   );
   record(
     checks,
     "8. under_review / approved / rejected / draft hidden via status guard",
-    loaders.includes('summary.review_status !== "resubmission_required"'),
+    dashboardLoaders.includes('summary.review_status !== "resubmission_required"'),
   );
   record(
     checks,
@@ -119,6 +120,13 @@ function main(): void {
     "15. dashboard page loads data via loader",
     dashboardPage.includes("loadBreederDashboardPageData") &&
       dashboardPage.includes("BreederDashboardView"),
+  );
+  record(
+    checks,
+    "16. dashboard handles checkout return query",
+    dashboardPage.includes("searchParams") &&
+      dashboardPage.includes("checkout") &&
+      dashboardLoaders.includes("parseCheckoutReturnQuery"),
   );
 
   const passed = checks.filter((check) => check.passed).length;

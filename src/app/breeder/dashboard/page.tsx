@@ -6,8 +6,13 @@ export const metadata = {
   title: "ブリーダーダッシュボード",
 };
 
-export default async function BreederDashboardPage() {
-  const pageData = await loadBreederDashboardPageData();
+type BreederDashboardPageProps = {
+  searchParams: Promise<{ checkout?: string }>;
+};
+
+export default async function BreederDashboardPage({ searchParams }: BreederDashboardPageProps) {
+  const { checkout } = await searchParams;
+  const pageData = await loadBreederDashboardPageData({ checkoutQuery: checkout });
 
   return <BreederDashboardView {...pageData} />;
 }
