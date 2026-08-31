@@ -463,13 +463,15 @@ function testBreederSafetyAndSync(checks: Check[]): void {
   );
 
   const typesSource = readSource("src/features/billing/webhook/types.ts");
-  const updateCalls = [checkoutSource, subscriptionSource, invoiceSource].join("\n");
+  const applySource = readSource(
+    "src/features/billing/webhook/apply-subscription-webhook-update.ts",
+  );
+  const updateCalls = [checkoutSource, subscriptionSource, invoiceSource, applySource].join("\n");
   record(
     checks,
-    "37. handlers do not update membership_status",
-    !updateCalls.includes("membership_status:") &&
-      !updateCalls.includes('"membership_status"') &&
-      !typesSource.includes('| "membership_status"'),
+    "37. membership_status updated via centralized mapping (Step 5)",
+    updateCalls.includes("buildBreederUpdateFromSubscription") &&
+      typesSource.includes('"membership_status"'),
   );
   record(
     checks,

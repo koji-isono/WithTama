@@ -1,24 +1,36 @@
 import type Stripe from "stripe";
 
+import { buildBreederUpdateFromSubscription } from "../apply-subscription-webhook-update";
 import { WebhookHandlerError } from "../errors";
 import { assertBreederSubscriptionProduct } from "../product-validation";
 import { updateBreederWebhookFields } from "../repository";
 import { resolveBreederForSubscription } from "../resolve-breeder";
-import { extractSubscriptionSyncFields, resolveSubscriptionCurrentPeriodEnd } from "../stripe-refs";
+import { resolveStripeId } from "../stripe-refs";
 
 export async function handleCustomerSubscriptionUpdated(event: Stripe.Event): Promise<void> {
   const subscription = event.data.object as Stripe.Subscription;
 
   assertBreederSubscriptionProduct(subscription);
 
-  const syncFields = extractSubscriptionSyncFields(subscription);
+  const customerId = resolveStripeId(subscription.customer);
+  if (!customerId) {
+    throw new WebhookHandlerError("missing_customer", "Subscription has no customer");
+  }
+
   const breeder = await resolveBreederForSubscription({
     metadataBreederId: subscription.metadata?.breeder_id ?? null,
-    stripeSubscriptionId: syncFields.stripe_subscription_id,
-    stripeCustomerId: syncFields.stripe_customer_id,
+    stripeSubscriptionId: subscription.id,
+    stripeCustomerId: customerId,
   });
 
-  await updateBreederWebhookFields(breeder.id, syncFields);
+  const fields = buildBreederUpdateFromSubscription({
+    breeder,
+    subscription,
+    context: "sync",
+    now: new Date(event.created * 1000),
+  });
+
+  await updateBreederWebhookFields(breeder.id, fields);
 }
 
 export async function handleCustomerSubscriptionDeleted(event: Stripe.Event): Promise<void> {
@@ -36,11 +48,12 @@ export async function handleCustomerSubscriptionDeleted(event: Stripe.Event): Pr
     stripeCustomerId: customerId,
   });
 
-  await updateBreederWebhookFields(breeder.id, {
-    stripe_subscription_id: subscription.id,
-    stripe_customer_id: customerId,
-    subscription_status: subscription.status,
-    cancel_at_period_end: subscription.cancel_at_period_end ?? false,
-    subscription_current_period_end: resolveSubscriptionCurrentPeriodEnd(subscription),
+  const fields = buildBreederUpdateFromSubscription({
+    breeder,
+    subscription,
+    context: "sync",
+    now: new Date(event.created * 1000),
   });
+
+  await updateBreederWebhookFields(breeder.id, fields);
 }

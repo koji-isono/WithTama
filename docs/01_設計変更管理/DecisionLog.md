@@ -1482,3 +1482,19 @@ _*管理者画面は AD-* で採番する_*
 - **影響範囲:** Migration、Webhook Route、`src/lib/stripe/`
 - **決定日:** 2026-08-26
 - **参照:** [Decision No.139](#decision-no139) / [Stripe 第1期実装計画](../09_開発履歴/2026-08-26_Stripe第1期実装計画.md)
+
+---
+
+## Decision No.149
+
+**Stripe 課金停止時の `suspended_at` の扱い**
+
+- **決定内容:**
+  - `membership_status` → **`suspended`** のとき **`suspended_at` = 現在時刻** を設定する
+  - **`suspended` → `active`** 回復時は **`suspended_at` = `null`** でクリアする
+  - `membership_status` → **`canceled`** のとき **`suspended_at` は変更しない**
+- **理由:** `suspended_at` は **「現在の課金停止状態になった日時」** として扱う。過去の停止履歴を保持する監査ログ用途ではない。将来、停止履歴が必要になった場合は別の履歴テーブル等で対応する。
+- **Migration:** 今回 **追加しない**（Step 1 既存列を使用）
+- **影響範囲:** Stripe Webhook（Step 5）、`breeders.suspended_at`、`src/lib/stripe/membership-mapping.ts`
+- **決定日:** 2026-08-31
+- **参照:** [Decision No.144](#decision-no144) / [Stripe Step 5 実装報告](../09_開発履歴/2026-08-31_Stripe-Step5_membership-status連携_実装報告.md)

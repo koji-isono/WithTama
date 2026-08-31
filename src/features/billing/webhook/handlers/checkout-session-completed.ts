@@ -2,11 +2,12 @@ import type Stripe from "stripe";
 
 import { getStripeServerClient } from "@/lib/stripe/server";
 
+import { buildBreederUpdateFromSubscription } from "../apply-subscription-webhook-update";
 import { WebhookHandlerError } from "../errors";
 import { assertBreederSubscriptionProduct } from "../product-validation";
 import { getBreederWebhookRowById, updateBreederWebhookFields } from "../repository";
 import { assertCustomerIdMatches, assertSubscriptionIdReplaceAllowed } from "../resolve-breeder";
-import { extractSubscriptionSyncFields, resolveStripeId } from "../stripe-refs";
+import { resolveStripeId } from "../stripe-refs";
 
 async function loadSubscription(session: Stripe.Checkout.Session): Promise<Stripe.Subscription> {
   const subscriptionRef = session.subscription;
@@ -61,6 +62,12 @@ export async function handleCheckoutSessionCompleted(event: Stripe.Event): Promi
   assertSubscriptionIdReplaceAllowed(breeder, subscription.id);
   assertBreederSubscriptionProduct(subscription);
 
-  const fields = extractSubscriptionSyncFields(subscription);
+  const fields = buildBreederUpdateFromSubscription({
+    breeder,
+    subscription,
+    context: "checkout",
+    now: new Date(event.created * 1000),
+  });
+
   await updateBreederWebhookFields(breeder.id, fields);
 }

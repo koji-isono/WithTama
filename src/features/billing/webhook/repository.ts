@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { BreederWebhookRow, BreederWebhookUpdate, WebhookClaimResult } from "./types";
 
 const breederWebhookSelect =
-  "id, stripe_customer_id, stripe_subscription_id, stripe_price_id, membership_status, subscription_status, subscription_current_period_end, cancel_at_period_end, last_payment_failed_at";
+  "id, stripe_customer_id, stripe_subscription_id, stripe_price_id, membership_status, subscription_status, subscription_current_period_end, cancel_at_period_end, last_payment_failed_at, suspended_at";
 
 type WebhookEventTimestamps = {
   created_at: string;
