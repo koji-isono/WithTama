@@ -51,6 +51,32 @@ export function getOptionalStripeBreederProductId(): string | undefined {
   return readOptionalEnv("STRIPE_BREEDER_PRODUCT_ID");
 }
 
+/** Required in production; used when strict Product validation is enforced. */
+export function getStripeBreederProductId(): string {
+  return readRequiredEnv("STRIPE_BREEDER_PRODUCT_ID");
+}
+
+/** True when Product ID must be present (production webhook hardening). */
+export function isStripeBreederProductIdRequired(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+/**
+ * Resolves Product ID for subscription validation.
+ * - production + unset → StripeConfigError (fail closed)
+ * - non-production + unset → null (skip validation for local dev / tests)
+ */
+export function resolveStripeBreederProductIdForValidation(): string | null {
+  const configured = getOptionalStripeBreederProductId();
+  if (configured) {
+    return configured;
+  }
+  if (isStripeBreederProductIdRequired()) {
+    throw new StripeConfigError("STRIPE_BREEDER_PRODUCT_ID");
+  }
+  return null;
+}
+
 /** True when core Stripe server env vars needed for billing flows are present. Does not validate key format. */
 export function isStripeServerConfigured(): boolean {
   return Boolean(
