@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 
+import { getSignupEmailRedirectUrl } from "@/lib/supabase/auth-redirect";
+
 export type SignupRole = "buyer" | "breeder";
 
 export async function signUpWithRole(email: string, password: string, role: SignupRole) {
@@ -12,6 +14,7 @@ export async function signUpWithRole(email: string, password: string, role: Sign
       data: {
         role,
       },
+      emailRedirectTo: getSignupEmailRedirectUrl(),
     },
   });
 }

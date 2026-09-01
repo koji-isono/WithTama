@@ -17,18 +17,18 @@ const INVALID_LINK_MESSAGE =
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const invalidLinkError =
+    searchParams.get("error") === "invalid_link" ? INVALID_LINK_MESSAGE : null;
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [mismatchError, setMismatchError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [sessionError, setSessionError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [isCheckingSession, setIsCheckingSession] = useState(() => !invalidLinkError);
   const [hasRecoverySession, setHasRecoverySession] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const invalidLinkError =
-    searchParams.get("error") === "invalid_link" ? INVALID_LINK_MESSAGE : null;
 
   useEffect(() => {
     if (invalidLinkError) {
@@ -48,7 +48,7 @@ function ResetPasswordForm() {
         return;
       }
 
-      if (tokenHash && type) {
+      if (tokenHash && type === "recovery") {
         const params = new URLSearchParams({
           token_hash: tokenHash,
           type,
@@ -147,6 +147,13 @@ function ResetPasswordForm() {
           <AlertDescription>{invalidLinkError ?? sessionError}</AlertDescription>
         </Alert>
         <p className="mt-6 text-sm text-neutral-600">
+          <Link
+            href="/forgot-password"
+            className="font-medium text-[var(--primary)] underline-offset-4 hover:underline"
+          >
+            パスワード再設定メールを再送する
+          </Link>
+          {" · "}
           <Link
             href="/login"
             className="font-medium text-[var(--primary)] underline-offset-4 hover:underline"

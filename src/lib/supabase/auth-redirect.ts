@@ -1,7 +1,17 @@
+function getAppBaseUrl(): string {
+  return (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+}
+
+/**
+ * 新規登録確認メールの emailRedirectTo（Supabase Auth 許可 URL に登録すること）
+ */
+export function getSignupEmailRedirectUrl(): string {
+  return `${getAppBaseUrl()}/auth/callback?next=/login`;
+}
+
 /**
  * パスワード再設定メールの redirectTo（Supabase Auth 許可 URL に登録すること）
  */
 export function getPasswordRecoveryRedirectUrl(): string {
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
-  return `${appUrl}/auth/callback?next=/reset-password`;
+  return `${getAppBaseUrl()}/auth/callback?next=/reset-password`;
 }

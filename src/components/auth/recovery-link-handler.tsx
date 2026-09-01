@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
+import { buildAuthLandingRedirectPath } from "@/lib/auth/auth-callback-next";
+
 const AUTH_ROUTE_PREFIXES = ["/auth/", "/reset-password", "/forgot-password", "/login", "/signup"];
 
 function isAuthRoute(pathname: string): boolean {
@@ -42,26 +44,14 @@ export function RecoveryLinkHandler() {
     }
 
     const params = new URLSearchParams(search);
-    const code = params.get("code");
-    const tokenHash = params.get("token_hash");
-    const type = params.get("type");
+    const authRedirectPath = buildAuthLandingRedirectPath({
+      code: params.get("code") ?? undefined,
+      token_hash: params.get("token_hash") ?? undefined,
+      type: params.get("type") ?? undefined,
+    });
 
-    if (code) {
-      const next = type === "recovery" || !type ? "/reset-password" : "/login";
-      window.location.replace(
-        `/auth/callback?next=${encodeURIComponent(next)}&code=${encodeURIComponent(code)}`,
-      );
-      return;
-    }
-
-    if (tokenHash && type) {
-      const next = type === "recovery" ? "/reset-password" : "/login";
-      const confirmParams = new URLSearchParams({
-        token_hash: tokenHash,
-        type,
-        next,
-      });
-      window.location.replace(`/auth/confirm?${confirmParams.toString()}`);
+    if (authRedirectPath) {
+      window.location.replace(authRedirectPath);
     }
   }, [pathname]);
 

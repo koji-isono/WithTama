@@ -1,32 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-function buildAuthRedirectPath(params: Record<string, string | undefined>): string | null {
-  const tokenHash = params.token_hash;
-  const type = params.type;
-  const code = params.code;
-
-  if (tokenHash && type) {
-    const next = type === "recovery" ? "/reset-password" : "/login";
-    const query = new URLSearchParams({
-      token_hash: tokenHash,
-      type,
-      next,
-    });
-    return `/auth/confirm?${query.toString()}`;
-  }
-
-  if (code) {
-    const next = type === "recovery" || !type ? "/reset-password" : "/login";
-    const query = new URLSearchParams({
-      code,
-      next,
-    });
-    return `/auth/callback?${query.toString()}`;
-  }
-
-  return null;
-}
+import { buildAuthLandingRedirectPath } from "@/lib/auth/auth-callback-next";
 
 export default async function HomePage({
   searchParams,
@@ -34,7 +9,11 @@ export default async function HomePage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const params = await searchParams;
-  const authRedirectPath = buildAuthRedirectPath(params);
+  const authRedirectPath = buildAuthLandingRedirectPath({
+    code: params.code,
+    token_hash: params.token_hash,
+    type: params.type,
+  });
 
   if (authRedirectPath) {
     redirect(authRedirectPath);
