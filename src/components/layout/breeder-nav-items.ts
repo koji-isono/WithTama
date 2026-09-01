@@ -5,7 +5,6 @@ import {
   LayoutGrid,
   MessageCircle,
   PawPrint,
-  Settings,
   User,
   type LucideIcon,
 } from "lucide-react";
@@ -35,7 +34,6 @@ export const BREEDER_SIDEBAR_ITEMS: BreederNavItem[] = [
     icon: CreditCard,
     title: "月額会費",
   },
-  { label: "設定", href: "/breeder/settings", icon: Settings, title: "設定" },
 ];
 
 export const BREEDER_MOBILE_ITEMS: BreederNavItem[] = [
@@ -54,9 +52,7 @@ export const BREEDER_MOBILE_ITEMS: BreederNavItem[] = [
     icon: LayoutGrid,
     title: "メニュー",
     match: (pathname) =>
-      pathname.startsWith("/breeder/profile") ||
-      pathname.startsWith("/breeder/settings") ||
-      pathname.startsWith("/breeder/billing"),
+      pathname.startsWith("/breeder/profile") || pathname.startsWith("/breeder/billing"),
   },
 ];
 

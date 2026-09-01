@@ -1498,3 +1498,20 @@ _*管理者画面は AD-* で採番する_*
 - **影響範囲:** Stripe Webhook（Step 5）、`breeders.suspended_at`、`src/lib/stripe/membership-mapping.ts`
 - **決定日:** 2026-08-31
 - **参照:** [Decision No.144](#decision-no144) / [Stripe Step 5 実装報告](../09_開発履歴/2026-08-31_Stripe-Step5_membership-status連携_実装報告.md)
+
+---
+
+## Decision No.150
+
+**第1期ブリーダー共通 UI から通知ベルと未実装「設定」nav を除外する**
+
+- **決定内容:**
+  - 共通ヘッダーの **通知ベル（鈴アイコン）は第1期非表示** とする。サイト内通知センター（`notifications` テーブル、未読集約、Popover）は **将来対応**。
+  - PC サイドバーの **「設定」（`/breeder/settings`）nav は第1期非表示** とする。route 未実装の 404 リンクを production UI に残さない。月額会費は `/breeder/billing`（BR-13）、プロフィール編集は `/breeder/profile` で代替。
+  - ヘッダー **ログアウト** は Supabase Auth `signOut()`（browser client、`@supabase/ssr` cookie 無効化）→ `/login` redirect を実装する。
+- **理由:** クリックしても何も起きない UI を第1期 production から排除。問い合わせ未読等は BR-12 等の各画面で既に表示（Decision No.113 / No.116 と整合）。
+- **影響範囲:** `BreederHeader`、`breeder-nav-items`、`LogoutButton`、`sign-out.ts`
+- **Migration:** **追加しない**
+- **将来対応:** サイト内通知センター、メール通知（Resend）、`/breeder/settings` ハブ
+- **決定日:** 2026-09-01
+- **参照:** [ブリーダーヘッダー操作機能 調査報告](../09_開発履歴/2026-09-01_ブリーダーヘッダー操作機能_調査報告.md) / [Decision No.113](#decision-no113) / [BR-06](../04_画面設計/BR-06_ブリーダーダッシュボード.md)
