@@ -6,9 +6,11 @@ import { usePathname } from "next/navigation";
 import { getBreederPageTitle } from "@/components/layout/breeder-nav-items";
 import { Button } from "@/components/ui/button";
 
-const BREEDER_NAME = "田中 ブリーダー";
+type BreederHeaderProps = {
+  displayName: string;
+};
 
-export function BreederHeader() {
+export function BreederHeader({ displayName }: BreederHeaderProps) {
   const pathname = usePathname();
   const pageTitle = getBreederPageTitle(pathname);
 
@@ -23,7 +25,7 @@ export function BreederHeader() {
           </Button>
 
           <span className="hidden max-w-[8rem] truncate text-sm text-neutral-600 sm:inline">
-            {BREEDER_NAME}
+            {displayName}
           </span>
 
           <Button variant="outline" size="sm" className="rounded-full px-3">

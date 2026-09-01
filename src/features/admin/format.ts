@@ -12,22 +12,7 @@ import {
   type PetReviewLogAction,
 } from "./constants";
 
-export function formatBreederDisplayName(
-  businessName: string | null,
-  representativeName: string | null,
-): string {
-  const trimmedBusiness = businessName?.trim();
-  if (trimmedBusiness) {
-    return trimmedBusiness;
-  }
-
-  const trimmedRepresentative = representativeName?.trim();
-  if (trimmedRepresentative) {
-    return trimmedRepresentative;
-  }
-
-  return "（名称未設定）";
-}
+export { formatBreederDisplayName } from "@/lib/breeder/format";
 
 export function formatAdminPetReviewSubmittedAt(isoString: string): string {
   const date = new Date(isoString);

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { requireBreeder } from "@/features/auth/breeder-auth";
 import { loadLatestReturnedCommentForBreederSafely } from "@/features/breeder-review";
+import { formatBreederDisplayName } from "@/lib/breeder/format";
 
 import { isProfileEditable } from "./edit-guard";
 import {
@@ -130,4 +131,12 @@ export async function loadVerificationStepState(): Promise<VerificationStepIniti
     businessLicenseSubmitted: Boolean(row.business_license_path?.trim()),
     missingSteps: getMissingProfileSteps(row),
   };
+}
+
+/** Breeder layout header: session user → breeders row → display name only. */
+export async function loadBreederHeaderDisplayName(): Promise<string> {
+  const user = await requireBreeder();
+  const row = await getBasicProfileByUserId(user.id);
+
+  return formatBreederDisplayName(row?.business_name ?? null, row?.representative_name ?? null);
 }

@@ -32,6 +32,7 @@
     "test:buyer-profile-page": "npx tsx scripts/test-buyer-profile-page.mts",
     "test:buyer-dashboard-page": "npx tsx scripts/test-buyer-dashboard-page.mts",
     "test:breeder-dashboard-page": "npx tsx scripts/test-breeder-dashboard-page.mts",
+    "test:breeder-header-display-name": "npx tsx --env-file=.env.local scripts/test-breeder-header-display-name.mts",
     "test:breeder-profile-edit-guard": "npx tsx scripts/test-breeder-profile-edit-guard.mts",
     "test:breeder-profile-return-reason": "npx tsx scripts/test-breeder-profile-return-reason.mts",
     "test:breeder-profile-resubmit-ui": "npx tsx scripts/test-breeder-profile-resubmit-ui.mts",
