@@ -18,7 +18,10 @@ export async function getBreederReviewSummaryByUserId(
     .maybeSingle();
 
   if (error) {
-    throw error;
+    if (process.env.NODE_ENV === "development") {
+      console.error("[getBreederReviewSummaryByUserId]", error);
+    }
+    return null;
   }
 
   return data as BreederReviewSummaryRow | null;

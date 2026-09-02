@@ -49,7 +49,7 @@ function main(): void {
   record(
     checks,
     "2. resubmission_required only shows banner data",
-    dashboardLoaders.includes('summary.review_status !== "resubmission_required"') &&
+    dashboardLoaders.includes('context.review_status !== "resubmission_required"') &&
       dashboardLoaders.includes("resubmissionBanner: null"),
   );
   record(
@@ -73,12 +73,20 @@ function main(): void {
     checks,
     "7. submitted status does not fetch banner (loader guard)",
     dashboardLoaders.includes('"resubmission_required"') &&
-      dashboardLoaders.includes("loadLatestReturnedCommentForBreederSafely(summary.id)"),
+      dashboardLoaders.includes("loadLatestReturnedCommentForBreederSafely(context.id)"),
   );
   record(
     checks,
     "8. under_review / approved / rejected / draft hidden via status guard",
-    dashboardLoaders.includes('summary.review_status !== "resubmission_required"'),
+    dashboardLoaders.includes('context.review_status !== "resubmission_required"'),
+  );
+  record(
+    checks,
+    "8b. incomplete draft profile redirects to profile wizard",
+    dashboardLoaders.includes("ensureBreederProfileContextByUserId") &&
+      dashboardLoaders.includes("!context.profile_completed") &&
+      dashboardLoaders.includes('context.review_status === "draft"') &&
+      dashboardLoaders.includes('redirect(BREEDER_PROFILE_PATH)'),
   );
   record(
     checks,

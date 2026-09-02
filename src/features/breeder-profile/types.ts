@@ -217,6 +217,7 @@ export type ResubmitBreederProfileResult = CompleteBreederProfileResult;
 export type BreederProfileContextRow = {
   id: string;
   review_status: string;
+  profile_completed: boolean;
 };
 
 export type BreederProfilePageContext = {

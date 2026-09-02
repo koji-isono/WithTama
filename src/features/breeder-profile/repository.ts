@@ -20,7 +20,7 @@ import { BREEDER_DOCUMENTS_BUCKET } from "./document-constants";
 import { isValidBreederDocumentStoragePath } from "./document-utils";
 import { logBreederDocumentUploadFailure } from "./format-document-upload-error";
 
-const breederProfileContextSelect = "id, review_status";
+const breederProfileContextSelect = "id, review_status, profile_completed";
 
 const basicProfileSelect = "business_name, representative_name, phone, public_email, website_url";
 
@@ -41,10 +41,44 @@ export async function getBreederProfileContextByUserId(
     .maybeSingle();
 
   if (error) {
-    throw error;
+    if (process.env.NODE_ENV === "development") {
+      console.error("[getBreederProfileContextByUserId]", error);
+    }
+    return null;
   }
 
   return data as BreederProfileContextRow | null;
+}
+
+/** Creates a draft breeders row when missing (post-login / email-confirmed new breeders). */
+export async function ensureBreederProfileContextByUserId(
+  userId: string,
+): Promise<BreederProfileContextRow | null> {
+  const existing = await getBreederProfileContextByUserId(userId);
+  if (existing) {
+    return existing;
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("breeders")
+    .insert({ user_id: userId })
+    .select(breederProfileContextSelect)
+    .single();
+
+  if (error) {
+    if (error.code === "23505") {
+      return getBreederProfileContextByUserId(userId);
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.error("[ensureBreederProfileContextByUserId]", error);
+    }
+    return null;
+  }
+
+  return data as BreederProfileContextRow;
 }
 
 const introductionProfileSelect =
@@ -129,7 +163,10 @@ export async function getBasicProfileByUserId(userId: string): Promise<BasicProf
     .maybeSingle();
 
   if (error) {
-    throw error;
+    if (process.env.NODE_ENV === "development") {
+      console.error("[getBasicProfileByUserId]", error);
+    }
+    return null;
   }
 
   return data as BasicProfileRow | null;

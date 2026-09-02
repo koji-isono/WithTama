@@ -8,7 +8,7 @@ import { formatBreederDisplayName } from "@/lib/breeder/format";
 
 import { isProfileEditable } from "./edit-guard";
 import {
-  getBreederProfileContextByUserId,
+  ensureBreederProfileContextByUserId,
   getBasicProfileByUserId,
   getIntroductionProfileByUserId,
   getLicenseProfileByUserId,
@@ -29,6 +29,9 @@ import {
 } from "./types";
 
 const BREEDER_DASHBOARD_PATH = "/breeder/dashboard";
+
+const BREEDER_PROFILE_LOAD_ERROR_MESSAGE =
+  "ブリーダー情報を読み込めませんでした。時間をおいて再度お試しください。";
 
 function mapRowToLicenseProfileInput(
   row: NonNullable<Awaited<ReturnType<typeof getLicenseProfileByUserId>>>,
@@ -55,9 +58,13 @@ function mapRowToIntroductionProfileInput(
 export async function loadBreederProfilePageContext(): Promise<BreederProfilePageContext> {
   const user = await requireBreeder();
 
-  const context = await getBreederProfileContextByUserId(user.id);
+  const context = await ensureBreederProfileContextByUserId(user.id);
 
-  if (!context || !isProfileEditable(context.review_status)) {
+  if (!context) {
+    throw new Error(BREEDER_PROFILE_LOAD_ERROR_MESSAGE);
+  }
+
+  if (!isProfileEditable(context.review_status)) {
     redirect(BREEDER_DASHBOARD_PATH);
   }
 

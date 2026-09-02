@@ -85,6 +85,9 @@ export function IntroductionStepForm({
       }
 
       router.push(verificationPath);
+    } catch (error) {
+      console.error(error);
+      setSaveError("保存に失敗しました。時間をおいて再度お試しください。");
     } finally {
       setIsSubmitting(false);
     }

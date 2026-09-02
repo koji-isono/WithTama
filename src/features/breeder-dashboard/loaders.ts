@@ -1,11 +1,18 @@
 import "server-only";
 
+import { redirect } from "next/navigation";
+
 import { requireBreeder } from "@/features/auth/breeder-auth";
 import { parseCheckoutReturnQuery } from "@/features/billing/billing-display";
+import { ensureBreederProfileContextByUserId } from "@/features/breeder-profile/repository";
 import { loadLatestReturnedCommentForBreederSafely } from "@/features/breeder-review";
 
-import { getBreederReviewSummaryByUserId } from "./repository";
 import type { BreederDashboardPageData } from "./types";
+
+const BREEDER_PROFILE_PATH = "/breeder/profile";
+
+const BREEDER_PROFILE_LOAD_ERROR_MESSAGE =
+  "ブリーダー情報を読み込めませんでした。時間をおいて再度お試しください。";
 
 export async function loadBreederDashboardPageData(input?: {
   checkoutQuery?: string;
@@ -14,13 +21,21 @@ export async function loadBreederDashboardPageData(input?: {
 
   const checkoutReturn = parseCheckoutReturnQuery(input?.checkoutQuery);
 
-  const summary = await getBreederReviewSummaryByUserId(user.id);
+  const context = await ensureBreederProfileContextByUserId(user.id);
 
-  if (!summary || summary.review_status !== "resubmission_required") {
+  if (!context) {
+    throw new Error(BREEDER_PROFILE_LOAD_ERROR_MESSAGE);
+  }
+
+  if (!context.profile_completed && context.review_status === "draft") {
+    redirect(BREEDER_PROFILE_PATH);
+  }
+
+  if (context.review_status !== "resubmission_required") {
     return { resubmissionBanner: null, checkoutReturn };
   }
 
-  const comment = await loadLatestReturnedCommentForBreederSafely(summary.id);
+  const comment = await loadLatestReturnedCommentForBreederSafely(context.id);
 
   return {
     resubmissionBanner: { comment },

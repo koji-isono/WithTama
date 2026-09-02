@@ -3,7 +3,7 @@ import "server-only";
 import { getCurrentBreeder } from "@/features/auth/breeder-auth";
 
 import { isProfileEditable, PROFILE_NOT_EDITABLE_MESSAGE } from "./edit-guard";
-import { getBreederProfileContextByUserId } from "./repository";
+import { ensureBreederProfileContextByUserId } from "./repository";
 
 export type AuthorizeEditableBreederProfileResult =
   | {
@@ -21,10 +21,13 @@ export async function authorizeEditableBreederProfile(): Promise<AuthorizeEditab
     return { ok: false, error: "ログインが必要です。" };
   }
 
-  const context = await getBreederProfileContextByUserId(user.id);
+  const context = await ensureBreederProfileContextByUserId(user.id);
 
   if (!context) {
-    return { ok: false, error: "プロフィールが見つかりません。" };
+    return {
+      ok: false,
+      error: "ブリーダー情報を読み込めませんでした。時間をおいて再度お試しください。",
+    };
   }
 
   if (!isProfileEditable(context.review_status)) {
