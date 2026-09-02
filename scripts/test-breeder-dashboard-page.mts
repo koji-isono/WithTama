@@ -86,7 +86,7 @@ function main(): void {
     dashboardLoaders.includes("ensureBreederProfileContextByUserId") &&
       dashboardLoaders.includes("!context.profile_completed") &&
       dashboardLoaders.includes('context.review_status === "draft"') &&
-      dashboardLoaders.includes('redirect(BREEDER_PROFILE_PATH)'),
+      dashboardLoaders.includes("redirect(BREEDER_PROFILE_PATH)"),
   );
   record(
     checks,

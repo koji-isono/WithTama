@@ -26,13 +26,13 @@ Server
 
 ### 2.1 開発サーバーログ
 
-| ログ | 内容 |
-| ---- | ---- |
-| `⨯ Error: {"message":"Internal server error."}` | Supabase `PostgrestError` がそのまま throw された痕跡 |
-| `[getBasicProfileByUserId] { message: 'Internal server error.' }` | layout ヘッダー表示名取得時の DB エラー（dev ログ） |
-| `[getBreederProfileContextByUserId] { message: 'Internal server error.' }` | プロフィール context 取得時の DB エラー |
-| `POST /breeder/profile/introduction 500` | 紹介ステップ保存時、Client 側 `catch` なしによる unhandled rejection |
-| `GET /breeder/dashboard 200` | ページ自体は 200 だが、throw された非 `Error` オブジェクトが overlay を起こす |
+| ログ                                                                       | 内容                                                                          |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `⨯ Error: {"message":"Internal server error."}`                            | Supabase `PostgrestError` がそのまま throw された痕跡                         |
+| `[getBasicProfileByUserId] { message: 'Internal server error.' }`          | layout ヘッダー表示名取得時の DB エラー（dev ログ）                           |
+| `[getBreederProfileContextByUserId] { message: 'Internal server error.' }` | プロフィール context 取得時の DB エラー                                       |
+| `POST /breeder/profile/introduction 500`                                   | 紹介ステップ保存時、Client 側 `catch` なしによる unhandled rejection          |
+| `GET /breeder/dashboard 200`                                               | ページ自体は 200 だが、throw された非 `Error` オブジェクトが overlay を起こす |
 
 ### 2.2 コード追跡（Server Component / layout / 認証 / Supabase）
 
@@ -62,13 +62,13 @@ Server Component から Client Component へ **エラーオブジェクトを pr
 
 ### 2.4 新規ブリーダー（プロフィール未完成）の状態
 
-| 項目 | 内容 |
-| ---- | ---- |
-| `breeders` 行 | メール認証直後は **存在しない場合あり**（正常） |
-| RLS | `breeders_insert_own` / `breeders_select_own` で本人 INSERT/SELECT 可 |
-| `.maybeSingle()` | 行なし → `data: null`（エラーではない） |
-| 旧 dashboard loader | 行なし + DB エラー時に throw → Runtime Error |
-| 旧 profile layout | `!context` → dashboard へ redirect → サイドバーから dashboard に来ると不整合 |
+| 項目                | 内容                                                                         |
+| ------------------- | ---------------------------------------------------------------------------- |
+| `breeders` 行       | メール認証直後は **存在しない場合あり**（正常）                              |
+| RLS                 | `breeders_insert_own` / `breeders_select_own` で本人 INSERT/SELECT 可        |
+| `.maybeSingle()`    | 行なし → `data: null`（エラーではない）                                      |
+| 旧 dashboard loader | 行なし + DB エラー時に throw → Runtime Error                                 |
+| 旧 profile layout   | `!context` → dashboard へ redirect → サイドバーから dashboard に来ると不整合 |
 
 ### 2.5 DB Migration
 
@@ -86,16 +86,16 @@ Server Component から Client Component へ **エラーオブジェクトを pr
 
 ## 4. 修正内容
 
-| ファイル | 変更 |
-| -------- | ---- |
-| `src/features/breeder-profile/repository.ts` | 読み取り系は throw せず `null` + dev ログ。`ensureBreederProfileContextByUserId()` 追加（draft 行 INSERT、23505 競合時は再取得） |
-| `src/features/breeder-profile/types.ts` | `BreederProfileContextRow` に `profile_completed` 追加 |
-| `src/features/breeder-profile/loaders.ts` | `ensure` 利用。`!context` 時の dashboard 誤 redirect 削除 |
-| `src/features/breeder-profile/service-auth.ts` | 保存前認可でも `ensure` 利用 |
-| `src/features/breeder-dashboard/loaders.ts` | `ensure` + 未完成 draft は `/breeder/profile` へ redirect |
-| `src/features/breeder-dashboard/repository.ts` | エラー時 throw → `null` |
-| `src/features/breeder-profile/components/introduction-step-form.tsx` | server action の `catch` 追加 |
-| `scripts/test-breeder-dashboard-page.mts` | 新 loader 仕様に合わせて更新 |
+| ファイル                                                             | 変更                                                                                                                             |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `src/features/breeder-profile/repository.ts`                         | 読み取り系は throw せず `null` + dev ログ。`ensureBreederProfileContextByUserId()` 追加（draft 行 INSERT、23505 競合時は再取得） |
+| `src/features/breeder-profile/types.ts`                              | `BreederProfileContextRow` に `profile_completed` 追加                                                                           |
+| `src/features/breeder-profile/loaders.ts`                            | `ensure` 利用。`!context` 時の dashboard 誤 redirect 削除                                                                        |
+| `src/features/breeder-profile/service-auth.ts`                       | 保存前認可でも `ensure` 利用                                                                                                     |
+| `src/features/breeder-dashboard/loaders.ts`                          | `ensure` + 未完成 draft は `/breeder/profile` へ redirect                                                                        |
+| `src/features/breeder-dashboard/repository.ts`                       | エラー時 throw → `null`                                                                                                          |
+| `src/features/breeder-profile/components/introduction-step-form.tsx` | server action の `catch` 追加                                                                                                    |
+| `scripts/test-breeder-dashboard-page.mts`                            | 新 loader 仕様に合わせて更新                                                                                                     |
 
 ### 4.1 触っていないもの
 
@@ -110,34 +110,34 @@ Server Component から Client Component へ **エラーオブジェクトを pr
 
 ### 5.1 新規ブリーダー（`profile_completed = false` / `review_status = draft`）
 
-| 操作 | 挙動 |
-| ---- | ---- |
-| `/breeder` 入口 | 従来どおり `/breeder/profile` へ |
+| 操作                      | 挙動                                                     |
+| ------------------------- | -------------------------------------------------------- |
+| `/breeder` 入口           | 従来どおり `/breeder/profile` へ                         |
 | `/breeder/dashboard` 直接 | **`/breeder/profile` へ redirect**（Runtime Error なし） |
-| プロフィール wizard | `ensure` で draft 行を確保してから編集 |
-| 紹介ステップ保存失敗 | フォーム内エラー表示（overlay なし） |
+| プロフィール wizard       | `ensure` で draft 行を確保してから編集                   |
+| 紹介ステップ保存失敗      | フォーム内エラー表示（overlay なし）                     |
 
 ### 5.2 既存ブリーダー
 
-| 状態 | 挙動 |
-| ---- | ---- |
-| `submitted` / `under_review` / `approved` | 従来どおり dashboard 表示 |
-| `resubmission_required` | 差戻しバナー表示（`context.id` ベース、変更なし） |
-| ヘッダー表示名 | DB エラー時は `（名称未設定）` にフォールバック（クラッシュしない） |
+| 状態                                      | 挙動                                                                |
+| ----------------------------------------- | ------------------------------------------------------------------- |
+| `submitted` / `under_review` / `approved` | 従来どおり dashboard 表示                                           |
+| `resubmission_required`                   | 差戻しバナー表示（`context.id` ベース、変更なし）                   |
+| ヘッダー表示名                            | DB エラー時は `（名称未設定）` にフォールバック（クラッシュしない） |
 
 ---
 
 ## 6. 検証結果
 
-| 項目 | 結果 |
-| ---- | ---- |
-| `npm run lint` | PASS |
-| `npm run typecheck` | PASS |
-| `npm run build` | PASS |
-| `npm run test:breeder-dashboard-page` | **17 / 17 PASS** |
+| 項目                                          | 結果             |
+| --------------------------------------------- | ---------------- |
+| `npm run lint`                                | PASS             |
+| `npm run typecheck`                           | PASS             |
+| `npm run build`                               | PASS             |
+| `npm run test:breeder-dashboard-page`         | **17 / 17 PASS** |
 | `npm run test:breeder-profile-initial-values` | **33 / 33 PASS** |
-| `npm run test:breeder-profile-edit-guard` | **28 / 28 PASS** |
-| `npm run test:breeder-header-display-name` | **25 / 25 PASS** |
+| `npm run test:breeder-profile-edit-guard`     | **28 / 28 PASS** |
+| `npm run test:breeder-header-display-name`    | **25 / 25 PASS** |
 
 ### 6.1 ブラウザ / dev サーバー
 
