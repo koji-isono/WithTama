@@ -55,7 +55,9 @@ Stripe Customer Portal の **期間終了解約予約** を WithTama が正し�
 5. Step 6 に CASE B 統合テスト追加（`buildBreederUpdateFromSubscription` 経路）
 6. 回帰テスト実行
 
-**未実施:** DB 手動更新 / Migration / BR-13 UI 変更 / 手動 E2E 再実施 / push
+**未実施:** DB 手動更新 / Migration / BR-13 UI 変更
+
+**後日実施:** 手動 E2E（§19 参照） / push（§20 参照）
 
 ---
 
@@ -159,36 +161,155 @@ SDK 型根拠:
 
 | 項目    | 内容                                                 |
 | ------- | ---------------------------------------------------- |
-| hash    | （commit 後に追記）                                  |
+| hash    | `ed174c5`                                            |
 | message | `fix(billing): detect scheduled Stripe cancellation` |
 
 ---
 
-## 16. push の有無
+## 16. push の有無（修正 commit `ed174c5`）
 
-**未実施**（ユーザー指示）
+**未実施**（修正 commit 時点）
 
 ---
 
 ## 17. 未確認事項・残課題
 
-| #   | 内容                                        | 区分           |
-| --- | ------------------------------------------- | -------------- |
-| 1   | Test Mode 手動 E2E（解約予約 → BR-13 表示） | **未実施**     |
-| 2   | 解約取消 → 「利用中」復帰の手動 E2E         | **未実施**     |
-| 3   | 本番 Stripe API version で同一挙動か        | **未確認**     |
-| 4   | `trialing` / `paused` + `cancel_at` 境界    | 自動テストのみ |
+| #   | 内容                                        | 区分                                  |
+| --- | ------------------------------------------- | ------------------------------------- |
+| 1   | 本番 Stripe API version で同一挙動か        | **未確認**                            |
+| 2   | `trialing` / `paused` + `cancel_at` 境界    | 自動テストのみ                        |
+| 3   | 期間終了まで待つ `subscription.deleted` E2E | **未実施**（Step 5 自動テストで担保） |
 
 ---
 
-## 18. 次に実施する手動 E2E
+## 18. 次に実施する手動 E2E（修正 commit 時点）
 
-1. `stripe listen --forward-to localhost:3000/api/webhooks/stripe` 起動（whsec 同期）
-2. active テスト用ブリーダーで `/breeder/billing` を開く
-3. Portal で「期間終了時に解約」
-4. Webhook 200 → DB `cancel_at_period_end=true` を確認
-5. BR-13 再表示 → **「解約予定」「利用終了予定日」** を確認
-6. Portal で「サブスクを続ける」→ DB `false` → **「利用中」** 復帰を確認
+~~1. stripe listen 起動~~ → **§19 で PASS 済み**
+
+---
+
+## 19. 手動 E2E 結果
+
+### 実施日
+
+2026-09-04
+
+### 環境
+
+- Stripe Test Mode
+- Stripe Customer Portal
+- Stripe CLI Webhook forwarding
+- localhost Next.js
+- Supabase 接続環境
+
+### 解約予約
+
+| 項目                            | 結果     |
+| ------------------------------- | -------- |
+| Customer Portal 操作            | **PASS** |
+| `customer.subscription.updated` | **PASS** |
+| Webhook HTTP 200                | **PASS** |
+| Supabase 同期                   | **PASS** |
+| BR-13「解約予定」表示           | **PASS** |
+| 利用終了予定日表示              | **PASS** |
+
+確認内容（ユーザー実ブラウザ）:
+
+- 初期: 「利用中」「次回更新予定日 2026年10月2日」
+- Portal: 「10/02 に終了します」「サブスクを続ける」
+- 再読み込み後: 「解約予定」「2026年10月2日に利用終了予定です。」「解約予定日までは引き続きご利用いただけます。」「利用終了予定日 2026年10月2日」
+
+### 解約取消
+
+| 項目                            | 結果     |
+| ------------------------------- | -------- |
+| Customer Portal 操作            | **PASS** |
+| `customer.subscription.updated` | **PASS** |
+| Webhook HTTP 200                | **PASS** |
+| Supabase 同期                   | **PASS** |
+| BR-13「利用中」復帰             | **PASS** |
+| 次回更新予定日復帰              | **PASS** |
+
+確認内容（ユーザー実ブラウザ）:
+
+- Portal「サブスクを続ける」実行後、BR-13 が「利用中」「次回更新予定日 2026年10月2日」に復帰
+- Stripe 側でも次回請求が復活（ユーザー目視確認）
+
+### E2E 総合判定
+
+**PASS**
+
+### 確認できた一連のフロー
+
+```
+利用中
+  → Customer Portal
+  → 期間終了解約
+  → customer.subscription.updated
+  → Webhook
+  → Supabase
+  → BR-13 解約予定
+  → Customer Portal
+  → サブスク継続
+  → customer.subscription.updated
+  → Webhook
+  → Supabase
+  → BR-13 利用中
+```
+
+### 残課題（手動 E2E 時点）
+
+- 本番 Stripe API version での同一挙動: **未確認**
+- 期間終了後 `subscription.deleted` までの E2E: **未実施**（Step 5 自動テストで担保）
+- `trialing` / `paused` 状態での Portal 解約予約: **未実施**
+
+---
+
+## 20. E2E 報告 commit
+
+| 項目    | 内容                                                   |
+| ------- | ------------------------------------------------------ |
+| hash    | （E2E 報告 commit 後に追記）                           |
+| message | `docs(billing): record Stripe cancellation E2E result` |
+
+---
+
+## 21. push 結果（修正 + E2E 報告）
+
+| 項目   | 内容                        |
+| ------ | --------------------------- |
+| branch | `main`                      |
+| 結果   | （push 後に追記）           |
+| 対象   | `ed174c5` + E2E 報告 commit |
+
+---
+
+## 22. GitHub Actions（push 後）
+
+| 項目         | 結果              |
+| ------------ | ----------------- |
+| workflow     | CI                |
+| run          | （push 後に追記） |
+| status       | （push 後に追記） |
+| npm ci       | （push 後に追記） |
+| lint         | （push 後に追記） |
+| typecheck    | （push 後に追記） |
+| format:check | （push 後に追記） |
+| build        | （push 後に追記） |
+
+---
+
+## 23. 旧 §17〜18（修正 commit 時点の記録）
+
+<details>
+<summary>修正 commit 時点の未確認・次手順（アーカイブ）</summary>
+
+| #   | 内容                                        | 区分                  |
+| --- | ------------------------------------------- | --------------------- |
+| 1   | Test Mode 手動 E2E（解約予約 → BR-13 表示） | ~~未実施~~ → §19 PASS |
+| 2   | 解約取消 → 「利用中」復帰の手動 E2E         | ~~未実施~~ → §19 PASS |
+
+</details>
 
 ---
 
