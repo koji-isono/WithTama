@@ -269,33 +269,40 @@ SDK 型根拠:
 
 | 項目    | 内容                                                   |
 | ------- | ------------------------------------------------------ |
-| hash    | （E2E 報告 commit 後に追記）                           |
+| hash    | `4e1867e`                                              |
 | message | `docs(billing): record Stripe cancellation E2E result` |
 
 ---
 
 ## 21. push 結果（修正 + E2E 報告）
 
-| 項目   | 内容                        |
-| ------ | --------------------------- |
-| branch | `main`                      |
-| 結果   | （push 後に追記）           |
-| 対象   | `ed174c5` + E2E 報告 commit |
+| 項目   | 内容                                              |
+| ------ | ------------------------------------------------- |
+| branch | `main`                                            |
+| 結果   | **成功** — `846a863..4e1867e  main -> main`      |
+| 対象   | `ed174c5`（修正）+ `4e1867e`（E2E 報告）         |
 
 ---
 
 ## 22. GitHub Actions（push 後）
 
-| 項目         | 結果              |
-| ------------ | ----------------- |
-| workflow     | CI                |
-| run          | （push 後に追記） |
-| status       | （push 後に追記） |
-| npm ci       | （push 後に追記） |
-| lint         | （push 後に追記） |
-| typecheck    | （push 後に追記） |
-| format:check | （push 後に追記） |
-| build        | （push 後に追記） |
+| 項目         | 結果                                                            |
+| ------------ | --------------------------------------------------------------- |
+| workflow     | **CI**（`.github/workflows/ci.yml`）                            |
+| run          | **#63**                                                         |
+| head commit  | `4e1867e`                                                       |
+| status       | **success**                                                     |
+| URL          | https://github.com/koji-isono/WithTama/actions/runs/33845231278 |
+
+### job: `quality`
+
+| step                   | 結果    |
+| ---------------------- | ------- |
+| `npm ci`               | success |
+| `npm run lint`         | success |
+| `npm run typecheck`    | success |
+| `npm run format:check` | success |
+| `npm run build`        | success |
 
 ---
 
@@ -317,3 +324,17 @@ SDK 型根拠:
 
 - [原因調査報告](./2026-09-04_Stripe-Step7_BR-13_解約予約E2E_原因調査_報告.md)
 - [BR-13 解約予約表示 実装報告](./2026-09-04_BR-13_解約予約表示対応_実装報告.md)
+
+---
+
+## 最終ドキュメント確定
+
+| 項目                  | 内容                                                                 |
+| --------------------- | -------------------------------------------------------------------- |
+| 作業日                | 2026-09-04                                                           |
+| 種別                  | ドキュメント整理のみ（**コード変更なし**）                           |
+| 実施内容              | §20〜22（E2E 報告 commit / push 結果 / GitHub Actions #63）を commit |
+| 手動 E2E 総合         | **PASS**（§19 参照）                                                 |
+| Stripe Step 7 + BR-13 | **FINAL PASS**                                                       |
+
+**注:** 本セクション追記時点の最終 docs commit hash / push 結果 / 当該 commit 起動 CI は、再帰的な docs 更新を避けるため本 MD には記載しない。Git 履歴・CI 結果は作業完了報告（Cursor）を正とする。
