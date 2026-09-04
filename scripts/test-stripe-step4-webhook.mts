@@ -27,6 +27,7 @@ import {
   eventCreatedAtIso,
   extractSubscriptionSyncFields,
   resolveStripeId,
+  resolveSubscriptionCancelAtPeriodEnd,
 } from "@/features/billing/webhook/stripe-refs";
 import { isWebhookEventFinalized } from "@/features/billing/webhook/repository";
 import {
@@ -143,6 +144,84 @@ function sampleSubscription(overrides: Partial<Stripe.Subscription> = {}): Strip
     metadata: { breeder_id: "breeder-uuid-1" },
     ...overrides,
   } as Stripe.Subscription;
+}
+
+function testCancelAtPeriodEndSync(checks: Check[]): void {
+  const periodEnd = 1_700_100_000;
+
+  const caseA = extractSubscriptionSyncFields(
+    sampleSubscription({ cancel_at_period_end: true, cancel_at: null }),
+  );
+  record(
+    checks,
+    "27b. CASE A: cancel_at_period_end=true → sync true",
+    caseA.cancel_at_period_end === true,
+  );
+
+  const caseB = extractSubscriptionSyncFields(
+    sampleSubscription({
+      cancel_at_period_end: false,
+      cancel_at: periodEnd,
+      items: {
+        object: "list",
+        data: [
+          {
+            id: "si_test",
+            object: "subscription_item",
+            current_period_end: periodEnd,
+            price: {
+              id: "price_test",
+              object: "price",
+              product: "prod_withtama_breeder",
+            } as Stripe.Price,
+          } as Stripe.SubscriptionItem,
+        ],
+        has_more: false,
+        url: "/v1/subscription_items",
+      },
+    }),
+  );
+  record(
+    checks,
+    "27c. CASE B: cancel_at === current_period_end → sync true",
+    caseB.cancel_at_period_end === true,
+  );
+
+  const caseC = extractSubscriptionSyncFields(
+    sampleSubscription({ cancel_at_period_end: false, cancel_at: null }),
+  );
+  record(checks, "27d. CASE C: cancel_at null → sync false", caseC.cancel_at_period_end === false);
+
+  const caseD = extractSubscriptionSyncFields(
+    sampleSubscription({
+      cancel_at_period_end: false,
+      cancel_at: periodEnd + 86_400,
+    }),
+  );
+  record(
+    checks,
+    "27e. CASE D: cancel_at != current_period_end → sync false",
+    caseD.cancel_at_period_end === false,
+  );
+
+  const caseE = extractSubscriptionSyncFields(
+    sampleSubscription({
+      status: "canceled",
+      cancel_at_period_end: false,
+      cancel_at: periodEnd,
+    }),
+  );
+  record(
+    checks,
+    "27f. CASE E: canceled status + cancel_at → sync false",
+    caseE.cancel_at_period_end === false,
+  );
+
+  record(
+    checks,
+    "27g. resolveSubscriptionCancelAtPeriodEnd exported for mapping",
+    typeof resolveSubscriptionCancelAtPeriodEnd === "function",
+  );
 }
 
 async function testSignatureAndRouting(checks: Check[]): Promise<void> {
@@ -345,6 +424,8 @@ function testBreederSafetyAndSync(checks: Check[]): void {
     "28. resolveStripeId handles expanded customer",
     resolveStripeId({ id: "cus_x" } as Stripe.Customer) === "cus_x",
   );
+
+  testCancelAtPeriodEndSync(checks);
 
   const createdIso = eventCreatedAtIso(buildTestEvent({ created: 1_700_000_000 }));
   record(

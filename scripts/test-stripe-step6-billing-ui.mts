@@ -407,6 +407,19 @@ function main(): void {
       cancelScheduledSync.membership_status !== "suspended",
   );
 
+  const periodEndUnix = 1_789_344_000;
+  const cancelScheduledViaCancelAt = buildBreederUpdateFromSubscription({
+    breeder: sampleBreeder(),
+    subscription: sampleSubscription({ cancel_at: periodEndUnix }),
+    context: "sync",
+  });
+  record(
+    checks,
+    "38b. CASE B: cancel_at === period_end sync → cancel_at_period_end true",
+    cancelScheduledViaCancelAt.cancel_at_period_end === true &&
+      cancelScheduledViaCancelAt.membership_status !== "canceled",
+  );
+
   const cancelUndoSync = buildBreederUpdateFromSubscription({
     breeder: sampleBreeder({ cancel_at_period_end: true }),
     subscription: sampleSubscription({ cancel_at_period_end: false }),

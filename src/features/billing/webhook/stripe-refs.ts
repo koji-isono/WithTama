@@ -15,14 +15,55 @@ export function resolveInvoiceSubscriptionId(invoice: Stripe.Invoice): string | 
   return resolveStripeId(subscriptionRef);
 }
 
+/** Unix seconds from first subscription item (Stripe SDK: number). */
+export function resolveSubscriptionCurrentPeriodEndUnix(
+  subscription: Stripe.Subscription,
+): number | null {
+  const periodEnd = subscription.items.data[0]?.current_period_end;
+  if (periodEnd == null) {
+    return null;
+  }
+  return periodEnd;
+}
+
 export function resolveSubscriptionCurrentPeriodEnd(
   subscription: Stripe.Subscription,
 ): string | null {
-  const periodEnd = subscription.items.data[0]?.current_period_end;
-  if (!periodEnd) {
+  const periodEnd = resolveSubscriptionCurrentPeriodEndUnix(subscription);
+  if (periodEnd == null) {
     return null;
   }
   return new Date(periodEnd * 1000).toISOString();
+}
+
+/** Terminal Stripe statuses — do not infer period-end cancel schedule from cancel_at alone. */
+const SUBSCRIPTION_STATUSES_INELIGIBLE_FOR_PERIOD_END_CANCEL: ReadonlySet<Stripe.Subscription.Status> =
+  new Set(["canceled", "unpaid", "incomplete_expired", "incomplete"]);
+
+/**
+ * Maps Stripe Subscription → WithTama cancel_at_period_end (DB flag).
+ * CASE A: cancel_at_period_end=true. CASE B: cancel_at equals item current_period_end.
+ */
+export function resolveSubscriptionCancelAtPeriodEnd(subscription: Stripe.Subscription): boolean {
+  if (subscription.cancel_at_period_end === true) {
+    return true;
+  }
+
+  if (SUBSCRIPTION_STATUSES_INELIGIBLE_FOR_PERIOD_END_CANCEL.has(subscription.status)) {
+    return false;
+  }
+
+  const cancelAt = subscription.cancel_at;
+  if (cancelAt == null) {
+    return false;
+  }
+
+  const periodEnd = resolveSubscriptionCurrentPeriodEndUnix(subscription);
+  if (periodEnd == null) {
+    return false;
+  }
+
+  return cancelAt === periodEnd;
 }
 
 export type SubscriptionSyncFields = {
@@ -50,7 +91,7 @@ export function extractSubscriptionSyncFields(
     stripe_price_id: price?.id ?? null,
     subscription_status: subscription.status,
     subscription_current_period_end: resolveSubscriptionCurrentPeriodEnd(subscription),
-    cancel_at_period_end: subscription.cancel_at_period_end ?? false,
+    cancel_at_period_end: resolveSubscriptionCancelAtPeriodEnd(subscription),
   };
 }
 
