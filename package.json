@@ -70,7 +70,9 @@
     "test:stripe-step3-checkout-live": "npx tsx scripts/test-stripe-step3-checkout-live.mts",
     "test:stripe-step4-webhook": "npx tsx --import ./scripts/mock-server-only.mts scripts/test-stripe-step4-webhook.mts",
     "test:stripe-step5-membership-status": "npx tsx --import ./scripts/mock-server-only.mts scripts/test-stripe-step5-membership-status.mts",
-    "test:stripe-step6-billing-ui": "npx tsx scripts/test-stripe-step6-billing-ui.mts"
+    "test:stripe-step6-billing-ui": "npx tsx scripts/test-stripe-step6-billing-ui.mts",
+    "test:stripe-step7-customer-portal": "npx tsx scripts/test-stripe-step7-customer-portal.mts",
+    "test:stripe-step7-portal-live": "npx tsx --env-file=.env.local scripts/test-stripe-step7-portal-live.mts"
   },
   "dependencies": {
     "@radix-ui/react-select": "^2.3.7",

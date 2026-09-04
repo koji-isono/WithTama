@@ -150,10 +150,10 @@ function main(): void {
   record(checks, "13. suspended has no Checkout CTA", suspended.showCheckoutCta === false);
   record(
     checks,
-    "14. suspended shows portal prep notice (no portal link)",
-    suspended.auxiliaryMessage?.includes("準備中") === true &&
-      !view.includes("billing.stripe.com") &&
-      !view.includes("portal"),
+    "14. suspended shows Portal CTA (not prep notice)",
+    suspended.showPortalCta === true &&
+      suspended.portalCtaLabel?.includes("お支払い方法") === true &&
+      suspended.auxiliaryMessage === null,
   );
 
   const canceled = resolveBillingStatusPresentation({

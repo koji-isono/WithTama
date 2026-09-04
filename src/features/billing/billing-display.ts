@@ -3,6 +3,8 @@
  * membership_status is primary; subscription_status is auxiliary only.
  */
 
+import { shouldShowPortalCta } from "./portal-gate";
+
 export type MembershipStatus = "pending" | "active" | "suspended" | "canceled";
 
 export type BillingUiVariant =
@@ -15,6 +17,8 @@ export type BillingStatusPresentation = {
   auxiliaryMessage: string | null;
   showCheckoutCta: boolean;
   checkoutCtaLabel: string | null;
+  showPortalCta: boolean;
+  portalCtaLabel: string | null;
   showNextRenewalDate: boolean;
   showEndScheduledDate: boolean;
 };
@@ -26,8 +30,10 @@ export const BREEDER_BILLING_PATH = "/breeder/billing";
 export const BILLING_CHECKOUT_PENDING_LABEL = "月額会費のお支払いへ";
 export const BILLING_CHECKOUT_RESUBSCRIBE_LABEL = "もう一度申し込む";
 export const BILLING_CHECKOUT_LOADING_LABEL = "お支払い画面を開いています…";
+export const BILLING_PORTAL_LOADING_LABEL = "お支払い設定を開いています…";
 
-export const BILLING_SUSPENDED_PORTAL_NOTICE = "お支払い方法の確認・変更機能は準備中です。";
+export const BILLING_PORTAL_ACTIVE_LABEL = "支払い方法を確認・変更";
+export const BILLING_PORTAL_SUSPENDED_LABEL = "お支払い方法を確認する";
 
 export const BILLING_PAST_DUE_AUXILIARY_MESSAGE =
   "現在、お支払い状況を確認しています。サービスは引き続きご利用いただけます。";
@@ -59,6 +65,24 @@ export function shouldShowCheckoutCta(membershipStatus: MembershipStatus): boole
   return membershipStatus === "pending" || membershipStatus === "canceled";
 }
 
+function resolvePortalPresentation(input: {
+  membershipStatus: MembershipStatus;
+  reviewApproved: boolean;
+  variant: BillingUiVariant;
+}): Pick<BillingStatusPresentation, "showPortalCta" | "portalCtaLabel"> {
+  const showPortalCta = input.reviewApproved && shouldShowPortalCta(input.membershipStatus);
+
+  if (!showPortalCta) {
+    return { showPortalCta: false, portalCtaLabel: null };
+  }
+
+  if (input.variant === "suspended") {
+    return { showPortalCta: true, portalCtaLabel: BILLING_PORTAL_SUSPENDED_LABEL };
+  }
+
+  return { showPortalCta: true, portalCtaLabel: BILLING_PORTAL_ACTIVE_LABEL };
+}
+
 export function resolveBillingStatusPresentation(input: {
   membershipStatus: MembershipStatus;
   subscriptionStatus: string | null;
@@ -71,6 +95,11 @@ export function resolveBillingStatusPresentation(input: {
   });
 
   const showCheckoutCta = input.reviewApproved && shouldShowCheckoutCta(input.membershipStatus);
+  const portal = resolvePortalPresentation({
+    membershipStatus: input.membershipStatus,
+    reviewApproved: input.reviewApproved,
+    variant,
+  });
 
   switch (variant) {
     case "pending":
@@ -84,6 +113,7 @@ export function resolveBillingStatusPresentation(input: {
           : "審査承認後に月額会費のお支払い手続きが可能になります。",
         showCheckoutCta,
         checkoutCtaLabel: showCheckoutCta ? BILLING_CHECKOUT_PENDING_LABEL : null,
+        ...portal,
         showNextRenewalDate: false,
         showEndScheduledDate: false,
       };
@@ -96,6 +126,7 @@ export function resolveBillingStatusPresentation(input: {
           input.subscriptionStatus === "past_due" ? BILLING_PAST_DUE_AUXILIARY_MESSAGE : null,
         showCheckoutCta: false,
         checkoutCtaLabel: null,
+        ...portal,
         showNextRenewalDate: true,
         showEndScheduledDate: false,
       };
@@ -107,6 +138,7 @@ export function resolveBillingStatusPresentation(input: {
         auxiliaryMessage: null,
         showCheckoutCta: false,
         checkoutCtaLabel: null,
+        ...portal,
         showNextRenewalDate: false,
         showEndScheduledDate: true,
       };
@@ -115,9 +147,10 @@ export function resolveBillingStatusPresentation(input: {
         variant,
         headline: "お支払いの確認が必要です",
         description: "月額会費のお支払いを確認できない状態です。",
-        auxiliaryMessage: BILLING_SUSPENDED_PORTAL_NOTICE,
+        auxiliaryMessage: null,
         showCheckoutCta: false,
         checkoutCtaLabel: null,
+        ...portal,
         showNextRenewalDate: false,
         showEndScheduledDate: false,
       };
@@ -129,6 +162,7 @@ export function resolveBillingStatusPresentation(input: {
         auxiliaryMessage: null,
         showCheckoutCta,
         checkoutCtaLabel: showCheckoutCta ? BILLING_CHECKOUT_RESUBSCRIBE_LABEL : null,
+        ...portal,
         showNextRenewalDate: false,
         showEndScheduledDate: false,
       };

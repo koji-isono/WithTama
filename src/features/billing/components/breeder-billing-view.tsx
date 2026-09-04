@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BILLING_PLAN_NAME, BILLING_PLAN_PRICE_LABEL } from "../billing-display";
 import type { BreederBillingPageData } from "../types";
 import { BillingCheckoutButton } from "./billing-checkout-button";
+import { BillingPortalButton } from "./billing-portal-button";
 
 type BreederBillingViewProps = BreederBillingPageData;
 
@@ -73,6 +74,16 @@ export function BreederBillingView({ presentation, periodEndLabel }: BreederBill
           {presentation.showCheckoutCta && presentation.checkoutCtaLabel ? (
             <div className="border-t border-[var(--border)] pt-5">
               <BillingCheckoutButton label={presentation.checkoutCtaLabel} />
+            </div>
+          ) : null}
+
+          {presentation.showPortalCta && presentation.portalCtaLabel ? (
+            <div
+              className={
+                presentation.showCheckoutCta ? "pt-3" : "border-t border-[var(--border)] pt-5"
+              }
+            >
+              <BillingPortalButton label={presentation.portalCtaLabel} />
             </div>
           ) : null}
         </CardContent>
