@@ -276,23 +276,23 @@ SDK 型根拠:
 
 ## 21. push 結果（修正 + E2E 報告）
 
-| 項目   | 内容                                              |
-| ------ | ------------------------------------------------- |
-| branch | `main`                                            |
-| 結果   | **成功** — `846a863..4e1867e  main -> main`      |
-| 対象   | `ed174c5`（修正）+ `4e1867e`（E2E 報告）         |
+| 項目   | 内容                                        |
+| ------ | ------------------------------------------- |
+| branch | `main`                                      |
+| 結果   | **成功** — `846a863..4e1867e  main -> main` |
+| 対象   | `ed174c5`（修正）+ `4e1867e`（E2E 報告）    |
 
 ---
 
 ## 22. GitHub Actions（push 後）
 
-| 項目         | 結果                                                            |
-| ------------ | --------------------------------------------------------------- |
-| workflow     | **CI**（`.github/workflows/ci.yml`）                            |
-| run          | **#63**                                                         |
-| head commit  | `4e1867e`                                                       |
-| status       | **success**                                                     |
-| URL          | https://github.com/koji-isono/WithTama/actions/runs/33845231278 |
+| 項目        | 結果                                                            |
+| ----------- | --------------------------------------------------------------- |
+| workflow    | **CI**（`.github/workflows/ci.yml`）                            |
+| run         | **#63**                                                         |
+| head commit | `4e1867e`                                                       |
+| status      | **success**                                                     |
+| URL         | https://github.com/koji-isono/WithTama/actions/runs/33845231278 |
 
 ### job: `quality`
 
@@ -337,4 +337,69 @@ SDK 型根拠:
 | 手動 E2E 総合         | **PASS**（§19 参照）                                                 |
 | Stripe Step 7 + BR-13 | **FINAL PASS**                                                       |
 
-**注:** 本セクション追記時点の最終 docs commit hash / push 結果 / 当該 commit 起動 CI は、再帰的な docs 更新を避けるため本 MD には記載しない。Git 履歴・CI 結果は作業完了報告（Cursor）を正とする。
+### 最終 docs commit
+
+| 項目    | 内容                                                     |
+| ------- | -------------------------------------------------------- |
+| hash    | `8cc76a4`                                                |
+| message | `docs(billing): finalize Stripe cancellation E2E report` |
+
+### push 結果（最終 docs commit）
+
+| 項目   | 内容                                        |
+| ------ | ------------------------------------------- |
+| branch | `main`                                      |
+| 結果   | **成功** — `4e1867e..8cc76a4  main -> main` |
+
+### GitHub Actions（最終 docs commit push 後）
+
+| 項目        | 結果                                                            |
+| ----------- | --------------------------------------------------------------- |
+| workflow    | **CI**（`.github/workflows/ci.yml`）                            |
+| run         | **#64**                                                         |
+| head commit | `8cc76a4`                                                       |
+| status      | **failure**                                                     |
+| URL         | https://github.com/koji-isono/WithTama/actions/runs/33846118105 |
+
+#### job: `quality`
+
+| step                   | 結果    |
+| ---------------------- | ------- |
+| `npm ci`               | success |
+| `npm run lint`         | success |
+| `npm run typecheck`    | success |
+| `npm run format:check` | failure |
+| `npm run build`        | skipped |
+
+**失敗原因:** 本報告書 MD の Prettier 未整形。機能コードは CI **#63**（`4e1867e`）で success 済み。
+
+### git status（作業完了時点）
+
+| 区分       | 内容                                                                 |
+| ---------- | -------------------------------------------------------------------- |
+| 対象 MD    | commit 済み（working tree に残存なし）                               |
+| 無関係変更 | 他 docs / `next-env.d.ts` / `tsconfig.tsbuildinfo` 等 — **未 touch** |
+
+### Stripe Step 7 + BR-13 総合判定
+
+**FINAL PASS**
+
+| 区分              | 結果     | 根拠                                |
+| ----------------- | -------- | ----------------------------------- |
+| Webhook 修正      | **PASS** | `ed174c5`                           |
+| 手動 E2E          | **PASS** | §19                                 |
+| 機能 CI           | **PASS** | Actions **#63**（`4e1867e`）        |
+| 最終 docs CI      | **FAIL** | Actions **#64** — format:check のみ |
+| Customer Portal   | **PASS** | `4bcc89e`                           |
+| BR-13 解約予約 UI | **PASS** | `846a863`                           |
+
+### CI クリーンアップ（format:check 修正）
+
+| 項目             | 内容                                                   |
+| ---------------- | ------------------------------------------------------ |
+| 作業日           | 2026-09-04                                             |
+| 対象 CI          | GitHub Actions **#64**（head: `8cc76a4`）              |
+| 失敗 step        | `npm run format:check`                                 |
+| 原因             | 本報告書 MD の Prettier 未整形                         |
+| 対応             | 本報告書 MD を Prettier 整形（**機能コード変更なし**） |
+| その他 step 結果 | `npm ci` / `lint` / `typecheck` — success（#64 時点）  |
