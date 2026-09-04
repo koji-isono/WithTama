@@ -9,11 +9,18 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
+  BILLING_ACTIVE_CANCEL_SCHEDULED_HEADLINE,
+  BILLING_PORTAL_ACTIVE_LABEL,
   BREEDER_BILLING_PATH,
   BILLING_CHECKOUT_SUCCESS_MESSAGE,
+  buildCancelScheduledDescription,
   resolveBillingStatusPresentation,
+  resolveBillingUiVariant,
   shouldShowCheckoutCta,
 } from "@/features/billing/billing-display";
+import { buildBreederUpdateFromSubscription } from "@/features/billing/webhook/apply-subscription-webhook-update";
+import type { BreederWebhookRow } from "@/features/billing/webhook/types";
+import type Stripe from "stripe";
 
 type Check = {
   name: string;
@@ -118,22 +125,28 @@ function main(): void {
     pastDue.auxiliaryMessage?.includes("引き続きご利用") === true,
   );
 
+  const periodEndSample = "2026年10月2日";
+
   const cancelScheduled = resolveBillingStatusPresentation({
     membershipStatus: "active",
     subscriptionStatus: "active",
     cancelAtPeriodEnd: true,
     reviewApproved: true,
+    periodEndLabel: periodEndSample,
   });
   record(
     checks,
     "10. cancel_at_period_end shows 解約予定 (not canceled)",
-    cancelScheduled.headline === "解約予定" &&
+    cancelScheduled.headline === BILLING_ACTIVE_CANCEL_SCHEDULED_HEADLINE &&
       cancelScheduled.variant === "active_cancel_scheduled",
   );
   record(
     checks,
-    "11. cancel scheduled hides next renewal date",
-    cancelScheduled.showNextRenewalDate === false && cancelScheduled.showEndScheduledDate === true,
+    "11. cancel scheduled shows end date and cancel copy (not next renewal)",
+    cancelScheduled.showNextRenewalDate === false &&
+      cancelScheduled.showEndScheduledDate === true &&
+      cancelScheduled.description.includes(`${periodEndSample}に利用終了予定です`) &&
+      cancelScheduled.description.includes("解約予定日までは引き続きご利用いただけます"),
   );
 
   const suspended = resolveBillingStatusPresentation({
@@ -287,6 +300,142 @@ function main(): void {
     "33. user-facing error uses generic message constant",
     checkoutBtn.includes("BILLING_CHECKOUT_GENERIC_ERROR_MESSAGE") &&
       !checkoutBtn.includes("error.message"),
+  );
+
+  const normalActive = resolveBillingStatusPresentation({
+    membershipStatus: "active",
+    subscriptionStatus: "active",
+    cancelAtPeriodEnd: false,
+    reviewApproved: true,
+    periodEndLabel: periodEndSample,
+  });
+  record(
+    checks,
+    "34. A: normal active shows 利用中 + next renewal + portal active label",
+    normalActive.headline === "利用中" &&
+      normalActive.showNextRenewalDate === true &&
+      normalActive.showEndScheduledDate === false &&
+      normalActive.portalCtaLabel === BILLING_PORTAL_ACTIVE_LABEL,
+  );
+
+  record(
+    checks,
+    "35. B: cancel scheduled shows end date label + same portal label as active",
+    cancelScheduled.headline === BILLING_ACTIVE_CANCEL_SCHEDULED_HEADLINE &&
+      cancelScheduled.showEndScheduledDate === true &&
+      cancelScheduled.portalCtaLabel === BILLING_PORTAL_ACTIVE_LABEL &&
+      buildCancelScheduledDescription(periodEndSample).includes(
+        `${periodEndSample}に利用終了予定です`,
+      ),
+  );
+
+  record(
+    checks,
+    "36. C: cancel_at_period_end keeps active variant (not canceled)",
+    resolveBillingUiVariant({ membershipStatus: "active", cancelAtPeriodEnd: true }) ===
+      "active_cancel_scheduled",
+  );
+
+  const afterUndo = resolveBillingStatusPresentation({
+    membershipStatus: "active",
+    subscriptionStatus: "active",
+    cancelAtPeriodEnd: false,
+    reviewApproved: true,
+    periodEndLabel: periodEndSample,
+  });
+  record(
+    checks,
+    "37. D: cancel undo (cancel_at_period_end=false) reverts to normal active UI",
+    afterUndo.variant === "active" &&
+      afterUndo.headline === "利用中" &&
+      afterUndo.showNextRenewalDate === true &&
+      afterUndo.portalCtaLabel === BILLING_PORTAL_ACTIVE_LABEL,
+  );
+
+  const sampleBreeder = (overrides: Partial<BreederWebhookRow> = {}): BreederWebhookRow => ({
+    id: "breeder-uuid-1",
+    stripe_customer_id: "cus_test_1",
+    stripe_subscription_id: "sub_test_1",
+    stripe_price_id: "price_test",
+    membership_status: "active",
+    subscription_status: "active",
+    subscription_current_period_end: "2026-10-02T00:00:00.000Z",
+    cancel_at_period_end: false,
+    last_payment_failed_at: null,
+    suspended_at: null,
+    ...overrides,
+  });
+
+  const sampleSubscription = (overrides: Partial<Stripe.Subscription> = {}): Stripe.Subscription =>
+    ({
+      id: "sub_test_1",
+      object: "subscription",
+      customer: "cus_test_1",
+      status: "active",
+      cancel_at_period_end: false,
+      items: {
+        object: "list",
+        data: [
+          {
+            id: "si_test",
+            object: "subscription_item",
+            current_period_end: 1_789_344_000,
+            price: {
+              id: "price_test",
+              object: "price",
+              product: "prod_withtama_breeder",
+            },
+          },
+        ],
+        has_more: false,
+        url: "/v1/subscription_items",
+      },
+      metadata: { breeder_id: "breeder-uuid-1" },
+      ...overrides,
+    }) as Stripe.Subscription;
+
+  const cancelScheduledSync = buildBreederUpdateFromSubscription({
+    breeder: sampleBreeder(),
+    subscription: sampleSubscription({ cancel_at_period_end: true }),
+    context: "sync",
+  });
+  record(
+    checks,
+    "38. E: cancel_at_period_end sync keeps membership active",
+    cancelScheduledSync.cancel_at_period_end === true &&
+      cancelScheduledSync.membership_status !== "canceled" &&
+      cancelScheduledSync.membership_status !== "suspended",
+  );
+
+  const cancelUndoSync = buildBreederUpdateFromSubscription({
+    breeder: sampleBreeder({ cancel_at_period_end: true }),
+    subscription: sampleSubscription({ cancel_at_period_end: false }),
+    context: "sync",
+  });
+  record(
+    checks,
+    "39. D/E: cancel undo sync sets cancel_at_period_end=false without canceling membership",
+    cancelUndoSync.cancel_at_period_end === false &&
+      (cancelUndoSync.membership_status === undefined ||
+        cancelUndoSync.membership_status === "active"),
+  );
+
+  record(
+    checks,
+    "40. billing view shows 利用終了予定日 for cancel scheduled",
+    view.includes("利用終了予定日") && view.includes("showEndScheduledDate"),
+  );
+
+  record(
+    checks,
+    "41. loader passes cancel_at_period_end to presentation",
+    loaders.includes("cancel_at_period_end") && loaders.includes("periodEndLabel"),
+  );
+
+  record(
+    checks,
+    "42. cancel scheduled uses calm amber accent (distinct from active green)",
+    view.includes("active_cancel_scheduled") && view.includes("text-amber-800"),
   );
 
   finish(checks);

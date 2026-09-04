@@ -35,6 +35,8 @@ export const BILLING_PORTAL_LOADING_LABEL = "お支払い設定を開いてい�
 export const BILLING_PORTAL_ACTIVE_LABEL = "支払い方法を確認・変更";
 export const BILLING_PORTAL_SUSPENDED_LABEL = "お支払い方法を確認する";
 
+export const BILLING_ACTIVE_CANCEL_SCHEDULED_HEADLINE = "解約予定";
+
 export const BILLING_PAST_DUE_AUXILIARY_MESSAGE =
   "現在、お支払い状況を確認しています。サービスは引き続きご利用いただけます。";
 
@@ -83,11 +85,21 @@ function resolvePortalPresentation(input: {
   return { showPortalCta: true, portalCtaLabel: BILLING_PORTAL_ACTIVE_LABEL };
 }
 
+/** BR-13 copy when cancel_at_period_end is true (period end from DB, not hardcoded). */
+export function buildCancelScheduledDescription(periodEndLabel: string | null): string {
+  if (periodEndLabel) {
+    return `${periodEndLabel}に利用終了予定です。解約予定日までは引き続きご利用いただけます。`;
+  }
+
+  return "解約予定日までは引き続きご利用いただけます。";
+}
+
 export function resolveBillingStatusPresentation(input: {
   membershipStatus: MembershipStatus;
   subscriptionStatus: string | null;
   cancelAtPeriodEnd: boolean;
   reviewApproved: boolean;
+  periodEndLabel?: string | null;
 }): BillingStatusPresentation {
   const variant = resolveBillingUiVariant({
     membershipStatus: input.membershipStatus,
@@ -133,8 +145,8 @@ export function resolveBillingStatusPresentation(input: {
     case "active_cancel_scheduled":
       return {
         variant,
-        headline: "解約予定",
-        description: "現在の契約期間終了までは WithTamaをご利用いただけます。",
+        headline: BILLING_ACTIVE_CANCEL_SCHEDULED_HEADLINE,
+        description: buildCancelScheduledDescription(input.periodEndLabel ?? null),
         auxiliaryMessage: null,
         showCheckoutCta: false,
         checkoutCtaLabel: null,

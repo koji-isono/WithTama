@@ -25,14 +25,15 @@ export async function loadBreederBillingPageData(): Promise<BreederBillingPageDa
 
   const reviewApproved = row.review_status === "approved";
 
+  const periodEndLabel = formatBillingPeriodEnd(row.subscription_current_period_end);
+
   const presentation = resolveBillingStatusPresentation({
     membershipStatus,
     subscriptionStatus: row.subscription_status,
     cancelAtPeriodEnd: row.cancel_at_period_end,
     reviewApproved,
+    periodEndLabel,
   });
-
-  const periodEndLabel = formatBillingPeriodEnd(row.subscription_current_period_end);
 
   return {
     presentation,

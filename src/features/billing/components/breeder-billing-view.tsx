@@ -16,7 +16,7 @@ function statusAccentClass(variant: BreederBillingPageData["presentation"]["vari
     case "active":
       return "text-emerald-700";
     case "active_cancel_scheduled":
-      return "text-amber-700";
+      return "text-amber-800";
     case "suspended":
       return "text-red-700";
     case "canceled":
