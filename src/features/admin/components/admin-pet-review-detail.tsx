@@ -2,10 +2,15 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowLeft, ImageOff } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { ADMIN_PET_REVIEW_DETAIL_SCREEN_ID, ADMIN_PET_REVIEWS_PATH } from "../constants";
+import {
+  ADMIN_PET_REVIEW_DETAIL_SCREEN_ID,
+  ADMIN_PET_REVIEWS_PATH,
+  ADMIN_PET_REVIEW_TYPE_LABELS,
+} from "../constants";
 import { formatAdminNullableText } from "../format";
 import type { AdminPetReviewDetailPageData } from "../types";
 import { AdminPetReviewActions } from "./admin-pet-review-actions";
@@ -139,6 +144,7 @@ function AdminPetReviewHistory({
 
 export function AdminPetReviewDetail({ data }: AdminPetReviewDetailProps) {
   const displayName = data.pet.publicDisplayName?.trim() || "（公開表示名未設定）";
+  const isDescriptionReview = data.reviewType === "description";
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
@@ -153,10 +159,28 @@ export function AdminPetReviewDetail({ data }: AdminPetReviewDetailProps) {
           {ADMIN_PET_REVIEW_DETAIL_SCREEN_ID}
         </p>
         <h1 className="mt-2 text-3xl font-bold">犬猫掲載審査詳細</h1>
-        <p className="mt-3 text-neutral-600">{displayName}</p>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <p className="text-neutral-600">{displayName}</p>
+          <Badge variant="outline">{ADMIN_PET_REVIEW_TYPE_LABELS[data.reviewType]}</Badge>
+        </div>
       </div>
 
       <div className="space-y-6">
+        {isDescriptionReview ? (
+          <DetailSection title="紹介文変更内容">
+            <DetailField
+              label="現在公開中の紹介文"
+              value={formatAdminNullableText(data.pet.description)}
+              multiline
+            />
+            <DetailField
+              label="変更後の紹介文"
+              value={formatAdminNullableText(data.pet.pendingDescription)}
+              multiline
+            />
+          </DetailSection>
+        ) : null}
+
         <DetailSection title="犬猫基本情報">
           <DetailField label="管理名" value={data.pet.managementName} />
           <DetailField label="公開表示名" value={displayName} />
@@ -170,11 +194,13 @@ export function AdminPetReviewDetail({ data }: AdminPetReviewDetailProps) {
             value={formatAdminNullableText(data.pet.temperament)}
             multiline
           />
-          <DetailField
-            label="紹介文"
-            value={formatAdminNullableText(data.pet.description)}
-            multiline
-          />
+          {!isDescriptionReview ? (
+            <DetailField
+              label="紹介文"
+              value={formatAdminNullableText(data.pet.description)}
+              multiline
+            />
+          ) : null}
           <DetailField label="価格" value={data.pet.priceLabel} />
           <DetailField
             label="価格補足"
@@ -272,7 +298,11 @@ export function AdminPetReviewDetail({ data }: AdminPetReviewDetailProps) {
           </CardContent>
         </Card>
 
-        <AdminPetReviewActions petId={data.pet.id} petDisplayName={displayName} />
+        <AdminPetReviewActions
+          petId={data.pet.id}
+          petDisplayName={displayName}
+          reviewType={data.reviewType}
+        />
       </div>
     </main>
   );

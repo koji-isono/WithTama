@@ -44,13 +44,16 @@
 
 ### CHECK 制約 — action
 
-| 値          | 説明                     | `comment`                          |
-| ----------- | ------------------------ | ---------------------------------- |
-| `submitted` | ブリーダーによる公開申請 | NULL 可                            |
-| `returned`  | 管理者による差戻し       | **必須**（`btrim(comment) <> ''`） |
-| `approved`  | 管理者による公開承認     | NULL 可                            |
+| 値                      | 説明                           | `comment`                          |
+| ----------------------- | ------------------------------ | ---------------------------------- |
+| `submitted`             | ブリーダーによる公開申請       | NULL 可                            |
+| `returned`              | 管理者による差戻し             | **必須**（`btrim(comment) <> ''`） |
+| `approved`              | 管理者による公開承認           | NULL 可                            |
+| `description_submitted` | ブリーダーによる紹介文変更申請 | NULL 可                            |
+| `description_approved`  | 管理者による紹介文変更承認     | NULL 可                            |
+| `description_returned`  | 管理者による紹介文変更差戻し   | **必須**                           |
 
-DB 制約: `pet_review_logs_returned_comment_check` — `action = 'returned'` 時は `comment IS NOT NULL AND btrim(comment) <> ''`
+DB 制約: `pet_review_logs_returned_comment_check` — `action IN ('returned', 'description_returned')` 時は comment 非空
 
 ### ビジネスルール
 

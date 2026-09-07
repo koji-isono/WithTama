@@ -19,6 +19,7 @@ import type {
 } from "../types";
 import { hasPetValidationErrors, validateCreatePetDraftInput } from "../validation";
 import { PetDraftFormFields } from "./pet-draft-form-fields";
+import { PetDescriptionRevisionSection } from "./pet-description-revision-section";
 import { PetPhotoManager } from "./pet-photo-manager";
 
 type PetEditFormProps = {
@@ -99,6 +100,13 @@ export function PetEditForm({ initialData }: PetEditFormProps) {
     router.push(BREEDER_PETS_PATH);
   }
 
+  const descriptionMode =
+    initialData.status === "published"
+      ? "hidden"
+      : initialData.status === "under_review"
+        ? "readonly"
+        : "edit";
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-6 pb-28 sm:py-10 sm:pb-10">
       <header className="mb-8 space-y-3">
@@ -127,6 +135,7 @@ export function PetEditForm({ initialData }: PetEditFormProps) {
               fieldErrors={fieldErrors}
               isSubmitting={isSubmitting}
               onFieldChange={updateField}
+              descriptionMode={descriptionMode}
             />
 
             {saveSuccess ? (
@@ -164,6 +173,16 @@ export function PetEditForm({ initialData }: PetEditFormProps) {
           </form>
         </CardContent>
       </Card>
+
+      {initialData.status === "published" ? (
+        <PetDescriptionRevisionSection
+          petId={initialData.petId}
+          publishedDescription={initialData.publishedDescription}
+          pendingDescription={initialData.pendingDescription}
+          descriptionReviewStatus={initialData.descriptionReviewStatus}
+          descriptionReturnReason={initialData.descriptionReturnReason}
+        />
+      ) : null}
 
       <PetPhotoManager petId={initialData.petId} initialPhotos={initialData.photos} />
     </div>

@@ -12,14 +12,23 @@ import { Textarea } from "@/components/ui/textarea";
 
 import {
   ADMIN_PET_REVIEWS_PATH,
+  ADMIN_PET_DESCRIPTION_REVIEW_APPROVE_CONFIRM_MESSAGE,
+  ADMIN_PET_DESCRIPTION_REVIEW_RETURN_CONFIRM_MESSAGE,
   ADMIN_PET_REVIEW_APPROVE_CONFIRM_MESSAGE,
   ADMIN_PET_REVIEW_RETURN_CONFIRM_MESSAGE,
+  type AdminPetReviewType,
 } from "../constants";
-import { approvePetForPublishAction, returnPetReviewAction } from "../service";
+import {
+  approvePetDescriptionRevisionAction,
+  approvePetForPublishAction,
+  returnPetDescriptionRevisionAction,
+  returnPetReviewAction,
+} from "../service";
 
 type AdminPetReviewActionsProps = {
   petId: string;
   petDisplayName: string;
+  reviewType: AdminPetReviewType;
 };
 
 type ConfirmDialogProps = {
@@ -101,7 +110,11 @@ function ConfirmDialog({
   );
 }
 
-export function AdminPetReviewActions({ petId, petDisplayName }: AdminPetReviewActionsProps) {
+export function AdminPetReviewActions({
+  petId,
+  petDisplayName,
+  reviewType,
+}: AdminPetReviewActionsProps) {
   const router = useRouter();
   const [returnComment, setReturnComment] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
@@ -118,12 +131,25 @@ export function AdminPetReviewActions({ petId, petDisplayName }: AdminPetReviewA
     router.refresh();
   }
 
+  const isDescriptionReview = reviewType === "description";
+  const approveConfirmMessage = isDescriptionReview
+    ? ADMIN_PET_DESCRIPTION_REVIEW_APPROVE_CONFIRM_MESSAGE
+    : ADMIN_PET_REVIEW_APPROVE_CONFIRM_MESSAGE;
+  const returnConfirmMessage = isDescriptionReview
+    ? ADMIN_PET_DESCRIPTION_REVIEW_RETURN_CONFIRM_MESSAGE
+    : ADMIN_PET_REVIEW_RETURN_CONFIRM_MESSAGE;
+  const approveButtonLabel = isDescriptionReview ? "承認して反映" : "承認して公開";
+  const approveDialogTitle = isDescriptionReview ? "紹介文変更承認の確認" : "公開承認の確認";
+  const approveDialogConfirmLabel = isDescriptionReview ? "承認して反映" : "承認して公開";
+
   async function handleConfirmApprove() {
     setActionError(null);
     setIsApproving(true);
 
     try {
-      const result = await approvePetForPublishAction(petId);
+      const result = isDescriptionReview
+        ? await approvePetDescriptionRevisionAction(petId)
+        : await approvePetForPublishAction(petId);
 
       if (!result.success) {
         setActionError(result.error);
@@ -142,7 +168,9 @@ export function AdminPetReviewActions({ petId, petDisplayName }: AdminPetReviewA
     setIsReturning(true);
 
     try {
-      const result = await returnPetReviewAction(petId, returnComment);
+      const result = isDescriptionReview
+        ? await returnPetDescriptionRevisionAction(petId, returnComment)
+        : await returnPetReviewAction(petId, returnComment);
 
       if (!result.success) {
         setActionError(result.error);
@@ -193,7 +221,9 @@ export function AdminPetReviewActions({ petId, petDisplayName }: AdminPetReviewA
         </CardHeader>
         <CardContent className="space-y-5">
           <p className="text-sm text-neutral-600">
-            内容を確認のうえ、公開承認または差戻しを行ってください。
+            {isDescriptionReview
+              ? "紹介文の変更内容を確認のうえ、承認または差戻しを行ってください。"
+              : "内容を確認のうえ、公開承認または差戻しを行ってください。"}
           </p>
 
           {actionError && !approveDialogOpen && !returnDialogOpen ? (
@@ -232,7 +262,7 @@ export function AdminPetReviewActions({ petId, petDisplayName }: AdminPetReviewA
               onClick={handleOpenApproveDialog}
               disabled={isBusy}
             >
-              承認して公開
+              {approveButtonLabel}
             </Button>
           </div>
         </CardContent>
@@ -240,10 +270,10 @@ export function AdminPetReviewActions({ petId, petDisplayName }: AdminPetReviewA
 
       <ConfirmDialog
         open={approveDialogOpen}
-        title="公開承認の確認"
-        message={ADMIN_PET_REVIEW_APPROVE_CONFIRM_MESSAGE}
+        title={approveDialogTitle}
+        message={approveConfirmMessage}
         petDisplayName={petDisplayName}
-        confirmLabel="承認して公開"
+        confirmLabel={approveDialogConfirmLabel}
         isSubmitting={isApproving}
         error={actionError}
         onCancel={handleCloseApproveDialog}
@@ -253,7 +283,7 @@ export function AdminPetReviewActions({ petId, petDisplayName }: AdminPetReviewA
       <ConfirmDialog
         open={returnDialogOpen}
         title="差戻しの確認"
-        message={ADMIN_PET_REVIEW_RETURN_CONFIRM_MESSAGE}
+        message={returnConfirmMessage}
         petDisplayName={petDisplayName}
         confirmLabel="差戻しする"
         isSubmitting={isReturning}

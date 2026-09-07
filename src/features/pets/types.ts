@@ -3,6 +3,8 @@ export type PetSex = "male" | "female";
 export type PetStatus =
   "draft" | "under_review" | "published" | "paused" | "family_decided" | "closed";
 
+export type DescriptionReviewStatus = "none" | "draft" | "under_review" | "returned";
+
 /** Supabase public.pets 行型（一覧・Repository 用） */
 export type PetRow = {
   id: string;
@@ -70,6 +72,7 @@ export type CreatePetDraftInput = {
   birthday: string;
   color: string;
   temperament: string;
+  description: string;
   price: string;
   priceComment: string;
 };
@@ -87,6 +90,7 @@ export const INITIAL_CREATE_PET_DRAFT_INPUT: CreatePetDraftInput = {
   birthday: "",
   color: "",
   temperament: "",
+  description: "",
   price: "",
   priceComment: "",
 };
@@ -100,6 +104,7 @@ export type NormalizedCreatePetDraftInput = {
   birthday: string | null;
   color: string | null;
   temperament: string | null;
+  description: string | null;
   price: number | null;
   priceComment: string | null;
 };
@@ -113,6 +118,7 @@ export type InsertPetData = {
   birthday: string | null;
   color: string | null;
   temperament: string | null;
+  description: string | null;
   price: number | null;
   price_comment: string | null;
   status: "draft";
@@ -136,6 +142,9 @@ export type PetEditRow = {
   birthday: string | null;
   color: string | null;
   temperament: string | null;
+  description: string | null;
+  pending_description: string | null;
+  description_review_status: DescriptionReviewStatus;
   price: number | null;
   price_comment: string | null;
   status: PetStatus;
@@ -172,6 +181,10 @@ export type InsertPetPhotoData = {
 export type PetEditPageData = {
   petId: string;
   status: PetStatus;
+  descriptionReviewStatus: DescriptionReviewStatus;
+  publishedDescription: string | null;
+  pendingDescription: string | null;
+  descriptionReturnReason: string | null;
   input: CreatePetDraftInput;
   photos: PetPhotoListItem[];
 };
@@ -182,6 +195,10 @@ export type UploadPetPhotoResult =
 export type PetPhotoActionResult = { success: true } | { success: false; error: string };
 
 export type SubmitPetForReviewResult = { success: true } | { success: false; error: string };
+
+export type DescriptionRevisionActionResult =
+  | { success: true }
+  | { success: false; error: string; fieldErrors?: { pendingDescription?: string } };
 
 /** published_pets_public View 行（Repository 用） */
 export type PublishedPetPublicRow = {
@@ -294,6 +311,7 @@ export type UpdatePetDraftData = {
   birthday: string | null;
   color: string | null;
   temperament: string | null;
+  description: string | null;
   price: number | null;
   price_comment: string | null;
   updated_by: string;
@@ -423,6 +441,7 @@ export function mapPetEditRowToInput(row: PetEditRow): CreatePetDraftInput {
     birthday: row.birthday ?? "",
     color: row.color ?? "",
     temperament: row.temperament ?? "",
+    description: row.description ?? "",
     price: row.price != null ? String(row.price) : "",
     priceComment: row.price_comment ?? "",
   };

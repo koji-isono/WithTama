@@ -25,7 +25,7 @@ const petListWithMainPhotoSelect =
   "id, management_name, public_display_name, species, breed, sex, birthday, price, status, updated_at";
 
 const petEditSelect =
-  "id, breeder_id, management_name, public_display_name, species, breed, sex, birthday, color, temperament, price, price_comment, status";
+  "id, breeder_id, management_name, public_display_name, species, breed, sex, birthday, color, temperament, description, pending_description, description_review_status, price, price_comment, status";
 
 export async function getBreederIdByUserId(userId: string): Promise<string | null> {
   const supabase = await createClient();
@@ -289,6 +289,7 @@ export async function createPet(userId: string, data: InsertPetData): Promise<{ 
     birthday: data.birthday,
     color: data.color,
     temperament: data.temperament,
+    description: data.description,
     price: data.price,
     price_comment: data.price_comment,
     status: "draft" as const,
@@ -361,7 +362,10 @@ export async function submitPetForReview(userId: string, petId: string): Promise
     if (
       message.includes("invalid pet status") ||
       message.includes("pet not found") ||
-      message.includes("unauthorized")
+      message.includes("unauthorized") ||
+      message.includes("description required") ||
+      message.includes("description too short") ||
+      message.includes("description too long")
     ) {
       return false;
     }
@@ -370,6 +374,122 @@ export async function submitPetForReview(userId: string, petId: string): Promise
   }
 
   return true;
+}
+
+export async function savePetDescriptionRevisionDraftViaRpc(
+  userId: string,
+  petId: string,
+  pendingDescription: string | null,
+): Promise<boolean> {
+  const breederId = await getBreederIdByUserId(userId);
+
+  if (!breederId) {
+    throw new Error("ブリーダー情報が見つかりません。");
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("save_pet_description_revision_draft", {
+    p_pet_id: petId,
+    p_pending_description: pendingDescription,
+  });
+
+  if (error) {
+    const message = error.message.toLowerCase();
+
+    if (
+      message.includes("invalid pet status") ||
+      message.includes("invalid description review status") ||
+      message.includes("pet not found") ||
+      message.includes("unauthorized") ||
+      message.includes("pending description too long")
+    ) {
+      return false;
+    }
+
+    throw error;
+  }
+
+  return true;
+}
+
+export async function submitPetDescriptionRevisionViaRpc(
+  userId: string,
+  petId: string,
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const breederId = await getBreederIdByUserId(userId);
+
+  if (!breederId) {
+    throw new Error("ブリーダー情報が見つかりません。");
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("submit_pet_description_revision", {
+    p_pet_id: petId,
+  });
+
+  if (error) {
+    const message = error.message.toLowerCase();
+
+    if (message.includes("pending description unchanged")) {
+      return { ok: false, reason: "unchanged" };
+    }
+
+    if (
+      message.includes("pending description too short") ||
+      message.includes("pending description required")
+    ) {
+      return { ok: false, reason: "too_short" };
+    }
+
+    if (message.includes("pending description too long")) {
+      return { ok: false, reason: "too_long" };
+    }
+
+    if (
+      message.includes("invalid pet status") ||
+      message.includes("invalid description review status") ||
+      message.includes("pet not found") ||
+      message.includes("unauthorized")
+    ) {
+      return { ok: false, reason: "invalid_status" };
+    }
+
+    throw error;
+  }
+
+  return { ok: true };
+}
+
+export async function getLatestDescriptionReturnCommentForBreeder(
+  userId: string,
+  petId: string,
+): Promise<string | null> {
+  const existing = await getPetByIdForBreeder(userId, petId);
+
+  if (!existing) {
+    return null;
+  }
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("pet_review_logs")
+    .select("comment")
+    .eq("pet_id", petId)
+    .eq("action", "description_returned")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  const comment = data?.comment?.trim();
+
+  return comment || null;
 }
 
 export async function updatePetDraft(
@@ -396,6 +516,7 @@ export async function updatePetDraft(
       birthday: data.birthday,
       color: data.color,
       temperament: data.temperament,
+      ...(existing.status === "draft" ? { description: data.description } : {}),
       price: data.price,
       price_comment: data.price_comment,
       updated_by: data.updated_by,

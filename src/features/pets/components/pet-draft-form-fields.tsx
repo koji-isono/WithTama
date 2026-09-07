@@ -11,6 +11,7 @@ import { ProfileFormField } from "@/features/breeder-profile/components/profile-
 import { cn } from "@/lib/utils";
 
 import {
+  PET_DESCRIPTION_MAX_LENGTH,
   PET_PRICE_COMMENT_MAX_LENGTH,
   PET_SPECIES_OPTIONS,
   PET_SEX_OPTIONS,
@@ -29,6 +30,8 @@ export type PetDraftFormFieldsProps = {
     key: K,
     value: CreatePetDraftInput[K],
   ) => void;
+  /** draft: edit, under_review: read-only, published: hidden (revision section) */
+  descriptionMode?: "edit" | "readonly" | "hidden";
 };
 
 export function PetDraftFormFields({
@@ -36,6 +39,7 @@ export function PetDraftFormFields({
   fieldErrors,
   isSubmitting,
   onFieldChange,
+  descriptionMode = "edit",
 }: PetDraftFormFieldsProps) {
   return (
     <>
@@ -184,6 +188,43 @@ export function PetDraftFormFields({
           </p>
         </div>
       </ProfileFormField>
+
+      {descriptionMode !== "hidden" ? (
+        <ProfileFormField
+          id="description"
+          label="紹介文"
+          optional={descriptionMode === "edit"}
+          description="性格や普段の様子、育った環境、この子の魅力などを、家族として迎える方に伝わるように入力してください。"
+          error={fieldErrors.description}
+        >
+          <div className="space-y-1">
+            <Textarea
+              id="description"
+              name="description"
+              value={form.description}
+              onChange={(event) => onFieldChange("description", event.target.value)}
+              placeholder={
+                "人と遊ぶことが大好きで、普段は兄弟たちと元気に過ごしています。\n初めて会う人には少し慎重ですが、慣れるとそばに寄ってくる子です。"
+              }
+              disabled={isSubmitting || descriptionMode === "readonly"}
+              readOnly={descriptionMode === "readonly"}
+              maxLength={PET_DESCRIPTION_MAX_LENGTH}
+              rows={6}
+              aria-invalid={Boolean(fieldErrors.description)}
+              className={cn(
+                textareaClassName,
+                fieldErrors.description && "border-red-400 focus-visible:ring-red-400",
+                descriptionMode === "readonly" && "bg-neutral-50 text-neutral-700",
+              )}
+            />
+            {descriptionMode === "edit" ? (
+              <p className="text-right text-xs text-neutral-500">
+                {form.description.length} / {PET_DESCRIPTION_MAX_LENGTH}
+              </p>
+            ) : null}
+          </div>
+        </ProfileFormField>
+      ) : null}
 
       <ProfileFormField
         id="price"

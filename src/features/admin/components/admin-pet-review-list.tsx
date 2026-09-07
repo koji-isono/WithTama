@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { ImageOff } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import {
   ADMIN_PET_REVIEW_LIST_SCREEN_ID,
   ADMIN_PET_REVIEW_SUBMITTED_AT_UNKNOWN_LABEL,
+  ADMIN_PET_REVIEW_TYPE_LABELS,
   getAdminPetReviewDetailPath,
 } from "../constants";
 import { formatAdminPetReviewSubmittedAt } from "../format";
@@ -42,7 +44,10 @@ function AdminPetReviewListItemCard({ item }: { item: AdminPetReviewListItem }) 
         </div>
         <CardContent className="flex flex-1 flex-col justify-between gap-4 p-4 sm:p-5">
           <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-neutral-900">{displayName}</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-lg font-semibold text-neutral-900">{displayName}</h2>
+              <Badge variant="outline">{ADMIN_PET_REVIEW_TYPE_LABELS[item.reviewType]}</Badge>
+            </div>
             <dl className="grid gap-1 text-sm text-neutral-600">
               <div className="flex flex-wrap gap-x-2">
                 <dt className="font-medium text-neutral-700">品種</dt>
@@ -77,7 +82,7 @@ export function AdminPetReviewList({ items }: AdminPetReviewListProps) {
       </p>
       <h1 className="mt-2 text-3xl font-bold">犬猫掲載審査一覧</h1>
       <p className="mt-3 text-neutral-600">
-        審査待ち（under_review）の犬猫掲載申請を確認できます。
+        新規掲載審査および紹介文変更審査の申請を確認できます。
       </p>
 
       {items.length === 0 ? (

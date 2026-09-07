@@ -20,6 +20,19 @@ export const ADMIN_PET_REVIEW_APPROVE_CONFIRM_MESSAGE =
 export const ADMIN_PET_REVIEW_RETURN_CONFIRM_MESSAGE =
   "この犬猫情報をブリーダーへ差し戻します。よろしいですか？";
 
+export const ADMIN_PET_DESCRIPTION_REVIEW_APPROVE_CONFIRM_MESSAGE =
+  "紹介文の変更を承認して公開内容を更新します。よろしいですか？";
+
+export const ADMIN_PET_DESCRIPTION_REVIEW_RETURN_CONFIRM_MESSAGE =
+  "紹介文の変更をブリーダーへ差戻します。よろしいですか？";
+
+export const ADMIN_PET_REVIEW_TYPE_LABELS = {
+  initial: "新規掲載",
+  description: "紹介文変更",
+} as const;
+
+export type AdminPetReviewType = keyof typeof ADMIN_PET_REVIEW_TYPE_LABELS;
+
 export function getAdminPetReviewDetailPath(petId: string): string {
   return `${ADMIN_PET_REVIEWS_PATH}/${petId}`;
 }
@@ -147,7 +160,14 @@ export const ADMIN_BREEDER_REVIEW_REJECT_ERROR_MESSAGE =
 export const ADMIN_BREEDER_REVIEW_RETURN_COMMENT_PLACEHOLDER =
   "例：第一種動物取扱業登録証の画像が不鮮明です。再提出をお願いします。";
 
-export const PET_REVIEW_LOG_ACTIONS = ["submitted", "returned", "approved"] as const;
+export const PET_REVIEW_LOG_ACTIONS = [
+  "submitted",
+  "returned",
+  "approved",
+  "description_submitted",
+  "description_returned",
+  "description_approved",
+] as const;
 
 export type PetReviewLogAction = (typeof PET_REVIEW_LOG_ACTIONS)[number];
 
@@ -155,4 +175,7 @@ export const PET_REVIEW_LOG_ACTION_LABELS: Record<PetReviewLogAction, string> = 
   submitted: "公開申請",
   returned: "差戻し",
   approved: "公開承認",
+  description_submitted: "紹介文変更申請",
+  description_returned: "紹介文変更差戻し",
+  description_approved: "紹介文変更承認",
 };

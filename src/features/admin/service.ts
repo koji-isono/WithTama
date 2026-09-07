@@ -8,9 +8,11 @@ import { ADMIN_BREEDER_REVIEWS_PATH, ADMIN_PET_REVIEWS_PATH } from "./constants"
 import { mapAdminBreederReviewRpcError, mapAdminPetReviewRpcError } from "./errors";
 import {
   approveBreederReviewViaRpc,
+  approvePetDescriptionRevisionViaRpc,
   approvePetForPublishViaRpc,
   rejectBreederReviewViaRpc,
   returnBreederReviewViaRpc,
+  returnPetDescriptionRevisionViaRpc,
   returnPetReviewViaRpc,
   startBreederReviewViaRpc,
 } from "./repository";
@@ -84,6 +86,61 @@ export async function returnPetReviewAction(
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
       console.error("returnPetReviewAction failed", error);
+    }
+
+    return { success: false, error: mapAdminPetReviewRpcError(error) };
+  }
+}
+
+export async function approvePetDescriptionRevisionAction(
+  petId: string,
+): Promise<AdminPetReviewActionResult> {
+  await requireAdmin();
+
+  const petIdError = validatePetIdForAdminReview(petId);
+
+  if (petIdError) {
+    return { success: false, error: petIdError };
+  }
+
+  try {
+    await approvePetDescriptionRevisionViaRpc(petId);
+    revalidateAdminPetReviewPaths(petId);
+    return { success: true };
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("approvePetDescriptionRevisionAction failed", error);
+    }
+
+    return { success: false, error: mapAdminPetReviewRpcError(error) };
+  }
+}
+
+export async function returnPetDescriptionRevisionAction(
+  petId: string,
+  comment: string,
+): Promise<AdminPetReviewActionResult> {
+  await requireAdmin();
+
+  const petIdError = validatePetIdForAdminReview(petId);
+
+  if (petIdError) {
+    return { success: false, error: petIdError };
+  }
+
+  const commentError = validateReturnReviewComment(comment);
+
+  if (commentError) {
+    return { success: false, error: commentError };
+  }
+
+  try {
+    await returnPetDescriptionRevisionViaRpc(petId, comment.trim());
+    revalidateAdminPetReviewPaths(petId);
+    return { success: true };
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("returnPetDescriptionRevisionAction failed", error);
     }
 
     return { success: false, error: mapAdminPetReviewRpcError(error) };

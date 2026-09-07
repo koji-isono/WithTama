@@ -16,7 +16,9 @@ import {
   getPetByIdForBreeder,
   listPetsWithMainPhotoByBreederUserId,
   removePetPhotoFromStorage,
+  savePetDescriptionRevisionDraftViaRpc,
   setMainPetPhoto,
+  submitPetDescriptionRevisionViaRpc,
   submitPetForReview,
   updatePetDraft,
   uploadPetPhotoToStorage,
@@ -24,6 +26,7 @@ import {
 import type {
   CreatePetDraftInput,
   CreatePetDraftResult,
+  DescriptionRevisionActionResult,
   LoadBreederPetsResult,
   PetEditPageData,
   PetPhotoActionResult,
@@ -35,10 +38,18 @@ import { mapPetListWithMainPhotoToBreederPetListItem } from "./types";
 import {
   hasPetValidationErrors,
   normalizeCreatePetDraftInput,
+  PET_DESCRIPTION_REVISION_GENERIC_ERROR_MESSAGE,
+  PET_DESCRIPTION_REVISION_STATUS_INVALID_MESSAGE,
+  PET_DESCRIPTION_REVISION_UNCHANGED_MESSAGE,
+  PET_REVIEW_SUBMIT_DESCRIPTION_REQUIRED_MESSAGE,
+  PET_REVIEW_SUBMIT_DESCRIPTION_TOO_LONG_MESSAGE,
   PET_REVIEW_SUBMIT_GENERIC_ERROR_MESSAGE,
   PET_REVIEW_SUBMIT_PHOTO_REQUIRED_MESSAGE,
   PET_REVIEW_SUBMIT_STATUS_INVALID_MESSAGE,
   validateCreatePetDraftInput,
+  validateDescriptionForReviewSubmit,
+  validatePendingDescriptionDraft,
+  validatePendingDescriptionForRevisionSubmit,
   validatePetForReviewSubmit,
   validatePetPhotoUpload,
 } from "./validation";
@@ -102,6 +113,7 @@ export async function createPetDraft(input: CreatePetDraftInput): Promise<Create
       birthday: normalized.birthday,
       color: normalized.color,
       temperament: normalized.temperament,
+      description: normalized.description,
       price: normalized.price,
       price_comment: normalized.priceComment,
       status: "draft",
@@ -165,6 +177,7 @@ export async function updatePetDraftAction(
       birthday: normalized.birthday,
       color: normalized.color,
       temperament: normalized.temperament,
+      description: normalized.description,
       price: normalized.price,
       price_comment: normalized.priceComment,
       updated_by: user.id,
@@ -334,6 +347,12 @@ export async function submitPetForReviewAction(petId: string): Promise<SubmitPet
     const updated = await submitPetForReview(user.id, petId);
 
     if (!updated) {
+      const descriptionError = validateDescriptionForReviewSubmit(pet.description);
+
+      if (descriptionError) {
+        return { success: false, error: descriptionError };
+      }
+
       return { success: false, error: PET_REVIEW_SUBMIT_STATUS_INVALID_MESSAGE };
     }
 
@@ -344,5 +363,122 @@ export async function submitPetForReviewAction(petId: string): Promise<SubmitPet
     }
 
     return { success: false, error: PET_REVIEW_SUBMIT_GENERIC_ERROR_MESSAGE };
+  }
+}
+
+export async function savePetDescriptionRevisionDraftAction(
+  petId: string,
+  pendingDescription: string,
+): Promise<DescriptionRevisionActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "ログインが必要です。" };
+  }
+
+  const draftError = validatePendingDescriptionDraft(pendingDescription);
+
+  if (draftError) {
+    return { success: false, error: draftError, fieldErrors: { pendingDescription: draftError } };
+  }
+
+  try {
+    const pet = await getPetByIdForBreeder(user.id, petId);
+
+    if (!pet) {
+      return { success: false, error: "犬猫が見つかりません。" };
+    }
+
+    if (pet.status !== "published") {
+      return { success: false, error: PET_DESCRIPTION_REVISION_STATUS_INVALID_MESSAGE };
+    }
+
+    if (!["none", "draft", "returned"].includes(pet.description_review_status)) {
+      return { success: false, error: PET_DESCRIPTION_REVISION_STATUS_INVALID_MESSAGE };
+    }
+
+    const normalizedPending = pendingDescription.trim() || null;
+    const saved = await savePetDescriptionRevisionDraftViaRpc(user.id, petId, normalizedPending);
+
+    if (!saved) {
+      return { success: false, error: PET_DESCRIPTION_REVISION_STATUS_INVALID_MESSAGE };
+    }
+
+    return { success: true };
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("savePetDescriptionRevisionDraftAction failed", error);
+    }
+
+    return { success: false, error: PET_DESCRIPTION_REVISION_GENERIC_ERROR_MESSAGE };
+  }
+}
+
+export async function submitPetDescriptionRevisionAction(
+  petId: string,
+): Promise<DescriptionRevisionActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "ログインが必要です。" };
+  }
+
+  try {
+    const pet = await getPetByIdForBreeder(user.id, petId);
+
+    if (!pet) {
+      return { success: false, error: "犬猫が見つかりません。" };
+    }
+
+    if (pet.status !== "published") {
+      return { success: false, error: PET_DESCRIPTION_REVISION_STATUS_INVALID_MESSAGE };
+    }
+
+    const validationError = validatePendingDescriptionForRevisionSubmit(
+      pet.pending_description,
+      pet.description,
+    );
+
+    if (validationError) {
+      return {
+        success: false,
+        error: validationError,
+        fieldErrors: { pendingDescription: validationError },
+      };
+    }
+
+    const result = await submitPetDescriptionRevisionViaRpc(user.id, petId);
+
+    if (!result.ok) {
+      if (result.reason === "unchanged") {
+        return { success: false, error: PET_DESCRIPTION_REVISION_UNCHANGED_MESSAGE };
+      }
+
+      if (result.reason === "too_short") {
+        return { success: false, error: PET_REVIEW_SUBMIT_DESCRIPTION_REQUIRED_MESSAGE };
+      }
+
+      if (result.reason === "too_long") {
+        return { success: false, error: PET_REVIEW_SUBMIT_DESCRIPTION_TOO_LONG_MESSAGE };
+      }
+
+      return { success: false, error: PET_DESCRIPTION_REVISION_STATUS_INVALID_MESSAGE };
+    }
+
+    return { success: true };
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("submitPetDescriptionRevisionAction failed", error);
+    }
+
+    return { success: false, error: PET_DESCRIPTION_REVISION_GENERIC_ERROR_MESSAGE };
   }
 }

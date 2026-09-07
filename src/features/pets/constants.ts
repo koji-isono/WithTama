@@ -6,6 +6,15 @@ export const PUBLIC_PETS_PATH = "/pets";
 
 export const PET_TEMPERAMENT_MAX_LENGTH = 500;
 export const PET_PRICE_COMMENT_MAX_LENGTH = 500;
+export const PET_DESCRIPTION_MAX_LENGTH = 2000;
+export const PET_DESCRIPTION_MIN_LENGTH_FOR_REVIEW = 20;
+
+export const DESCRIPTION_REVIEW_STATUS_LABELS = {
+  none: "",
+  draft: "",
+  under_review: "紹介文変更審査中",
+  returned: "紹介文変更差戻し",
+} as const;
 
 export const PET_REGISTRATION_SCREEN_ID = "BR-10";
 export const PET_LIST_SCREEN_ID = "BR-10";

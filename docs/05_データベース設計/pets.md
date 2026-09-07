@@ -12,31 +12,33 @@
 
 ## カラム定義
 
-| カラム名              | 型          | NULL     | 初期値              | 説明                                                                                                                                      |
-| --------------------- | ----------- | -------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                  | uuid        | NOT NULL | `gen_random_uuid()` | 犬猫ID、主キー                                                                                                                            |
-| `breeder_id`          | uuid        | NOT NULL | なし                | ブリーダーID。`auth.users` または `breeders` への外部キー候補                                                                             |
-| `management_name`     | text        | NOT NULL | なし                | ブリーダー内部用の管理名                                                                                                                  |
-| `public_display_name` | text        | NOT NULL | なし                | 購入希望者へ表示する名前                                                                                                                  |
-| `species`             | text        | NOT NULL | なし                | `dog` または `cat`                                                                                                                        |
-| `breed`               | text        | NOT NULL | なし                | 犬種・猫種。第1期は自由入力                                                                                                               |
-| `sex`                 | text        | NOT NULL | なし                | `male` または `female`                                                                                                                    |
-| `birthday`            | date        | NULL     | `null`              | 誕生日                                                                                                                                    |
-| `color`               | text        | NULL     | `null`              | 毛色                                                                                                                                      |
-| `temperament`         | text        | NULL     | `null`              | 性格・気質（紹介文 `description` とは別管理）                                                                                             |
-| `description`         | text        | NULL     | `null`              | ブリーダーが確認・修正した公開紹介文                                                                                                      |
-| `ai_description`      | text        | NULL     | `null`              | AI が作成した紹介文の下書き                                                                                                               |
-| `ai_generated_at`     | timestamptz | NULL     | `null`              | AI 紹介文を生成した日時                                                                                                                   |
-| `price`               | integer     | NULL     | `null`              | **税抜**販売価格、円単位。0 以上（[Decision No.141](../01_設計変更管理/DecisionLog.md#decision-no141) — No.34 の price 意味を税抜に改定） |
-| `price_comment`       | text        | NULL     | `null`              | ワクチン費用込み等の価格補足                                                                                                              |
-| `status`              | text        | NOT NULL | `draft`             | 掲載状態                                                                                                                                  |
-| `published_at`        | timestamptz | NULL     | `null`              | 初回公開日時                                                                                                                              |
-| `display_order`       | integer     | NOT NULL | `0`                 | 一覧表示順（0 以上）                                                                                                                      |
-| `deleted_at`          | timestamptz | NULL     | `null`              | 論理削除日時。NULL の行を通常表示対象とする                                                                                               |
-| `created_by`          | uuid        | NULL     | `null`              | 作成者ユーザーID                                                                                                                          |
-| `updated_by`          | uuid        | NULL     | `null`              | 最終更新者ユーザーID                                                                                                                      |
-| `created_at`          | timestamptz | NOT NULL | `now()`             | 作成日時                                                                                                                                  |
-| `updated_at`          | timestamptz | NOT NULL | `now()`             | 更新日時（UPDATE 時にトリガーで自動更新）                                                                                                 |
+| カラム名                    | 型          | NULL     | 初期値              | 説明                                                                                                                                      |
+| --------------------------- | ----------- | -------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                        | uuid        | NOT NULL | `gen_random_uuid()` | 犬猫ID、主キー                                                                                                                            |
+| `breeder_id`                | uuid        | NOT NULL | なし                | ブリーダーID。`auth.users` または `breeders` への外部キー候補                                                                             |
+| `management_name`           | text        | NOT NULL | なし                | ブリーダー内部用の管理名                                                                                                                  |
+| `public_display_name`       | text        | NOT NULL | なし                | 購入希望者へ表示する名前                                                                                                                  |
+| `species`                   | text        | NOT NULL | なし                | `dog` または `cat`                                                                                                                        |
+| `breed`                     | text        | NOT NULL | なし                | 犬種・猫種。第1期は自由入力                                                                                                               |
+| `sex`                       | text        | NOT NULL | なし                | `male` または `female`                                                                                                                    |
+| `birthday`                  | date        | NULL     | `null`              | 誕生日                                                                                                                                    |
+| `color`                     | text        | NULL     | `null`              | 毛色                                                                                                                                      |
+| `temperament`               | text        | NULL     | `null`              | 性格・気質（紹介文 `description` とは別管理）                                                                                             |
+| `description`               | text        | NULL     | `null`              | 管理者承認済み・現在公開してよい紹介文（[Decision No.151](../01_設計変更管理/DecisionLog.md#decision-no151)）                             |
+| `pending_description`       | text        | NULL     | `null`              | 公開後の未承認紹介文改訂案。最大 2000 文字。Public View 非含有                                                                            |
+| `description_review_status` | text        | NOT NULL | `'none'`            | 公開後紹介文改訂審査状態。`none` / `draft` / `under_review` / `returned`。`pets.status` とは別軸                                          |
+| `ai_description`            | text        | NULL     | `null`              | AI が作成した紹介文の下書き                                                                                                               |
+| `ai_generated_at`           | timestamptz | NULL     | `null`              | AI 紹介文を生成した日時                                                                                                                   |
+| `price`                     | integer     | NULL     | `null`              | **税抜**販売価格、円単位。0 以上（[Decision No.141](../01_設計変更管理/DecisionLog.md#decision-no141) — No.34 の price 意味を税抜に改定） |
+| `price_comment`             | text        | NULL     | `null`              | ワクチン費用込み等の価格補足                                                                                                              |
+| `status`                    | text        | NOT NULL | `draft`             | 掲載状態                                                                                                                                  |
+| `published_at`              | timestamptz | NULL     | `null`              | 初回公開日時                                                                                                                              |
+| `display_order`             | integer     | NOT NULL | `0`                 | 一覧表示順（0 以上）                                                                                                                      |
+| `deleted_at`                | timestamptz | NULL     | `null`              | 論理削除日時。NULL の行を通常表示対象とする                                                                                               |
+| `created_by`                | uuid        | NULL     | `null`              | 作成者ユーザーID                                                                                                                          |
+| `updated_by`                | uuid        | NULL     | `null`              | 最終更新者ユーザーID                                                                                                                      |
+| `created_at`                | timestamptz | NOT NULL | `now()`             | 作成日時                                                                                                                                  |
+| `updated_at`                | timestamptz | NOT NULL | `now()`             | 更新日時（UPDATE 時にトリガーで自動更新）                                                                                                 |
 
 ## TypeScript 対応（参考）
 
@@ -172,13 +174,14 @@ stateDiagram-v2
 
 ## マイグレーション
 
-| ファイル                                              | 内容                                                             |
-| ----------------------------------------------------- | ---------------------------------------------------------------- |
-| `20260804132200_update_pets_v1_1.sql`                 | Version 1.0 → 1.1（`name` リネーム、カラム追加、制約、トリガー） |
-| `20260807120000_harden_pets_rls.sql`                  | RLS 本番化（Decision No.103、作成済み・未適用）                  |
-| `20260807130000_enforce_pets_status_transition.sql`   | status 遷移トリガー（作成済み・未適用。RLS 本番化の後に適用）    |
-| `20260814120000_add_public_pet_list_read_access.sql`  | PU-01 公開一覧 View + `is_publicly_listable_pet` + 写真 RLS      |
-| `20260814130000_add_public_pet_detail_read_views.sql` | PU-02 公開詳細 View（RLS / Storage 変更なし）                    |
+| ファイル                                                 | 内容                                                                                        |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `20260804132200_update_pets_v1_1.sql`                    | Version 1.0 → 1.1（`name` リネーム、カラム追加、制約、トリガー）                            |
+| `20260807120000_harden_pets_rls.sql`                     | RLS 本番化（Decision No.103、作成済み・未適用）                                             |
+| `20260807130000_enforce_pets_status_transition.sql`      | status 遷移トリガー（作成済み・未適用。RLS 本番化の後に適用）                               |
+| `20260814120000_add_public_pet_list_read_access.sql`     | PU-01 公開一覧 View + `is_publicly_listable_pet` + 写真 RLS                                 |
+| `20260814130000_add_public_pet_detail_read_views.sql`    | PU-02 公開詳細 View（RLS / Storage 変更なし）                                               |
+| `20260907100000_add_pet_description_revision_review.sql` | 公開後紹介文改訂審査（`pending_description` / `description_review_status` / RPC / trigger） |
 
 既存データを保持する。`DROP TABLE` / `TRUNCATE` / `DELETE` は使用しない。
 

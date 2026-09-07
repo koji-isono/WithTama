@@ -1,4 +1,6 @@
 import {
+  PET_DESCRIPTION_MAX_LENGTH,
+  PET_DESCRIPTION_MIN_LENGTH_FOR_REVIEW,
   PET_PRICE_COMMENT_MAX_LENGTH,
   PET_SPECIES_OPTIONS,
   PET_SEX_OPTIONS,
@@ -56,6 +58,7 @@ export function normalizeCreatePetDraftInput(
     birthday: input.birthday.trim() || null,
     color: input.color.trim() || null,
     temperament: input.temperament.trim() || null,
+    description: input.description.trim() || null,
     price: price === "invalid" ? null : price,
     priceComment: input.priceComment.trim() || null,
   };
@@ -95,6 +98,10 @@ export function validateCreatePetDraftInput(input: CreatePetDraftInput): CreateP
 
   if (normalized.temperament && normalized.temperament.length > PET_TEMPERAMENT_MAX_LENGTH) {
     errors.temperament = `性格は${PET_TEMPERAMENT_MAX_LENGTH}文字以内で入力してください。`;
+  }
+
+  if (normalized.description && normalized.description.length > PET_DESCRIPTION_MAX_LENGTH) {
+    errors.description = `紹介文は${PET_DESCRIPTION_MAX_LENGTH}文字以内で入力してください。`;
   }
 
   const parsedPrice = parsePrice(input.price);
@@ -142,6 +149,73 @@ export const PET_REVIEW_SUBMIT_STATUS_INVALID_MESSAGE = "この犬猫は現在�
 
 export const PET_REVIEW_SUBMIT_GENERIC_ERROR_MESSAGE = "公開申請に失敗しました。";
 
+export const PET_REVIEW_SUBMIT_DESCRIPTION_REQUIRED_MESSAGE =
+  "紹介文を20文字以上入力してください。";
+
+export const PET_REVIEW_SUBMIT_DESCRIPTION_TOO_LONG_MESSAGE = `紹介文は${PET_DESCRIPTION_MAX_LENGTH}文字以内で入力してください。`;
+
+export const PET_DESCRIPTION_REVISION_UNCHANGED_MESSAGE = "現在公開中の紹介文と変更がありません。";
+
+export const PET_DESCRIPTION_REVISION_GENERIC_ERROR_MESSAGE = "紹介文変更の処理に失敗しました。";
+
+export const PET_DESCRIPTION_REVISION_STATUS_INVALID_MESSAGE =
+  "現在、紹介文変更の操作はできません。";
+
+export function validateDescriptionForReviewSubmit(description: string | null): string | null {
+  const trimmed = description?.trim() ?? "";
+
+  if (!trimmed) {
+    return PET_REVIEW_SUBMIT_DESCRIPTION_REQUIRED_MESSAGE;
+  }
+
+  if (trimmed.length < PET_DESCRIPTION_MIN_LENGTH_FOR_REVIEW) {
+    return PET_REVIEW_SUBMIT_DESCRIPTION_REQUIRED_MESSAGE;
+  }
+
+  if (trimmed.length > PET_DESCRIPTION_MAX_LENGTH) {
+    return PET_REVIEW_SUBMIT_DESCRIPTION_TOO_LONG_MESSAGE;
+  }
+
+  return null;
+}
+
+export function validatePendingDescriptionForRevisionSubmit(
+  pendingDescription: string | null,
+  currentDescription: string | null,
+): string | null {
+  const trimmedPending = pendingDescription?.trim() ?? "";
+
+  if (!trimmedPending) {
+    return PET_REVIEW_SUBMIT_DESCRIPTION_REQUIRED_MESSAGE;
+  }
+
+  if (trimmedPending.length < PET_DESCRIPTION_MIN_LENGTH_FOR_REVIEW) {
+    return PET_REVIEW_SUBMIT_DESCRIPTION_REQUIRED_MESSAGE;
+  }
+
+  if (trimmedPending.length > PET_DESCRIPTION_MAX_LENGTH) {
+    return PET_REVIEW_SUBMIT_DESCRIPTION_TOO_LONG_MESSAGE;
+  }
+
+  const trimmedCurrent = currentDescription?.trim() ?? "";
+
+  if (trimmedPending === trimmedCurrent) {
+    return PET_DESCRIPTION_REVISION_UNCHANGED_MESSAGE;
+  }
+
+  return null;
+}
+
+export function validatePendingDescriptionDraft(pendingDescription: string): string | null {
+  const trimmed = pendingDescription.trim();
+
+  if (trimmed.length > PET_DESCRIPTION_MAX_LENGTH) {
+    return PET_REVIEW_SUBMIT_DESCRIPTION_TOO_LONG_MESSAGE;
+  }
+
+  return null;
+}
+
 export function validatePetForReviewSubmit(pet: {
   management_name: string;
   public_display_name: string;
@@ -151,6 +225,7 @@ export function validatePetForReviewSubmit(pet: {
   birthday: string | null;
   color: string | null;
   temperament: string | null;
+  description: string | null;
   price: number | null;
   price_comment: string | null;
 }): string | null {
@@ -163,6 +238,7 @@ export function validatePetForReviewSubmit(pet: {
     birthday: pet.birthday ?? "",
     color: pet.color ?? "",
     temperament: pet.temperament ?? "",
+    description: pet.description ?? "",
     price: pet.price != null ? String(pet.price) : "",
     priceComment: pet.price_comment ?? "",
   };
@@ -173,6 +249,12 @@ export function validatePetForReviewSubmit(pet: {
     const firstError = Object.values(errors).find(Boolean);
 
     return firstError ?? "公開申請に必要な情報が不足しています。";
+  }
+
+  const descriptionError = validateDescriptionForReviewSubmit(pet.description);
+
+  if (descriptionError) {
+    return descriptionError;
   }
 
   return null;

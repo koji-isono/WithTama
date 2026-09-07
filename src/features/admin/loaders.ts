@@ -26,8 +26,8 @@ import {
 import {
   createBreederDocumentSignedUrlForAdmin,
   getBreederReviewDetailForAdmin,
+  getLatestReviewSubmittedAtByPetIds,
   getLatestSubmittedAtByBreederIds,
-  getLatestSubmittedAtByPetIds,
   getMainPhotoSignedUrlByPetIds,
   getPetPhotoSignedUrlsForAdmin,
   getUnderReviewPetDetailForAdmin,
@@ -36,6 +36,7 @@ import {
   listPetPhotosForAdmin,
   listPetReviewLogsForAdmin,
   listUnderReviewPetsForAdmin,
+  resolveAdminPetReviewType,
 } from "./repository";
 import type {
   AdminBreederReviewDetailPageData,
@@ -78,14 +79,20 @@ export async function loadAdminPetReviewListPageData(): Promise<AdminPetReviewLi
   await requireAdmin();
 
   const petRows = await listUnderReviewPetsForAdmin();
+  const reviewItems = petRows.map((pet) => ({
+    petId: pet.id,
+    reviewType: resolveAdminPetReviewType(pet),
+  }));
   const petIds = petRows.map((pet) => pet.id);
 
   const [submittedAtByPetId, mainPhotoSignedUrlByPetId] = await Promise.all([
-    getLatestSubmittedAtByPetIds(petIds),
+    getLatestReviewSubmittedAtByPetIds(reviewItems),
     getMainPhotoSignedUrlByPetIds(petIds),
   ]);
 
   const items: AdminPetReviewListItem[] = petRows.map((pet) => {
+    const reviewType = resolveAdminPetReviewType(pet);
+
     return {
       id: pet.id,
       publicDisplayName: pet.public_display_name,
@@ -96,6 +103,7 @@ export async function loadAdminPetReviewListPageData(): Promise<AdminPetReviewLi
       ),
       submittedAt: submittedAtByPetId.get(pet.id) ?? null,
       mainPhotoSignedUrl: mainPhotoSignedUrlByPetId.get(pet.id) ?? null,
+      reviewType,
     };
   });
 
@@ -125,6 +133,7 @@ export async function loadAdminPetReviewDetailPageData(
   );
 
   const breederRow = petRow.breeders;
+  const reviewType = resolveAdminPetReviewType(petRow);
 
   const pet: AdminPetReviewDetailPageData["pet"] = {
     id: petRow.id,
@@ -137,6 +146,7 @@ export async function loadAdminPetReviewDetailPageData(
     color: petRow.color,
     temperament: petRow.temperament,
     description: petRow.description,
+    pendingDescription: petRow.pending_description,
     priceLabel: formatAdminPetPrice(petRow.price),
     priceComment: petRow.price_comment,
     statusLabel: formatAdminPetStatus(petRow.status),
@@ -186,7 +196,7 @@ export async function loadAdminPetReviewDetailPageData(
     actorUserId: log.actor_user_id,
   }));
 
-  return { pet, photos, breeder, reviewLogs };
+  return { reviewType, pet, photos, breeder, reviewLogs };
 }
 
 function compareBreederSubmittedAtAsc(

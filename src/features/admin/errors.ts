@@ -83,6 +83,14 @@ export function mapAdminPetReviewRpcError(error: unknown): string {
     return "この犬猫は審査対象ではありません。すでに処理済みの可能性があります。";
   }
 
+  if (message.includes("invalid description review status")) {
+    return "この紹介文変更は審査対象ではありません。すでに処理済みの可能性があります。";
+  }
+
+  if (message.includes("pending description required")) {
+    return "変更案の紹介文が見つかりません。";
+  }
+
   if (message.includes("breeder not eligible for publication")) {
     return "ブリーダーの審査状態または登録情報が公開承認条件を満たしていません。";
   }

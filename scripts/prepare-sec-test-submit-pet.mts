@@ -36,6 +36,7 @@ const NO_PHOTO_PET_NAME = "[SEC-TEST] Submit RPC No Photo Pet";
 const PROTECTED_PET_NAME = "[SEC-TEST] Trigger Test Pet";
 const PET_PHOTOS_BUCKET = "pet-photos";
 const MAX_SUBMIT_PHOTO_PET_SLOTS = 50;
+const SUBMIT_DESCRIPTION = "あ".repeat(20);
 
 /** Minimal valid 1x1 JPEG for Storage upload (well under 10MB limit). */
 const MINIMAL_JPEG_BASE64 =
@@ -94,6 +95,7 @@ function buildDraftInsertPayload(
     birthday: "2024-01-01",
     color: "test",
     temperament: "calm",
+    description: SUBMIT_DESCRIPTION,
     price: 100000,
     price_comment: null,
     status: "draft",
@@ -331,6 +333,21 @@ async function ensureDraftSubmitPetWithPhoto(
   return null;
 }
 
+async function ensureSubmitDescription(
+  supabase: SupabaseClient,
+  petId: string,
+  checks: Check[],
+): Promise<boolean> {
+  const { error } = await supabase
+    .from("pets")
+    .update({ description: SUBMIT_DESCRIPTION })
+    .eq("id", petId)
+    .eq("status", "draft");
+
+  record(checks, "ensure draft description for submit RPC", error == null, error?.message);
+  return error == null;
+}
+
 async function verifyFinalPetState(
   supabase: SupabaseClient,
   petId: string,
@@ -456,6 +473,14 @@ async function main(): Promise<void> {
   const petId = await ensureDraftSubmitPetWithPhoto(supabase, breederId, user.id, checks);
 
   if (!petId) {
+    console.log("");
+    console.log("Preparation aborted");
+    process.exitCode = 1;
+    return;
+  }
+
+  const descriptionOk = await ensureSubmitDescription(supabase, petId, checks);
+  if (!descriptionOk) {
     console.log("");
     console.log("Preparation aborted");
     process.exitCode = 1;

@@ -1,4 +1,4 @@
-import type { PetReviewLogAction } from "./constants";
+import type { AdminPetReviewType, PetReviewLogAction } from "./constants";
 
 export type AdminPetReviewListItem = {
   id: string;
@@ -7,6 +7,7 @@ export type AdminPetReviewListItem = {
   breederDisplayName: string;
   submittedAt: string | null;
   mainPhotoSignedUrl: string | null;
+  reviewType: AdminPetReviewType;
 };
 
 export type AdminPetReviewListPageData = {
@@ -92,6 +93,7 @@ export type AdminPetReviewDetailPet = {
   color: string | null;
   temperament: string | null;
   description: string | null;
+  pendingDescription: string | null;
   priceLabel: string;
   priceComment: string | null;
   statusLabel: string;
@@ -133,6 +135,7 @@ export type AdminPetReviewDetailLogItem = {
 };
 
 export type AdminPetReviewDetailPageData = {
+  reviewType: AdminPetReviewType;
   pet: AdminPetReviewDetailPet;
   photos: AdminPetReviewDetailPhoto[];
   breeder: AdminPetReviewDetailBreeder | null;

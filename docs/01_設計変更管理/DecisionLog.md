@@ -1515,3 +1515,22 @@ _*管理者画面は AD-* で採番する_*
 - **将来対応:** サイト内通知センター、メール通知（Resend）、`/breeder/settings` ハブ
 - **決定日:** 2026-09-01
 - **参照:** [ブリーダーヘッダー操作機能 調査報告](../09_開発履歴/2026-09-01_ブリーダーヘッダー操作機能_調査報告.md) / [Decision No.113](#decision-no113) / [BR-06](../04_画面設計/BR-06_ブリーダーダッシュボード.md)
+
+---
+
+## Decision No.151
+
+**公開後の犬猫紹介文変更は `pending_description` + 再審査必須とする**
+
+- **決定内容:**
+  - 公開済み（`published`）犬猫の紹介文改訂は **`pets.pending_description`** に保存し、管理者承認後に **`description` へ反映** する
+  - 改訂審査状態は **`description_review_status`**（`none` / `draft` / `under_review` / `returned`）で管理し、**`pets.status` とは分離** する
+  - 改訂審査中も **`pets.status = published` を維持** し、PU-01 / PU-02 の掲載継続と **`description`（旧文）表示** を担保する
+  - Public View / DTO には **`pending_description` / `description_review_status` を含めない**
+  - 第1期は **revision テーブル不採用**。`pet_review_logs` に `description_submitted` / `description_approved` / `description_returned` を追加
+  - **AI / Dify 連携は第1期対象外**（将来 `ai_description` → `pending_description` フローを想定）
+- **理由:** 公開中紹介文の即時反映を防ぎつつ、Migration 最小構成で再審査フローを実現するため（[DB業務フロー設計報告](../09_開発履歴/2026-09-04_犬猫紹介文_公開後改訂審査_DB業務フロー設計報告.md)）
+- **影響範囲:** `pets` テーブル、BR-08 / BR-11、AD-10 / AD-11、PU-02、`pet_review_logs`、Supabase RPC / trigger
+- **Migration:** `20260907100000_add_pet_description_revision_review.sql`
+- **決定日:** 2026-09-07
+- **参照:** [pets テーブル](../05_データベース設計/pets.md) / [BR-11](../04_画面設計/BR-11_犬猫情報編集.md)

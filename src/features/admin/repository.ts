@@ -8,7 +8,7 @@ import {
 } from "@/features/pets/photo-constants";
 import type { PetSex, PetSpecies, PetStatus } from "@/features/pets/types";
 
-import type { PetReviewLogAction } from "./constants";
+import type { AdminPetReviewType, PetReviewLogAction } from "./constants";
 import {
   BREEDER_DOCUMENT_SIGNED_URL_EXPIRES_SECONDS,
   BREEDER_REVIEW_DETAIL_VIEWABLE_STATUSES,
@@ -23,6 +23,8 @@ type UnderReviewPetRow = {
   id: string;
   public_display_name: string | null;
   breed: string;
+  status: PetStatus;
+  description_review_status: string;
   breeder: BreederSummary | null;
 };
 
@@ -55,14 +57,18 @@ export async function listUnderReviewPetsForAdmin(): Promise<UnderReviewPetRow[]
       id,
       public_display_name,
       breed,
+      status,
+      description_review_status,
       breeders (
         business_name,
         representative_name
       )
     `,
     )
-    .eq("status", "under_review")
-    .is("deleted_at", null);
+    .is("deleted_at", null)
+    .or(
+      "status.eq.under_review,and(status.eq.published,description_review_status.eq.under_review)",
+    );
 
   if (error) {
     throw error;
@@ -72,10 +78,27 @@ export async function listUnderReviewPetsForAdmin(): Promise<UnderReviewPetRow[]
     id: row.id as string,
     public_display_name: row.public_display_name as string | null,
     breed: row.breed as string,
+    status: row.status as PetStatus,
+    description_review_status: row.description_review_status as string,
     breeder: normalizeBreederSummary(
       row.breeders as BreederSummary | BreederSummary[] | null | undefined,
     ),
   }));
+}
+
+export function resolveAdminPetReviewType(row: {
+  status: PetStatus;
+  description_review_status: string;
+}): AdminPetReviewType {
+  if (row.status === "under_review") {
+    return "initial";
+  }
+
+  if (row.status === "published" && row.description_review_status === "under_review") {
+    return "description";
+  }
+
+  throw new Error("invalid admin pet review type");
 }
 
 export async function getLatestSubmittedAtByPetIds(petIds: string[]): Promise<Map<string, string>> {
@@ -102,6 +125,44 @@ export async function getLatestSubmittedAtByPetIds(petIds: string[]): Promise<Ma
     if (!latestByPetId.has(row.pet_id)) {
       latestByPetId.set(row.pet_id, row.created_at);
     }
+  }
+
+  return latestByPetId;
+}
+
+export async function getLatestReviewSubmittedAtByPetIds(
+  items: { petId: string; reviewType: AdminPetReviewType }[],
+): Promise<Map<string, string>> {
+  if (items.length === 0) {
+    return new Map();
+  }
+
+  const supabase = await createClient();
+  const petIds = items.map((item) => item.petId);
+  const reviewTypeByPetId = new Map(items.map((item) => [item.petId, item.reviewType]));
+
+  const { data, error } = await supabase
+    .from("pet_review_logs")
+    .select("pet_id, action, created_at")
+    .in("pet_id", petIds)
+    .in("action", ["submitted", "description_submitted"])
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  const latestByPetId = new Map<string, string>();
+
+  for (const row of (data ?? []) as { pet_id: string; action: string; created_at: string }[]) {
+    const reviewType = reviewTypeByPetId.get(row.pet_id);
+    const expectedAction = reviewType === "description" ? "description_submitted" : "submitted";
+
+    if (row.action !== expectedAction || latestByPetId.has(row.pet_id)) {
+      continue;
+    }
+
+    latestByPetId.set(row.pet_id, row.created_at);
   }
 
   return latestByPetId;
@@ -268,6 +329,8 @@ type UnderReviewPetDetailRow = {
   color: string | null;
   temperament: string | null;
   description: string | null;
+  pending_description: string | null;
+  description_review_status: string;
   price: number | null;
   price_comment: string | null;
   status: PetStatus;
@@ -349,6 +412,8 @@ export async function getUnderReviewPetDetailForAdmin(
       color,
       temperament,
       description,
+      pending_description,
+      description_review_status,
       price,
       price_comment,
       status,
@@ -373,8 +438,8 @@ export async function getUnderReviewPetDetailForAdmin(
     `,
     )
     .eq("id", petId)
-    .eq("status", "under_review")
     .is("deleted_at", null)
+    .or("status.eq.under_review,and(status.eq.published,description_review_status.eq.under_review)")
     .maybeSingle();
 
   if (error) {
@@ -447,6 +512,34 @@ export async function returnPetReviewViaRpc(petId: string, comment: string): Pro
   const supabase = await createClient();
 
   const { error } = await supabase.rpc("return_pet_review", {
+    p_pet_id: petId,
+    p_comment: comment,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function approvePetDescriptionRevisionViaRpc(petId: string): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("approve_pet_description_revision", {
+    p_pet_id: petId,
+  });
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function returnPetDescriptionRevisionViaRpc(
+  petId: string,
+  comment: string,
+): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("return_pet_description_revision", {
     p_pet_id: petId,
     p_comment: comment,
   });

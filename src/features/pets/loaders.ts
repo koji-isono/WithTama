@@ -2,11 +2,17 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 
-import { getPetByIdForBreeder, getPetPhotoSignedUrl, getPetPhotosForBreeder } from "./repository";
+import {
+  getPetByIdForBreeder,
+  getPetPhotoSignedUrl,
+  getPetPhotosForBreeder,
+  getLatestDescriptionReturnCommentForBreeder,
+} from "./repository";
 import { listPublishedPetsForPublic, getPublishedPetDetailForPublic } from "./public-repository";
 import {
   mapPetEditRowToInput,
   mapPetPhotoRowToListItem,
+  type DescriptionReviewStatus,
   type LoadPublicPetsPageResult,
   type LoadPublicPetDetailPageResult,
   type PetEditPageData,
@@ -44,10 +50,18 @@ export async function buildPetEditPageData(
   }
 
   const photos = await loadPetPhotosWithSignedUrls(userId, petId);
+  const descriptionReturnReason =
+    row.description_review_status === "returned"
+      ? await getLatestDescriptionReturnCommentForBreeder(userId, petId)
+      : null;
 
   return {
     petId: row.id,
     status: row.status,
+    descriptionReviewStatus: row.description_review_status as DescriptionReviewStatus,
+    publishedDescription: row.status === "published" ? row.description : null,
+    pendingDescription: row.pending_description,
+    descriptionReturnReason,
     input: mapPetEditRowToInput(row),
     photos,
   };
