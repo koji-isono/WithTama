@@ -131,19 +131,33 @@ under_review
 | RLS      | 操作可能な行 |
 | トリガー | status 遷移  |
 
-**第1期で許可する status 変更（1 件のみ）**
+**第1期で許可する status 変更（breeder 本人・トリガー / 専用 RPC）**
 
-| 主体            | 遷移                     | 条件                                                 |
-| --------------- | ------------------------ | ---------------------------------------------------- |
-| breeder（本人） | `draft` → `under_review` | `pets.breeder_id` がログインユーザーの `breeders.id` |
+| 主体            | 遷移                     | 経路                                                   |
+| --------------- | ------------------------ | ------------------------------------------------------ |
+| breeder（本人） | `draft` → `under_review` | `submit_pet_for_review` RPC + トリガー                 |
+| breeder（本人） | `published` → `paused`   | `pause_pet_listing` RPC + トリガー（Decision No.152）  |
+| breeder（本人） | `paused` → `published`   | `resume_pet_listing` RPC + トリガー（Decision No.152） |
 
 - `OLD.status = NEW.status` の場合は許可（通常の犬猫情報編集）
 - `auth.uid() IS NULL` で status が変わる UPDATE は拒否
-- admin による status 変更は **今回未実装**（AD-10 / AD-11 実装時に一体設計）
-- `paused` / `family_decided` / `closed` への遷移も将来対応
-- 関数は `SECURITY INVOKER`、`search_path = public`
+- admin による `under_review` → `published` / `draft` は AD-10 / AD-11 RPC 経由
+- `family_decided` / `closed` への遷移は第1期対象外
+- トリガー関数は `SECURITY INVOKER`、`search_path = public`
 
-Migration: `20260807130000_enforce_pets_status_transition.sql`（作成済み・未適用）
+Migration: `20260807130000_enforce_pets_status_transition.sql`、拡張 `20260908100000_add_pet_listing_pause_resume.sql`
+
+### 公開停止 / 再公開 RPC（Decision No.152）
+
+| RPC                  | 主体            | 前提 status | 更新内容                                                                                                                 |
+| -------------------- | --------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `pause_pet_listing`  | breeder（本人） | `published` | `status='paused'`、`pending_description=NULL`、`description_review_status='none'`。`description` / `published_at` は保持 |
+| `resume_pet_listing` | breeder（本人） | `paused`    | `status='published'`。`description` / `published_at` は変更しない（再審査なし）                                          |
+
+- `SECURITY DEFINER`、`search_path` 固定、`authenticated` のみ `GRANT`
+- buyer / anon / 他 breeder / admin（breeder 兼務）からの呼び出しは拒否
+
+セキュリティテスト: `npm run test:pet-listing-pause-db`
 
 ### 公開後フロー
 
@@ -182,6 +196,7 @@ stateDiagram-v2
 | `20260814120000_add_public_pet_list_read_access.sql`     | PU-01 公開一覧 View + `is_publicly_listable_pet` + 写真 RLS                                 |
 | `20260814130000_add_public_pet_detail_read_views.sql`    | PU-02 公開詳細 View（RLS / Storage 変更なし）                                               |
 | `20260907100000_add_pet_description_revision_review.sql` | 公開後紹介文改訂審査（`pending_description` / `description_review_status` / RPC / trigger） |
+| `20260908100000_add_pet_listing_pause_resume.sql`        | 公開停止 / 再公開（`pause_pet_listing` / `resume_pet_listing`、トリガー拡張）               |
 
 既存データを保持する。`DROP TABLE` / `TRUNCATE` / `DELETE` は使用しない。
 

@@ -41,6 +41,7 @@ export type BreederPetListItem = {
   birthday: string | null;
   price: number | null;
   status: PetStatus;
+  descriptionReviewStatus: DescriptionReviewStatus;
   updatedAt: string;
   mainPhotoUrl: string | null;
 };
@@ -56,6 +57,7 @@ export type PetListWithMainPhotoRow = {
   birthday: string | null;
   price: number | null;
   status: PetStatus;
+  description_review_status: DescriptionReviewStatus;
   updated_at: string;
   main_photo_signed_url: string | null;
 };
@@ -195,6 +197,8 @@ export type UploadPetPhotoResult =
 export type PetPhotoActionResult = { success: true } | { success: false; error: string };
 
 export type SubmitPetForReviewResult = { success: true } | { success: false; error: string };
+
+export type PetListingActionResult = { success: true } | { success: false; error: string };
 
 export type DescriptionRevisionActionResult =
   | { success: true }
@@ -342,6 +346,7 @@ export function mapPetListWithMainPhotoToBreederPetListItem(
     birthday: row.birthday,
     price: row.price,
     status: row.status,
+    descriptionReviewStatus: row.description_review_status,
     updatedAt: row.updated_at,
     mainPhotoUrl: row.main_photo_signed_url,
   };

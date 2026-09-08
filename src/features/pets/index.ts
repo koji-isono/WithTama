@@ -60,6 +60,8 @@ export {
   listPetsForCurrentBreeder,
   setMainPetPhoto,
   submitPetForReview,
+  pausePetListingViaRpc,
+  resumePetListingViaRpc,
   updatePetDraft,
   uploadPetPhotoToStorage,
 } from "./repository";
@@ -72,6 +74,8 @@ export {
   setMainPetPhotoAction,
   submitPetDescriptionRevisionAction,
   submitPetForReviewAction,
+  pausePetListingAction,
+  resumePetListingAction,
   updatePetDraftAction,
   uploadPetPhotoAction,
 } from "./service";
@@ -109,6 +113,7 @@ export type {
   SavePetResult,
   UpdatePetDraftData,
   SubmitPetForReviewResult,
+  PetListingActionResult,
   UpdatePetDraftResult,
   UploadPetPhotoResult,
 } from "./types";
@@ -152,4 +157,8 @@ export {
   PET_REVIEW_SUBMIT_GENERIC_ERROR_MESSAGE,
   PET_REVIEW_SUBMIT_PHOTO_REQUIRED_MESSAGE,
   PET_REVIEW_SUBMIT_STATUS_INVALID_MESSAGE,
+  PET_LISTING_PAUSE_STATUS_INVALID_MESSAGE,
+  PET_LISTING_PAUSE_GENERIC_ERROR_MESSAGE,
+  PET_LISTING_RESUME_STATUS_INVALID_MESSAGE,
+  PET_LISTING_RESUME_GENERIC_ERROR_MESSAGE,
 } from "./validation";

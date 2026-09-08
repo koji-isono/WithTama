@@ -23,8 +23,14 @@ import {
   getSexLabel,
   getSpeciesLabel,
 } from "../list-format";
-import { submitPetForReviewAction } from "../service";
+import {
+  submitPetForReviewAction,
+  pausePetListingAction,
+  resumePetListingAction,
+} from "../service";
 import type { BreederPetListItem, PetStatus } from "../types";
+import { PetPauseListingDialog } from "./pet-pause-listing-dialog";
+import { PetResumeListingDialog } from "./pet-resume-listing-dialog";
 import { PetSubmitReviewDialog } from "./pet-submit-review-dialog";
 
 type BreederPetsListContentProps = {
@@ -46,17 +52,28 @@ function statusBadgeClassName(status: PetStatus): string {
 function PetListCard({
   pet,
   onSubmitSuccess,
+  onPauseSuccess,
+  onResumeSuccess,
 }: {
   pet: BreederPetListItem;
   onSubmitSuccess: () => void;
+  onPauseSuccess: () => void;
+  onResumeSuccess: () => void;
 }) {
   const router = useRouter();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false);
+  const [pauseDialogOpen, setPauseDialogOpen] = useState(false);
+  const [resumeDialogOpen, setResumeDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPausing, setIsPausing] = useState(false);
+  const [isResuming, setIsResuming] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [pauseError, setPauseError] = useState<string | null>(null);
+  const [resumeError, setResumeError] = useState<string | null>(null);
 
   const updatedLabel = formatPetUpdatedAt(pet.updatedAt);
   const displayName = pet.publicDisplayName || "（公開表示名未設定）";
+  const hasDescriptionRevisionInReview = pet.descriptionReviewStatus === "under_review";
 
   async function handleConfirmSubmit() {
     setSubmitError(null);
@@ -70,7 +87,7 @@ function PetListCard({
         return;
       }
 
-      setDialogOpen(false);
+      setSubmitDialogOpen(false);
       onSubmitSuccess();
       router.refresh();
     } finally {
@@ -78,15 +95,79 @@ function PetListCard({
     }
   }
 
-  function handleOpenDialog() {
-    setSubmitError(null);
-    setDialogOpen(true);
+  async function handleConfirmPause() {
+    setPauseError(null);
+    setIsPausing(true);
+
+    try {
+      const result = await pausePetListingAction(pet.id);
+
+      if (!result.success) {
+        setPauseError(result.error);
+        return;
+      }
+
+      setPauseDialogOpen(false);
+      onPauseSuccess();
+      router.refresh();
+    } finally {
+      setIsPausing(false);
+    }
   }
 
-  function handleCloseDialog() {
+  async function handleConfirmResume() {
+    setResumeError(null);
+    setIsResuming(true);
+
+    try {
+      const result = await resumePetListingAction(pet.id);
+
+      if (!result.success) {
+        setResumeError(result.error);
+        return;
+      }
+
+      setResumeDialogOpen(false);
+      onResumeSuccess();
+      router.refresh();
+    } finally {
+      setIsResuming(false);
+    }
+  }
+
+  function handleOpenSubmitDialog() {
+    setSubmitError(null);
+    setSubmitDialogOpen(true);
+  }
+
+  function handleCloseSubmitDialog() {
     if (!isSubmitting) {
-      setDialogOpen(false);
+      setSubmitDialogOpen(false);
       setSubmitError(null);
+    }
+  }
+
+  function handleOpenPauseDialog() {
+    setPauseError(null);
+    setPauseDialogOpen(true);
+  }
+
+  function handleClosePauseDialog() {
+    if (!isPausing) {
+      setPauseDialogOpen(false);
+      setPauseError(null);
+    }
+  }
+
+  function handleOpenResumeDialog() {
+    setResumeError(null);
+    setResumeDialogOpen(true);
+  }
+
+  function handleCloseResumeDialog() {
+    if (!isResuming) {
+      setResumeDialogOpen(false);
+      setResumeError(null);
     }
   }
 
@@ -144,10 +225,24 @@ function PetListCard({
 
           {updatedLabel ? <p className="text-xs text-neutral-500">更新：{updatedLabel}</p> : null}
 
-          {submitError && !dialogOpen ? (
+          {submitError && !submitDialogOpen ? (
             <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
               <AlertCircle className="size-4 text-red-600" />
               <AlertDescription>{submitError}</AlertDescription>
+            </Alert>
+          ) : null}
+
+          {pauseError && !pauseDialogOpen ? (
+            <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
+              <AlertCircle className="size-4 text-red-600" />
+              <AlertDescription>{pauseError}</AlertDescription>
+            </Alert>
+          ) : null}
+
+          {resumeError && !resumeDialogOpen ? (
+            <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
+              <AlertCircle className="size-4 text-red-600" />
+              <AlertDescription>{resumeError}</AlertDescription>
             </Alert>
           ) : null}
 
@@ -156,7 +251,7 @@ function PetListCard({
               <Button
                 type="button"
                 className="h-10 w-full rounded-full bg-[var(--primary)] hover:bg-[var(--primary)]/90"
-                onClick={handleOpenDialog}
+                onClick={handleOpenSubmitDialog}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
@@ -166,6 +261,41 @@ function PetListCard({
                   </>
                 ) : (
                   "公開申請"
+                )}
+              </Button>
+            ) : null}
+            {pet.status === "published" ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-10 w-full rounded-full border-red-200 text-red-700 hover:bg-red-50"
+                onClick={handleOpenPauseDialog}
+                disabled={isPausing}
+              >
+                {isPausing ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    停止中...
+                  </>
+                ) : (
+                  "公開を停止"
+                )}
+              </Button>
+            ) : null}
+            {pet.status === "paused" ? (
+              <Button
+                type="button"
+                className="h-10 w-full rounded-full bg-[var(--primary)] hover:bg-[var(--primary)]/90"
+                onClick={handleOpenResumeDialog}
+                disabled={isResuming}
+              >
+                {isResuming ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    再公開中...
+                  </>
+                ) : (
+                  "再公開する"
                 )}
               </Button>
             ) : null}
@@ -181,12 +311,31 @@ function PetListCard({
       </Card>
 
       <PetSubmitReviewDialog
-        open={dialogOpen}
+        open={submitDialogOpen}
         petName={displayName}
         isSubmitting={isSubmitting}
         error={submitError}
-        onCancel={handleCloseDialog}
+        onCancel={handleCloseSubmitDialog}
         onConfirm={handleConfirmSubmit}
+      />
+
+      <PetPauseListingDialog
+        open={pauseDialogOpen}
+        petName={displayName}
+        hasDescriptionRevisionInReview={hasDescriptionRevisionInReview}
+        isSubmitting={isPausing}
+        error={pauseError}
+        onCancel={handleClosePauseDialog}
+        onConfirm={handleConfirmPause}
+      />
+
+      <PetResumeListingDialog
+        open={resumeDialogOpen}
+        petName={displayName}
+        isSubmitting={isResuming}
+        error={resumeError}
+        onCancel={handleCloseResumeDialog}
+        onConfirm={handleConfirmResume}
       />
     </>
   );
@@ -243,6 +392,8 @@ export function BreederPetsListContent({ pets }: BreederPetsListContentProps) {
               <PetListCard
                 pet={pet}
                 onSubmitSuccess={() => setSuccessMessage("公開申請を受け付けました。")}
+                onPauseSuccess={() => setSuccessMessage("公開を停止しました。")}
+                onResumeSuccess={() => setSuccessMessage("再公開しました。")}
               />
             </li>
           ))}

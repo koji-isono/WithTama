@@ -1534,3 +1534,24 @@ _*管理者画面は AD-* で採番する_*
 - **Migration:** `20260907100000_add_pet_description_revision_review.sql`
 - **決定日:** 2026-09-07
 - **参照:** [pets テーブル](../05_データベース設計/pets.md) / [BR-11](../04_画面設計/BR-11_犬猫情報編集.md)
+
+---
+
+## Decision No.152
+
+**ブリーダーによる犬猫公開停止（`published → paused`）と再公開（`paused → published`）を第1期で実装する**
+
+- **決定内容:**
+  - 公開停止: `published → paused`。ブリーダー本人のみ（専用 RPC `pause_pet_listing`）
+  - 再公開: `paused → published`。ブリーダー本人のみ（専用 RPC `resume_pet_listing`）。**再審査不要**
+  - `paused` は管理者承認済み掲載の一時非公開。`published_at` / 承認済み `description` は保持
+  - 紹介文変更審査中（`description_review_status = under_review` 等）でも公開停止を許可。停止時に `pending_description = NULL`、`description_review_status = 'none'`（審査中変更案は破棄）。`description` は変更しない
+  - 再公開後は停止前の承認済み `description` をそのまま公開
+  - `family_decided` / `closed` は今回対象外
+  - 既存 `inquiry` / `visit` / `favorites` 行は削除しない。新規問い合わせは公開 View 非表示により不可
+  - `pet_review_logs` / `audit_logs` への pause / resume 記録は行わない
+- **理由:** Decision No.93 の「公開停止は別操作」を Phase 1 で実装。運用上の一時停止と再開を最小構成で提供するため（[実装前調査](../09_開発履歴/2026-09-07_犬猫公開停止_実装前調査報告.md)）
+- **影響範囲:** `pets.status` トリガー、BR-10、Supabase RPC、公開 View（変更不要）
+- **Migration:** `20260908100000_add_pet_listing_pause_resume.sql`
+- **決定日:** 2026-09-08
+- **参照:** [BR-10 犬猫一覧](../04_画面設計/BR-10_犬猫一覧.md) / [Decision No.93](#decision-no93) / [Decision No.151](#decision-no151)

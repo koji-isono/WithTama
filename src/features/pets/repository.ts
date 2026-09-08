@@ -22,7 +22,7 @@ const petListSelect =
   "id, breeder_id, management_name, public_display_name, species, breed, sex, birthday, status, display_order, created_at";
 
 const petListWithMainPhotoSelect =
-  "id, management_name, public_display_name, species, breed, sex, birthday, price, status, updated_at";
+  "id, management_name, public_display_name, species, breed, sex, birthday, price, status, description_review_status, updated_at";
 
 const petEditSelect =
   "id, breeder_id, management_name, public_display_name, species, breed, sex, birthday, color, temperament, description, pending_description, description_review_status, price, price_comment, status";
@@ -156,6 +156,9 @@ export async function listPetsWithMainPhotoByBreederUserId(
       birthday: (pet.birthday as string | null) ?? null,
       price: (pet.price as number | null) ?? null,
       status: pet.status as PetListWithMainPhotoRow["status"],
+      description_review_status:
+        (pet.description_review_status as PetListWithMainPhotoRow["description_review_status"]) ??
+        "none",
       updated_at: pet.updated_at as string,
       main_photo_signed_url: storagePath ? (signedUrlByPath.get(storagePath) ?? null) : null,
     };
@@ -366,6 +369,70 @@ export async function submitPetForReview(userId: string, petId: string): Promise
       message.includes("description required") ||
       message.includes("description too short") ||
       message.includes("description too long")
+    ) {
+      return false;
+    }
+
+    throw error;
+  }
+
+  return true;
+}
+
+export async function pausePetListingViaRpc(userId: string, petId: string): Promise<boolean> {
+  const breederId = await getBreederIdByUserId(userId);
+
+  if (!breederId) {
+    throw new Error("ブリーダー情報が見つかりません。");
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("pause_pet_listing", {
+    p_pet_id: petId,
+  });
+
+  if (error) {
+    const message = error.message.toLowerCase();
+
+    if (
+      message.includes("invalid pet status") ||
+      message.includes("pet not found") ||
+      message.includes("unauthorized") ||
+      message.includes("invalid pause actor") ||
+      message.includes("authentication required")
+    ) {
+      return false;
+    }
+
+    throw error;
+  }
+
+  return true;
+}
+
+export async function resumePetListingViaRpc(userId: string, petId: string): Promise<boolean> {
+  const breederId = await getBreederIdByUserId(userId);
+
+  if (!breederId) {
+    throw new Error("ブリーダー情報が見つかりません。");
+  }
+
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc("resume_pet_listing", {
+    p_pet_id: petId,
+  });
+
+  if (error) {
+    const message = error.message.toLowerCase();
+
+    if (
+      message.includes("invalid pet status") ||
+      message.includes("pet not found") ||
+      message.includes("unauthorized") ||
+      message.includes("invalid resume actor") ||
+      message.includes("authentication required")
     ) {
       return false;
     }

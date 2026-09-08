@@ -1,6 +1,10 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { createClient } from "@/lib/supabase/server";
+
+import { BREEDER_PETS_PATH, PUBLIC_PETS_PATH } from "./constants";
 
 import { formatPetPhotoUploadError } from "./format-pet-photo-error";
 import { formatPetSaveError } from "./format-save-error";
@@ -17,6 +21,8 @@ import {
   listPetsWithMainPhotoByBreederUserId,
   removePetPhotoFromStorage,
   savePetDescriptionRevisionDraftViaRpc,
+  pausePetListingViaRpc,
+  resumePetListingViaRpc,
   setMainPetPhoto,
   submitPetDescriptionRevisionViaRpc,
   submitPetForReview,
@@ -29,6 +35,7 @@ import type {
   DescriptionRevisionActionResult,
   LoadBreederPetsResult,
   PetEditPageData,
+  PetListingActionResult,
   PetPhotoActionResult,
   SubmitPetForReviewResult,
   UpdatePetDraftResult,
@@ -41,6 +48,10 @@ import {
   PET_DESCRIPTION_REVISION_GENERIC_ERROR_MESSAGE,
   PET_DESCRIPTION_REVISION_STATUS_INVALID_MESSAGE,
   PET_DESCRIPTION_REVISION_UNCHANGED_MESSAGE,
+  PET_LISTING_PAUSE_GENERIC_ERROR_MESSAGE,
+  PET_LISTING_PAUSE_STATUS_INVALID_MESSAGE,
+  PET_LISTING_RESUME_GENERIC_ERROR_MESSAGE,
+  PET_LISTING_RESUME_STATUS_INVALID_MESSAGE,
   PET_REVIEW_SUBMIT_DESCRIPTION_REQUIRED_MESSAGE,
   PET_REVIEW_SUBMIT_DESCRIPTION_TOO_LONG_MESSAGE,
   PET_REVIEW_SUBMIT_GENERIC_ERROR_MESSAGE,
@@ -480,5 +491,91 @@ export async function submitPetDescriptionRevisionAction(
     }
 
     return { success: false, error: PET_DESCRIPTION_REVISION_GENERIC_ERROR_MESSAGE };
+  }
+}
+
+function revalidateBreederAndPublicPetPaths(petId: string): void {
+  revalidatePath(BREEDER_PETS_PATH);
+  revalidatePath(PUBLIC_PETS_PATH);
+  revalidatePath(`${PUBLIC_PETS_PATH}/${petId}`);
+}
+
+export async function pausePetListingAction(petId: string): Promise<PetListingActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "ログインが必要です。" };
+  }
+
+  try {
+    const pet = await getPetByIdForBreeder(user.id, petId);
+
+    if (!pet) {
+      return { success: false, error: PET_LISTING_PAUSE_GENERIC_ERROR_MESSAGE };
+    }
+
+    if (pet.status !== "published") {
+      return { success: false, error: PET_LISTING_PAUSE_STATUS_INVALID_MESSAGE };
+    }
+
+    const updated = await pausePetListingViaRpc(user.id, petId);
+
+    if (!updated) {
+      return { success: false, error: PET_LISTING_PAUSE_STATUS_INVALID_MESSAGE };
+    }
+
+    revalidateBreederAndPublicPetPaths(petId);
+
+    return { success: true };
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("pausePetListingAction failed", error);
+    }
+
+    return { success: false, error: PET_LISTING_PAUSE_GENERIC_ERROR_MESSAGE };
+  }
+}
+
+export async function resumePetListingAction(petId: string): Promise<PetListingActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "ログインが必要です。" };
+  }
+
+  try {
+    const pet = await getPetByIdForBreeder(user.id, petId);
+
+    if (!pet) {
+      return { success: false, error: PET_LISTING_RESUME_GENERIC_ERROR_MESSAGE };
+    }
+
+    if (pet.status !== "paused") {
+      return { success: false, error: PET_LISTING_RESUME_STATUS_INVALID_MESSAGE };
+    }
+
+    const updated = await resumePetListingViaRpc(user.id, petId);
+
+    if (!updated) {
+      return { success: false, error: PET_LISTING_RESUME_STATUS_INVALID_MESSAGE };
+    }
+
+    revalidateBreederAndPublicPetPaths(petId);
+
+    return { success: true };
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("resumePetListingAction failed", error);
+    }
+
+    return { success: false, error: PET_LISTING_RESUME_GENERIC_ERROR_MESSAGE };
   }
 }

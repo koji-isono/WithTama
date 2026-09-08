@@ -149,6 +149,14 @@ export const PET_REVIEW_SUBMIT_STATUS_INVALID_MESSAGE = "この犬猫は現在�
 
 export const PET_REVIEW_SUBMIT_GENERIC_ERROR_MESSAGE = "公開申請に失敗しました。";
 
+export const PET_LISTING_PAUSE_STATUS_INVALID_MESSAGE = "この犬猫は現在、公開を停止できません。";
+
+export const PET_LISTING_PAUSE_GENERIC_ERROR_MESSAGE = "公開の停止に失敗しました。";
+
+export const PET_LISTING_RESUME_STATUS_INVALID_MESSAGE = "この犬猫は現在、再公開できません。";
+
+export const PET_LISTING_RESUME_GENERIC_ERROR_MESSAGE = "再公開に失敗しました。";
+
 export const PET_REVIEW_SUBMIT_DESCRIPTION_REQUIRED_MESSAGE =
   "紹介文を20文字以上入力してください。";
 
