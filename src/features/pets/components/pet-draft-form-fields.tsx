@@ -228,9 +228,9 @@ export function PetDraftFormFields({
 
       <ProfileFormField
         id="price"
-        label="価格"
+        label="販売価格（税抜）"
         optional
-        description="円（税込）。未入力でも登録できます。"
+        description="円単位の整数。未入力でも登録できます。"
         error={fieldErrors.price}
       >
         <Input

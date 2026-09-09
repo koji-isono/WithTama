@@ -88,12 +88,13 @@ export function formatAdminPetBirthday(birthday: string | null): string {
   return age === "—" ? formatted : `${formatted}（${age}）`;
 }
 
+/** Decision No.153 — tax-exclusive display label (no tax calculation). */
 export function formatAdminPetPrice(price: number | null): string {
   if (price === null) {
     return "—";
   }
 
-  return `${price.toLocaleString("ja-JP")} 円`;
+  return `${price.toLocaleString("ja-JP")}円（税抜）`;
 }
 
 export function formatAdminDateOnly(isoDate: string | null): string {

@@ -9,12 +9,13 @@ export function getSexLabel(sex: PetSex): string {
   return PET_SEX_OPTIONS.find((option) => option.value === sex)?.label ?? sex;
 }
 
+/** Decision No.153 — tax-exclusive display label (no tax calculation). */
 export function formatPetPrice(price: number | null): string {
   if (price == null) {
     return "価格未設定";
   }
 
-  return `${new Intl.NumberFormat("ja-JP").format(price)}円`;
+  return `${new Intl.NumberFormat("ja-JP").format(price)}円（税抜）`;
 }
 
 export function formatPetBirthday(birthday: string | null): string {
