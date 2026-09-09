@@ -4,6 +4,8 @@ import { CheckCircle2, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 
+import { BillingSubscriptionNotice } from "@/features/legal";
+
 import { BILLING_PLAN_NAME, BILLING_PLAN_PRICE_LABEL } from "../billing-display";
 import type { BreederBillingPageData } from "../types";
 import { BillingCheckoutButton } from "./billing-checkout-button";
@@ -72,7 +74,8 @@ export function BreederBillingView({ presentation, periodEndLabel }: BreederBill
           ) : null}
 
           {presentation.showCheckoutCta && presentation.checkoutCtaLabel ? (
-            <div className="border-t border-[var(--border)] pt-5">
+            <div className="space-y-4 border-t border-[var(--border)] pt-5">
+              <BillingSubscriptionNotice />
               <BillingCheckoutButton label={presentation.checkoutCtaLabel} />
             </div>
           ) : null}

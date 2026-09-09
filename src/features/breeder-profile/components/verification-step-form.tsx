@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PrivacyPolicyNotice } from "@/features/legal";
 
 import {
   COMPLETE_SUBMIT_BUTTON_LABEL,
@@ -132,6 +133,7 @@ export function VerificationStepForm({ initialState }: VerificationStepFormProps
           <Info className="size-4 text-blue-600" />
           <AlertDescription>{VERIFICATION_PRIVACY_NOTICE}</AlertDescription>
         </Alert>
+        <PrivacyPolicyNotice />
 
         {priorStepMissing ? (
           <Alert variant="destructive" className="border-amber-200 bg-amber-50 text-amber-900">

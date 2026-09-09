@@ -14,6 +14,7 @@ import {
   getBuyerInquiryDetailPath,
   INQUIRY_MESSAGE_MAX_LENGTH,
 } from "@/features/inquiries/constants";
+import { PrivacyPolicyNotice } from "@/features/legal";
 import { cn } from "@/lib/utils";
 
 import { VISIT_REQUEST_SUCCESS_MESSAGE, getBuyerVisitDetailPath } from "../constants";
@@ -309,6 +310,8 @@ export function VisitRequestForm({ inquiryId, pet }: VisitRequestFormProps) {
               </p>
             </div>
           </div>
+
+          <PrivacyPolicyNotice />
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <Button

@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PrivacyPolicyNotice } from "@/features/legal";
 import { getPublicPetDetailPath } from "@/features/pets/constants";
 import { cn } from "@/lib/utils";
 
@@ -152,6 +153,8 @@ export function InquiryNewForm({ petId, pet }: InquiryNewFormProps) {
               </p>
             </div>
           </div>
+
+          <PrivacyPolicyNotice />
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <Button

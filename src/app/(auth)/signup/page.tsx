@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { TermsConsentError, TermsConsentField } from "@/features/legal";
 import { cn } from "@/lib/utils";
 import { signUpWithRole, type SignupRole } from "@/lib/supabase/sign-up";
 
@@ -40,6 +41,8 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [consentError, setConsentError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedOption = roleOptions.find((option) => option.role === role);
@@ -54,6 +57,12 @@ export default function SignupPage() {
       return;
     }
 
+    if (!termsAccepted) {
+      setConsentError("利用規約およびプライバシーポリシーへの同意が必要です");
+      return;
+    }
+
+    setConsentError(null);
     setIsSubmitting(true);
 
     const { error } = await signUpWithRole(email, password, role);
@@ -69,7 +78,7 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="mx-auto max-w-md px-4 py-8 sm:py-16">
+    <div className="mx-auto max-w-md px-4 py-8 sm:py-16">
       <h1 className="text-2xl font-bold sm:text-3xl">無料会員登録</h1>
 
       <section className="mt-8">
@@ -180,12 +189,23 @@ export default function SignupPage() {
               </Alert>
             ) : null}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <TermsConsentField
+              checked={termsAccepted}
+              onCheckedChange={(checked) => {
+                setTermsAccepted(checked);
+                if (checked) setConsentError(null);
+              }}
+              disabled={isSubmitting}
+              breeder={role === "breeder"}
+            />
+            <TermsConsentError message={consentError} />
+
+            <Button type="submit" className="w-full" disabled={isSubmitting || !termsAccepted}>
               {isSubmitting ? "登録中..." : "無料会員登録する"}
             </Button>
           </form>
         </section>
       ) : null}
-    </main>
+    </div>
   );
 }

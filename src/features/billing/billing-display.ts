@@ -24,7 +24,7 @@ export type BillingStatusPresentation = {
 };
 
 export const BILLING_PLAN_NAME = "WithTama ブリーダー会員";
-export const BILLING_PLAN_PRICE_LABEL = "月額 5,000円（税別）";
+export const BILLING_PLAN_PRICE_LABEL = "月額 5,000円（税込）";
 export const BREEDER_BILLING_PATH = "/breeder/billing";
 
 export const BILLING_CHECKOUT_PENDING_LABEL = "月額会費のお支払いへ";
