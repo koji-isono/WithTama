@@ -3,7 +3,7 @@
 | 項目   | 内容                                               |
 | ------ | -------------------------------------------------- |
 | 確定日 | 2026-09-10                                         |
-| 判定   | **PASS — main / origin/main 同期、CI #80 SUCCESS** |
+| 判定   | **PASS — main / origin/main 同期、CI #81 SUCCESS** |
 
 ---
 
@@ -68,11 +68,12 @@ https://github.com/koji-isono/WithTama/actions/runs/34439977115
 
 ## 8. 最終 HEAD
 
-| 項目                 | 値                         |
-| -------------------- | -------------------------- |
-| fix commit           | `a188bf8`                  |
-| 確定報告 commit      | `0145047`                  |
-| Prettier 修正 commit | `80e475e`（**最終 HEAD**） |
+| 項目                    | 値                         |
+| ----------------------- | -------------------------- |
+| fix commit              | `a188bf8`                  |
+| 確定報告 commit         | `0145047`                  |
+| Prettier 修正 commit    | `80e475e`                  |
+| 確定報告 CI 追記 commit | `f3c5bb7`（**最終 HEAD**） |
 
 ---
 
@@ -141,6 +142,7 @@ fix commit 後、本 MD 以外の無関係な未 commit 変更は **コミット
 | #78 | `a188bf8` | **SUCCESS** | https://github.com/koji-isono/WithTama/actions/runs/34439977115 |
 | #79 | `0145047` | **FAILURE** | https://github.com/koji-isono/WithTama/actions/runs/34440211808 |
 | #80 | `80e475e` | **SUCCESS** | https://github.com/koji-isono/WithTama/actions/runs/34440579763 |
+| #81 | `f3c5bb7` | **SUCCESS** | https://github.com/koji-isono/WithTama/actions/runs/34440747836 |
 
 **#79 原因:** 確定報告 MD の Prettier 未適用（`format:check` 失敗）。本 commit で修正。
 
