@@ -130,12 +130,12 @@
 
 ## マイグレーション
 
-| ファイル                                                       | 内容                                    |
-| -------------------------------------------------------------- | --------------------------------------- |
-| `20260804164648_create_buyers.sql`                             | Version 1.0 新規作成                    |
-| `20260805112236_update_initial_registration_profile.sql`       | Version 1.1 `profile_completed` 追加    |
-| `20260805112809_update_profile_registration_flow.sql`          | Version 1.2 仮登録フロー整合            |
-| `20260821153000_create_get_inquiry_buyer_display_name_rpc.sql` | 問い合わせ表示名 RPC（Decision No.112） |
+| ファイル                                                       | 内容                                                    |
+| -------------------------------------------------------------- | ------------------------------------------------------- |
+| `20260804160000_create_buyers.sql`                             | Version 1.0 新規作成（Decision No.155 で version 修正） |
+| `20260805112236_update_initial_registration_profile.sql`       | Version 1.1 `profile_completed` 追加                    |
+| `20260805112809_update_profile_registration_flow.sql`          | Version 1.2 仮登録フロー整合                            |
+| `20260821153000_create_get_inquiry_buyer_display_name_rpc.sql` | 問い合わせ表示名 RPC（Decision No.112）                 |
 
 ## 関連ドキュメント
 

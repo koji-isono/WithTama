@@ -82,9 +82,9 @@ WithTama/
         ├── 20260804132200_update_pets_v1_1.sql
         ├── 20260804135800_create_breeders.sql
         ├── 20260804144700_update_breeders_draft_nullable.sql
+        ├── 20260804160000_create_buyers.sql
         ├── 20260804161228_create_favorites.sql
         ├── 20260804163239_create_inquiries_messages_visits.sql
-        ├── 20260804164648_create_buyers.sql
         ├── 20260805112007_update_breeders_profile_nullable.sql
         ├── 20260805112236_update_initial_registration_profile.sql
         └── 20260805112809_update_profile_registration_flow.sql
@@ -280,9 +280,9 @@ supabase/
 | `20260804132200_update_pets_v1_1.sql`                    | pets v1.1                           |
 | `20260804135800_create_breeders.sql`                     | breeders 新規・RLS                  |
 | `20260804144700_update_breeders_draft_nullable.sql`      | breeders 仮登録 NULL 許可           |
+| `20260804160000_create_buyers.sql`                       | buyers                              |
 | `20260804161228_create_favorites.sql`                    | favorites                           |
 | `20260804163239_create_inquiries_messages_visits.sql`    | inquiries, inquiry_messages, visits |
-| `20260804164648_create_buyers.sql`                       | buyers                              |
 | `20260805112007_update_breeders_profile_nullable.sql`    | breeders プロフィール NULL          |
 | `20260805112236_update_initial_registration_profile.sql` | address1/2, profile_completed       |
 | `20260805112809_update_profile_registration_flow.sql`    | 仮登録フロー v1.4                   |

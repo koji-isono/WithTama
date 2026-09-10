@@ -20,6 +20,7 @@
     "test:pet-description-validation": "npx tsx scripts/test-pet-description-validation.mts",
     "test:pet-price-display": "npx tsx scripts/test-pet-price-display.mts",
     "test:legal-pages": "npx tsx scripts/test-legal-pages.mts",
+    "test:migration-order": "npx tsx scripts/test-migration-order.mts",
     "prepare:sec-test-description-revision": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-description-revision.mts",
     "test:pet-description-revision-db": "npm run prepare:sec-test-description-revision && npm run prepare:sec-test-submit-pet && node --env-file=.env.local --experimental-strip-types scripts/test-pet-description-revision-db.mts",
     "prepare:sec-test-pet-listing-pause": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-pet-listing-pause.mts",

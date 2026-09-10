@@ -1630,3 +1630,23 @@ _*管理者画面は AD-* で採番する_*
 - **決定日:** 2026-09-09
 
 - **参照:** [法務公開ページ 実装前調査設計](../09_開発履歴/2026-09-09_法務公開ページ_実装前調査設計報告.md) / [No.153](#decision-no153) / [No.131](#decision-no131)
+
+---
+
+## Decision No.155
+
+**`create_buyers` migration の version を修正し、空 DB への CLI 再現性を保証する**
+
+- **決定内容:** `20260804164648_create_buyers.sql` を `20260804160000_create_buyers.sql` に **rename**（SQL 本文変更なし）。`create_favorites` / `create_inquiries_messages_visits` より **前** に適用されるようにする。
+
+- **理由:** Production 初回 `db push` で `public.buyers` 未作成のまま FK 参照が実行され失敗した。Git clone → 空 Supabase → `db push` の再現性を保証するため。
+
+- **DEV への影響:** **既存 DEV schema の変更ではない**（`buyers` テーブルは既に存在）。CLI `schema_migrations` に旧 version `20260804164648` がある場合は、将来 `migration repair` で history 整合が必要。
+
+- **Production 復旧:** 本 Decision では **db reset しない**。修正 main 確定後、**新規 Production Project 作成 → 空 DB へ 33 本 `db push`** を採用候補とする。
+
+- **影響範囲:** `supabase/migrations/`、`scripts/test-migration-order.mts`、`docs/05_データベース設計/buyers.md`
+
+- **決定日:** 2026-09-10
+
+- **参照:** [Production 初回 Migration 失敗 原因調査・修正方針](../09_開発履歴/2026-09-10_SupabaseProduction_初回Migration失敗_原因調査_修正方針.md) / [buyers 依存順序修正 実装報告](../09_開発履歴/2026-09-10_SupabaseMigration_buyers依存順序修正_実装報告.md)
