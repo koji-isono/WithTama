@@ -1,15 +1,15 @@
 # Supabase Migration buyers 依存順序修正 確定報告
 
-| 項目   | 内容                                                            |
-| ------ | --------------------------------------------------------------- |
-| 確定日 | 2026-09-10                                                      |
-| 判定   | **PASS — fix #78 SUCCESS / 確定報告 Prettier 修正後 CI 再確認** |
+| 項目   | 内容                                               |
+| ------ | -------------------------------------------------- |
+| 確定日 | 2026-09-10                                         |
+| 判定   | **PASS — main / origin/main 同期、CI #80 SUCCESS** |
 
 ---
 
 ## 1. 結論
 
-`create_buyers` migration の version 修正（Decision No.155）を **main へ commit / push 完了**。GitHub Actions **#78 SUCCESS**。Production / DEV DB 操作は **未実施**。
+`create_buyers` migration の version 修正（Decision No.155）を **main へ commit / push 完了**。fix commit CI **#78 SUCCESS**、確定報告 Prettier 修正後 CI **#80 SUCCESS**。Production / DEV DB 操作は **未実施**。
 
 ---
 
@@ -68,11 +68,11 @@ https://github.com/koji-isono/WithTama/actions/runs/34439977115
 
 ## 8. 最終 HEAD
 
-| 項目                 | 値              |
-| -------------------- | --------------- |
-| fix commit           | `a188bf8`       |
-| 確定報告 commit      | `0145047`       |
-| Prettier 修正 commit | （push 後記載） |
+| 項目                 | 値                         |
+| -------------------- | -------------------------- |
+| fix commit           | `a188bf8`                  |
+| 確定報告 commit      | `0145047`                  |
+| Prettier 修正 commit | `80e475e`（**最終 HEAD**） |
 
 ---
 
@@ -136,11 +136,11 @@ fix commit 後、本 MD 以外の無関係な未 commit 変更は **コミット
 
 ## 付録 — CI 履歴
 
-| Run | commit          | 結果            | URL                                                             |
-| --- | --------------- | --------------- | --------------------------------------------------------------- |
-| #78 | `a188bf8`       | **SUCCESS**     | https://github.com/koji-isono/WithTama/actions/runs/34439977115 |
-| #79 | `0145047`       | **FAILURE**     | https://github.com/koji-isono/WithTama/actions/runs/34440211808 |
-| #80 | Prettier 修正後 | （push 後記載） | —                                                               |
+| Run | commit    | 結果        | URL                                                             |
+| --- | --------- | ----------- | --------------------------------------------------------------- |
+| #78 | `a188bf8` | **SUCCESS** | https://github.com/koji-isono/WithTama/actions/runs/34439977115 |
+| #79 | `0145047` | **FAILURE** | https://github.com/koji-isono/WithTama/actions/runs/34440211808 |
+| #80 | `80e475e` | **SUCCESS** | https://github.com/koji-isono/WithTama/actions/runs/34440579763 |
 
 **#79 原因:** 確定報告 MD の Prettier 未適用（`format:check` 失敗）。本 commit で修正。
 
