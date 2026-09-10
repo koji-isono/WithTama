@@ -1,9 +1,9 @@
 # Supabase Migration buyers 依存順序修正 確定報告
 
-| 項目     | 内容                                      |
-| -------- | ----------------------------------------- |
-| 確定日   | 2026-09-10                                |
-| 判定     | **PASS — main / origin/main 同期、CI SUCCESS** |
+| 項目   | 内容                                                            |
+| ------ | --------------------------------------------------------------- |
+| 確定日 | 2026-09-10                                                      |
+| 判定   | **PASS — fix #78 SUCCESS / 確定報告 Prettier 修正後 CI 再確認** |
 
 ---
 
@@ -15,10 +15,10 @@
 
 ## 2. feature/fix commit hash
 
-| 項目 | 値 |
-| ---- | -- |
+| 項目       | 値            |
+| ---------- | ------------- |
 | fix commit | **`a188bf8`** |
-| 親 commit | `a21c64a` |
+| 親 commit  | `a21c64a`     |
 
 ---
 
@@ -32,11 +32,11 @@ fix(db): correct buyers migration dependency order
 
 ## 4. push 結果
 
-| 項目 | 結果 |
-| ---- | ---- |
-| branch | `main` |
-| remote | `origin/main` |
-| push | **成功**（`a21c64a..a188bf8`） |
+| 項目   | 結果                           |
+| ------ | ------------------------------ |
+| branch | `main`                         |
+| remote | `origin/main`                  |
+| push   | **成功**（`a21c64a..a188bf8`） |
 
 ---
 
@@ -54,13 +54,13 @@ https://github.com/koji-isono/WithTama/actions/runs/34439977115
 
 ## 7. CI 結果
 
-| Step | 結果 |
-| ---- | ---- |
-| npm ci | **SUCCESS** |
-| lint | **SUCCESS** |
-| typecheck | **SUCCESS** |
+| Step         | 結果        |
+| ------------ | ----------- |
+| npm ci       | **SUCCESS** |
+| lint         | **SUCCESS** |
+| typecheck    | **SUCCESS** |
 | format:check | **SUCCESS** |
-| build | **SUCCESS** |
+| build        | **SUCCESS** |
 
 **総合: SUCCESS**
 
@@ -68,10 +68,11 @@ https://github.com/koji-isono/WithTama/actions/runs/34439977115
 
 ## 8. 最終 HEAD
 
-| 項目 | 値 |
-| ---- | -- |
-| fix commit 時点 HEAD | `a188bf8` |
-| 確定報告 commit 後 | （本 MD push 後に更新 — 下記 §14 参照） |
+| 項目                 | 値              |
+| -------------------- | --------------- |
+| fix commit           | `a188bf8`       |
+| 確定報告 commit      | `0145047`       |
+| Prettier 修正 commit | （push 後記載） |
 
 ---
 
@@ -83,11 +84,11 @@ https://github.com/koji-isono/WithTama/actions/runs/34439977115
 
 ## 10. buyers / favorites / inquiries の順序
 
-| 順 | migration |
-| -- | --------- |
-| #5 | `20260804160000_create_buyers.sql` |
-| #6 | `20260804161228_create_favorites.sql` |
-| #7 | `20260804163239_create_inquiries_messages_visits.sql` |
+| 順  | migration                                             |
+| --- | ----------------------------------------------------- |
+| #5  | `20260804160000_create_buyers.sql`                    |
+| #6  | `20260804161228_create_favorites.sql`                 |
+| #7  | `20260804163239_create_inquiries_messages_visits.sql` |
 
 ---
 
@@ -99,19 +100,19 @@ https://github.com/koji-isono/WithTama/actions/runs/34439977115
 
 ## 12. Production DB 未操作確認
 
-| 操作 | 状態 |
-| ---- | ---- |
+| 操作                                  | 状態       |
+| ------------------------------------- | ---------- |
 | db push / db reset / migration repair | **未実行** |
-| SQL Editor / Storage / Auth | **未実行** |
+| SQL Editor / Storage / Auth           | **未実行** |
 
 ---
 
 ## 13. DEV DB 未操作確認
 
-| 操作 | 状態 |
-| ---- | ---- |
-| link / push / reset / repair | **未実行** |
-| DEV schema | **変更なし** |
+| 操作                         | 状態         |
+| ---------------------------- | ------------ |
+| link / push / reset / repair | **未実行**   |
+| DEV schema                   | **変更なし** |
 
 ---
 
@@ -133,10 +134,21 @@ fix commit 後、本 MD 以外の無関係な未 commit 変更は **コミット
 
 ---
 
-## 付録 — 確定報告 commit（push 後追記）
+## 付録 — CI 履歴
 
-| 項目 | 値 |
-| ---- | -- |
-| docs commit message | `docs(db): add migration dependency fix completion report` |
-| 確定報告 commit hash | （push 後記載） |
-| CI run（確定報告後） | （push 後記載） |
+| Run | commit          | 結果            | URL                                                             |
+| --- | --------------- | --------------- | --------------------------------------------------------------- |
+| #78 | `a188bf8`       | **SUCCESS**     | https://github.com/koji-isono/WithTama/actions/runs/34439977115 |
+| #79 | `0145047`       | **FAILURE**     | https://github.com/koji-isono/WithTama/actions/runs/34440211808 |
+| #80 | Prettier 修正後 | （push 後記載） | —                                                               |
+
+**#79 原因:** 確定報告 MD の Prettier 未適用（`format:check` 失敗）。本 commit で修正。
+
+---
+
+## 付録 — docs commit
+
+| 項目    | 値                                                         |
+| ------- | ---------------------------------------------------------- |
+| message | `docs(db): add migration dependency fix completion report` |
+| hash    | `0145047`                                                  |
