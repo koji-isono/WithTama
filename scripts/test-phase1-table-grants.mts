@@ -127,11 +127,7 @@ function runStaticChecks(checks: Check[]): void {
   );
   record(checks, "S10. no TRIGGER TRUNCATE REFERENCES grants", !badPrivilegeGrant);
 
-  record(
-    checks,
-    "S11. no GRANT ALL ON TABLE",
-    !/GRANT ALL ON TABLE/i.test(sql),
-  );
+  record(checks, "S11. no GRANT ALL ON TABLE", !/GRANT ALL ON TABLE/i.test(sql));
 
   record(checks, "S12. no GRANT DELETE on buyers", !/GRANT[^;]*DELETE[^;]*buyers/i.test(sql));
 
@@ -145,7 +141,11 @@ function runStaticChecks(checks: Check[]): void {
       /GRANT SELECT ON TABLE public\.breeder_review_logs TO authenticated/.test(sql),
   );
 
-  record(checks, "S15. no anon GRANT on pets base table", !/GRANT SELECT ON TABLE public\.pets TO anon/.test(sql));
+  record(
+    checks,
+    "S15. no anon GRANT on pets base table",
+    !/GRANT SELECT ON TABLE public\.pets TO anon/.test(sql),
+  );
 }
 
 async function signIn(
@@ -325,8 +325,7 @@ async function runLiveChecks(checks: Check[]): void {
       .select("id")
       .limit(1);
 
-    const stripeBlocked =
-      stripeError != null && isPermissionDenied(stripeError.message);
+    const stripeBlocked = stripeError != null && isPermissionDenied(stripeError.message);
 
     record(
       checks,
@@ -346,8 +345,7 @@ async function runLiveChecks(checks: Check[]): void {
     .select("id")
     .limit(1);
 
-  const anonStripeBlocked =
-    anonStripeError != null && isPermissionDenied(anonStripeError.message);
+  const anonStripeBlocked = anonStripeError != null && isPermissionDenied(anonStripeError.message);
 
   record(
     checks,
