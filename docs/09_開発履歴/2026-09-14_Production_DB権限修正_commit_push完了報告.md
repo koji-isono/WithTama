@@ -12,16 +12,16 @@
 
 ## 1. commit 概要
 
-| 項目                | 内容                                                         |
-| ------------------- | ------------------------------------------------------------ |
-| 機能 commit hash    | **`d16ae82`**                                                |
-| 機能 commit message | `fix(db): grant Phase1 table privileges`                     |
-| format 修正 hash    | **`9ac1e25`**                                                |
-| format 修正 message | `docs(db): fix Phase1 grant report formatting`               |
-| 完了報告 hash       | **`ffd741a`**                                                |
-| 完了報告 message    | `docs(db): add Phase1 grant commit/push completion report`   |
-| push 先 branch      | **`main`**                                                   |
-| push 先 remote      | **`origin`**（`https://github.com/koji-isono/WithTama.git`） |
+| 項目                | 内容                                                          |
+| ------------------- | ------------------------------------------------------------- |
+| 機能 commit hash    | **`d16ae82`**                                                 |
+| 機能 commit message | `fix(db): grant Phase1 table privileges`                      |
+| format 修正 hash    | **`9ac1e25`**                                                 |
+| format 修正 message | `docs(db): fix Phase1 grant report formatting`                |
+| 完了報告 hash       | **`ffd741a`** / **`795b3be`**（CI #85 追記）                  |
+| 完了報告 message    | `docs(db): add Phase1 grant commit/push completion report` 等 |
+| push 先 branch      | **`main`**                                                    |
+| push 先 remote      | **`origin`**（`https://github.com/koji-isono/WithTama.git`）  |
 
 ---
 
@@ -72,6 +72,7 @@ git show main:supabase/migrations/20260914100000_grant_phase1_table_privileges.s
 | 1（機能）        | `38e7531..d16ae82` | **成功** |
 | 2（format 修正） | `d16ae82..9ac1e25` | **成功** |
 | 3（完了報告）    | `9ac1e25..ffd741a` | **成功** |
+| 4（報告追記）    | `ffd741a..795b3be` | **成功** |
 
 force push: **未使用**
 
@@ -117,7 +118,7 @@ force push: **未使用**
 | format:check | success |
 | build        | success |
 
-### 5.3 Run #85（完了報告 commit `ffd741a`）— **最終 PASS**
+### 5.3 Run #85（完了報告 commit `ffd741a`）
 
 | 項目       | 内容                                                            |
 | ---------- | --------------------------------------------------------------- |
@@ -125,6 +126,16 @@ force push: **未使用**
 | run id     | `34814271916`                                                   |
 | URL        | https://github.com/koji-isono/WithTama/actions/runs/34814271916 |
 | head SHA   | `ffd741a93ec9e764ac039d60616204dd6b8695d1`                      |
+| 結果       | **SUCCESS**（全ステップ success）                               |
+
+### 5.4 Run #86（報告追記 commit `795b3be`）— **最終 PASS**
+
+| 項目       | 内容                                                            |
+| ---------- | --------------------------------------------------------------- |
+| run number | **#86**                                                         |
+| run id     | `34814503511`                                                   |
+| URL        | https://github.com/koji-isono/WithTama/actions/runs/34814503511 |
+| head SHA   | `795b3be8adbdbd055d5eb0d665f871fd9318bd77`                      |
 | 結果       | **SUCCESS**（全ステップ success）                               |
 
 ---
@@ -147,7 +158,7 @@ force push: **未使用**
 | -------------------------------------- | -------------------------- |
 | Migration が `main` に含まれる         | **OK**                     |
 | DEV 検証（全テスト PASS / L8-L9 含む） | **OK**（DEV 検証報告参照） |
-| CI green（#84 / #85）                  | **OK**                     |
+| CI green（#84 / #85 / #86）            | **OK**                     |
 | Production `db push`                   | **未実施**（次ステップ）   |
 
 ### 結論
@@ -161,10 +172,10 @@ force push: **未使用**
 
 | 項目               | SHA                                        |
 | ------------------ | ------------------------------------------ |
-| `main`（ローカル） | `ffd741a93ec9e764ac039d60616204dd6b8695d1` |
-| `origin/main`      | `ffd741a93ec9e764ac039d60616204dd6b8695d1` |
+| `main`（ローカル） | `795b3be8adbdbd055d5eb0d665f871fd9318bd77` |
+| `origin/main`      | `795b3be8adbdbd055d5eb0d665f871fd9318bd77` |
 
-**一致**（CI #85 PASS 確認後）
+**一致**（CI #86 PASS 確認後）
 
 ---
 
