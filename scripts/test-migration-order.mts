@@ -10,7 +10,7 @@ import { join } from "node:path";
 
 const MIGRATIONS_DIR = join(process.cwd(), "supabase/migrations");
 
-const EXPECTED_COUNT = 33;
+const EXPECTED_COUNT = 34;
 const BUYERS = "20260804160000_create_buyers.sql";
 const FAVORITES = "20260804161228_create_favorites.sql";
 const INQUIRIES = "20260804163239_create_inquiries_messages_visits.sql";
@@ -40,7 +40,9 @@ const files = readdirSync(MIGRATIONS_DIR)
   .filter((name) => name.endsWith(".sql"))
   .sort((a, b) => migrationVersion(a).localeCompare(migrationVersion(b)));
 
-record("migration count is 33", files.length === EXPECTED_COUNT, `got ${files.length}`);
+const GRANTS = "20260914100000_grant_phase1_table_privileges.sql";
+
+record("migration count is 34", files.length === EXPECTED_COUNT, `got ${files.length}`);
 
 record("create_buyers uses corrected version", files.includes(BUYERS));
 record("old create_buyers version removed", !files.includes(OLD_BUYERS));
@@ -77,6 +79,13 @@ const expectedHead = [
 
 const headMatches = expectedHead.every((name, i) => files[i] === name);
 record("first 7 migrations in expected order", headMatches);
+
+record("grant_phase1_table_privileges migration exists", files.includes(GRANTS));
+record(
+  "grant migration is last",
+  files.length > 0 && files[files.length - 1] === GRANTS,
+  files.length > 0 ? `last=${files[files.length - 1]}` : undefined,
+);
 
 const failed = checks.filter((c) => !c.passed);
 console.log(`\n${checks.length - failed.length}/${checks.length} passed`);
