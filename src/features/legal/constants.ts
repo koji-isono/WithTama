@@ -20,4 +20,4 @@ export const COMPANY_INFO = {
 } as const;
 
 /** Re-export billing label — single source of truth for breeder monthly fee display. */
-export { BILLING_PLAN_PRICE_LABEL as BREEDER_MONTHLY_FEE_TAX_INCLUSIVE_LABEL } from "@/features/billing/billing-display";
+export { BILLING_PLAN_PRICE_LABEL as BREEDER_MONTHLY_FEE_LABEL } from "@/features/billing/billing-display";

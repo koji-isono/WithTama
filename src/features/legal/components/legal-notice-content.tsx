@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { BREEDER_MONTHLY_FEE_TAX_INCLUSIVE_LABEL, COMPANY_INFO } from "../constants";
+import { BREEDER_MONTHLY_FEE_LABEL, COMPANY_INFO } from "../constants";
 import { LegalList, LegalParagraph, LegalSection } from "./legal-page-shell";
 
 export function LegalNoticeContent() {
@@ -29,7 +29,7 @@ export function LegalNoticeContent() {
           本ページが対象とするのは、当社がブリーダー会員に提供する「{COMPANY_INFO.serviceName}
           」の月額会員サービスです。
         </LegalParagraph>
-        <LegalParagraph>{BREEDER_MONTHLY_FEE_TAX_INCLUSIVE_LABEL}</LegalParagraph>
+        <LegalParagraph>{BREEDER_MONTHLY_FEE_LABEL}</LegalParagraph>
         <LegalParagraph>第1期における無料お試し期間はありません。</LegalParagraph>
       </LegalSection>
 

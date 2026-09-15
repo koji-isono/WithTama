@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { COMPANY_INFO, LEGAL_PRIVACY_PATH } from "../constants";
+import { BREEDER_MONTHLY_FEE_LABEL, COMPANY_INFO, LEGAL_PRIVACY_PATH } from "../constants";
 import { LegalList, LegalParagraph, LegalSection } from "./legal-page-shell";
 
 export function TermsContent() {
@@ -164,7 +164,8 @@ export function TermsContent() {
 
       <LegalSection id="membership-fee" title="17. ブリーダー月額会費">
         <LegalParagraph>
-          ブリーダー会員は、本サービスの掲載機能等を利用するため、月額会費（5,000円（税込））を支払うものとします。決済は
+          ブリーダー会員は、本サービスの掲載機能等を利用するため、{BREEDER_MONTHLY_FEE_LABEL}
+          を支払うものとします。決済は
           Stripe を通じて行います。
         </LegalParagraph>
         <LegalParagraph>

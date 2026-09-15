@@ -70,14 +70,14 @@ record("billing BillingSubscriptionNotice", billing.includes("BillingSubscriptio
 
 const billingDisplay = read("src/features/billing/billing-display.ts");
 record(
-  "billing price label tax inclusive",
-  billingDisplay.includes('BILLING_PLAN_PRICE_LABEL = "月額 5,000円（税込）"') &&
-    !billingDisplay.includes("（税別）"),
+  "billing price label tax exclusive",
+  billingDisplay.includes('BILLING_PLAN_PRICE_LABEL = "月額 5,000円（税抜）"') &&
+    !billingDisplay.includes("（税込）"),
 );
 record(
   "legal constants re-export billing price label",
   read("src/features/legal/constants.ts").includes(
-    "BILLING_PLAN_PRICE_LABEL as BREEDER_MONTHLY_FEE_TAX_INCLUSIVE_LABEL",
+    "BILLING_PLAN_PRICE_LABEL as BREEDER_MONTHLY_FEE_LABEL",
   ),
 );
 
@@ -87,9 +87,9 @@ record("terms: no pet payment", terms.includes("犬猫代金を受領せず"));
 
 const legalNotice = read("src/features/legal/components/legal-notice-content.tsx");
 record(
-  "legal: monthly fee tax inclusive",
-  legalNotice.includes("BREEDER_MONTHLY_FEE_TAX_INCLUSIVE_LABEL") ||
-    legalNotice.includes("5,000円（税込）"),
+  "legal: monthly fee tax exclusive",
+  legalNotice.includes("BREEDER_MONTHLY_FEE_LABEL") &&
+    !legalNotice.includes("5,000円（税込）"),
 );
 record("legal: pet sales separated", legalNotice.includes("犬猫の販売主体ではありません"));
 
