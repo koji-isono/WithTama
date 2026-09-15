@@ -78,6 +78,7 @@ export function BasicInfoStepForm({
         return;
       }
 
+      router.refresh();
       router.push(locationPath);
     } finally {
       setIsSubmitting(false);

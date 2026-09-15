@@ -141,6 +141,20 @@ function runStaticChecks(checks: Check[]): void {
     "S12. admin format.ts does not duplicate formatter body",
     !adminFormat.includes('return "（名称未設定）"'),
   );
+
+  const service = read("src/features/breeder-profile/service.ts");
+  const basicForm = read("src/features/breeder-profile/components/basic-info-step-form.tsx");
+
+  record(
+    checks,
+    "S13. saveBasicProfile revalidates breeder layout",
+    service.includes('revalidatePath("/breeder", "layout")'),
+  );
+  record(
+    checks,
+    "S14. basic step refreshes router after save",
+    basicForm.includes("router.refresh()") && basicForm.includes("saveBasicProfile"),
+  );
 }
 
 async function runLiveChecks(checks: Check[]): Promise<void> {

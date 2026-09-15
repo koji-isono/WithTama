@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import { getCurrentBreeder } from "@/features/auth/breeder-auth";
 
 import { formatInitialSubmitError, formatResubmitError } from "./format-application-submit-error";
@@ -69,6 +71,8 @@ export async function saveBasicProfile(input: BasicProfileInput): Promise<SaveBa
       public_email: input.publicEmail.trim() || null,
       website_url: input.websiteUrl.trim() || null,
     });
+
+    revalidatePath("/breeder", "layout");
 
     return { success: true };
   } catch (error) {
