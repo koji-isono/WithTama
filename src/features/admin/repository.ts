@@ -675,6 +675,12 @@ export async function createBreederDocumentSignedUrlForAdmin(
     .createSignedUrl(storagePath, BREEDER_DOCUMENT_SIGNED_URL_EXPIRES_SECONDS);
 
   if (error || !data?.signedUrl) {
+    console.error("[createBreederDocumentSignedUrlForAdmin] createSignedUrl failed", {
+      errorMessage: error?.message ?? null,
+      errorName: error?.name ?? null,
+      storagePathLength: storagePath.length,
+      signedUrlObtained: Boolean(data?.signedUrl),
+    });
     return null;
   }
 
