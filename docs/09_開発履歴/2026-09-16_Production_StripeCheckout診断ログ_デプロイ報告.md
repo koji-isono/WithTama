@@ -79,14 +79,14 @@
 
 ## 7. 最終 HEAD / GitHub Actions
 
-| 項目              | 値                                   |
-| ----------------- | ------------------------------------ |
-| 最終 HEAD（短縮） | _（§8 Prettier 修正 push 後に確定）_ |
-| 最終 HEAD（完全） | _（§8 Prettier 修正 push 後に確定）_ |
-| 最終 CI Run       | _（§8 Prettier 修正 push 後に確定）_ |
-| 最終 CI Run ID    | _（§8 Prettier 修正 push 後に確定）_ |
-| 最終 CI URL       | _（§8 Prettier 修正 push 後に確定）_ |
-| 最終 CI 結果      | _（§8 Prettier 修正 push 後に確定）_ |
+| 項目              | 値                                                              |
+| ----------------- | --------------------------------------------------------------- |
+| 最終 HEAD（短縮） | **`c37d926`**                                                   |
+| 最終 HEAD（完全） | **`c37d926ea0ebb3a8b99da0dcc3d8b3181be0b99e`**                  |
+| 最終 CI Run       | **#102**                                                        |
+| 最終 CI Run ID    | **35071959224**                                                 |
+| 最終 CI URL       | https://github.com/koji-isono/WithTama/actions/runs/35071959224 |
+| 最終 CI 結果      | **success**                                                     |
 
 ---
 
@@ -156,11 +156,21 @@
 
 ### Prettier 修正 commit（§7 最終 HEAD）
 
-| 項目       | 値                                                       |
-| ---------- | -------------------------------------------------------- |
-| 短縮 SHA   | _push 後に確定_                                          |
-| 完全 SHA   | _push 後に確定_                                          |
-| メッセージ | `style: apply Prettier to stripe checkout deploy report` |
-| push 結果  | _push 後に確定_                                          |
-| CI Run     | _push 後に確定_                                          |
-| CI 結果    | _push 後に確定_                                          |
+| 項目       | 値                                                                         |
+| ---------- | -------------------------------------------------------------------------- |
+| 短縮 SHA   | **`c37d926`**                                                              |
+| 完全 SHA   | **`c37d926ea0ebb3a8b99da0dcc3d8b3181be0b99e`**                             |
+| メッセージ | `style: apply Prettier to stripe checkout deploy report`                   |
+| push 結果  | **成功** — `af909f1..c37d926  main -> main`                                |
+| CI Run     | **#102** — https://github.com/koji-isono/WithTama/actions/runs/35071959224 |
+| CI 結果    | **success**                                                                |
+
+### Vercel Production（§7 最終 HEAD）
+
+| 項目              | 値                                                |
+| ----------------- | ------------------------------------------------- |
+| 対象 commit       | **`c37d926ea0ebb3a8b99da0dcc3d8b3181be0b99e`**    |
+| GitHub Deployment | **6476508966**（environment: **Production**）     |
+| デプロイ status   | **success**（`Deployment has completed`）         |
+| Preview URL       | https://with-tama-c5kael97d-koji-isono.vercel.app |
+| Production URL    | https://withtama.jp                               |
