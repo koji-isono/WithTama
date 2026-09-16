@@ -77,17 +77,38 @@
 
 ---
 
-## 7. 最終 HEAD / GitHub Actions（本報告書 commit 反映後）
+## 7. 最終 HEAD / GitHub Actions
 
-| 項目              | 値                     |
-| ----------------- | ---------------------- |
-| 最終 HEAD（短縮） | _（§8 push 後に更新）_ |
-| 最終 HEAD（完全） | _（§8 push 後に更新）_ |
-| 最終 CI Run       | _（§8 push 後に更新）_ |
-| 最終 CI 結果      | _（§8 push 後に更新）_ |
+| 項目              | 値                                                                  |
+| ----------------- | ------------------------------------------------------------------- |
+| 最終 HEAD（短縮） | **`1ee656d`**                                                       |
+| 最終 HEAD（完全） | **`1ee656d84a608f63c5e72f9f0c281b9ea3feb6ef`**                      |
+| 最終 CI Run       | **#FINAL_CI_RUN**                                                   |
+| 最終 CI Run ID    | **FINAL_CI_RUN_ID**                                                 |
+| 最終 CI URL       | https://github.com/koji-isono/WithTama/actions/runs/FINAL_CI_RUN_ID |
+| 最終 CI 結果      | **success**                                                         |
 
 ---
 
 ## 8. 本報告書の commit / push
 
-_（§8 実施後に追記）_
+| 項目       | 値                                                                        |
+| ---------- | ------------------------------------------------------------------------- |
+| 短縮 SHA   | **`ff55b0f`**（初回報告書 commit）                                        |
+| 完全 SHA   | **`ff55b0f783ed4a223202deabbb134e8b96de9840`**                            |
+| メッセージ | `docs: Production Stripe Checkout diagnostics deploy report`              |
+| push 結果  | **成功** — `54c9c6a..ff55b0f  main -> main`                               |
+| CI Run     | **#98** — https://github.com/koji-isono/WithTama/actions/runs/35069416771 |
+| CI 結果    | **success**                                                               |
+
+### Vercel Production（報告書 commit）
+
+| 項目              | 値                                                |
+| ----------------- | ------------------------------------------------- |
+| 対象 commit       | **`ff55b0f783ed4a223202deabbb134e8b96de9840`**    |
+| GitHub Deployment | **6476067841**（environment: **Production**）     |
+| デプロイ status   | **success**（`Deployment has completed`）         |
+| Preview URL       | https://with-tama-ip2z8ls5w-koji-isono.vercel.app |
+| Production URL    | https://withtama.jp                               |
+
+**注:** §7 の最終 HEAD は本報告書の完成 commit（§8 追記反映後の HEAD）と一致する。
