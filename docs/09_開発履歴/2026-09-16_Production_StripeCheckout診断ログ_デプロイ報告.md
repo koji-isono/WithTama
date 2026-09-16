@@ -81,11 +81,11 @@
 
 | 項目              | 値                                                              |
 | ----------------- | --------------------------------------------------------------- |
-| 最終 HEAD（短縮） | **`c37d926`**                                                   |
-| 最終 HEAD（完全） | **`c37d926ea0ebb3a8b99da0dcc3d8b3181be0b99e`**                  |
-| 最終 CI Run       | **#102**                                                        |
-| 最終 CI Run ID    | **35071959224**                                                 |
-| 最終 CI URL       | https://github.com/koji-isono/WithTama/actions/runs/35071959224 |
+| 最終 HEAD（短縮） | **`ad07e9a`**                                                   |
+| 最終 HEAD（完全） | **`ad07e9a8f896a9b2d8d4fb127e4ef643349d2ea6`**                  |
+| 最終 CI Run       | **#103**                                                        |
+| 最終 CI Run ID    | **35072574871**                                                 |
+| 最終 CI URL       | https://github.com/koji-isono/WithTama/actions/runs/35072574871 |
 | 最終 CI 結果      | **success**                                                     |
 
 ---
@@ -154,7 +154,7 @@
 | CI Run     | **#101** — https://github.com/koji-isono/WithTama/actions/runs/35071229191 |
 | CI 結果    | **failure**（`format:check` — 本報告書 MD の Prettier 未適用）             |
 
-### Prettier 修正 commit（§7 最終 HEAD）
+### Prettier 修正 commit
 
 | 項目       | 値                                                                         |
 | ---------- | -------------------------------------------------------------------------- |
@@ -165,7 +165,7 @@
 | CI Run     | **#102** — https://github.com/koji-isono/WithTama/actions/runs/35071959224 |
 | CI 結果    | **success**                                                                |
 
-### Vercel Production（§7 最終 HEAD）
+### Vercel Production（Prettier 修正 commit）
 
 | 項目              | 値                                                |
 | ----------------- | ------------------------------------------------- |
@@ -173,4 +173,25 @@
 | GitHub Deployment | **6476508966**（environment: **Production**）     |
 | デプロイ status   | **success**（`Deployment has completed`）         |
 | Preview URL       | https://with-tama-c5kael97d-koji-isono.vercel.app |
+| Production URL    | https://withtama.jp                               |
+
+### 報告書 HEAD 確定 commit（§7 最終 HEAD）
+
+| 項目       | 値                                                                         |
+| ---------- | -------------------------------------------------------------------------- |
+| 短縮 SHA   | **`ad07e9a`**                                                              |
+| 完全 SHA   | **`ad07e9a8f896a9b2d8d4fb127e4ef643349d2ea6`**                             |
+| メッセージ | `docs: record final HEAD and CI #102 in stripe checkout deploy report`     |
+| push 結果  | **成功** — `c37d926..ad07e9a  main -> main`                                |
+| CI Run     | **#103** — https://github.com/koji-isono/WithTama/actions/runs/35072574871 |
+| CI 結果    | **success**                                                                |
+
+### Vercel Production（§7 最終 HEAD）
+
+| 項目              | 値                                                |
+| ----------------- | ------------------------------------------------- |
+| 対象 commit       | **`ad07e9a8f896a9b2d8d4fb127e4ef643349d2ea6`**    |
+| GitHub Deployment | **6476625593**（environment: **Production**）     |
+| デプロイ status   | **success**（`Deployment has completed`）         |
+| Preview URL       | https://with-tama-6mptnq2d3-koji-isono.vercel.app |
 | Production URL    | https://withtama.jp                               |
