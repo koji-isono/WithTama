@@ -81,11 +81,11 @@
 
 | 項目              | 値                                                              |
 | ----------------- | --------------------------------------------------------------- |
-| 最終 HEAD（短縮） | **`1c09bc2`**                                                   |
-| 最終 HEAD（完全） | **`1c09bc2636b6a5892b6eb90b8d8cb26029e2246e`**                  |
-| 最終 CI Run       | **#104**                                                        |
-| 最終 CI Run ID    | **35073157609**                                                 |
-| 最終 CI URL       | https://github.com/koji-isono/WithTama/actions/runs/35073157609 |
+| 最終 HEAD（短縮） | **`2809582`**                                                   |
+| 最終 HEAD（完全） | **`28095821615e7b9d18223c6d5f6707fa9613ef58`**                  |
+| 最終 CI Run       | **#105**                                                        |
+| 最終 CI Run ID    | **35073580408**                                                 |
+| 最終 CI URL       | https://github.com/koji-isono/WithTama/actions/runs/35073580408 |
 | 最終 CI 結果      | **success**                                                     |
 
 ---
@@ -196,7 +196,7 @@
 | Preview URL       | https://with-tama-6mptnq2d3-koji-isono.vercel.app |
 | Production URL    | https://withtama.jp                               |
 
-### 本報告書 sync commit（§7 最終 HEAD）
+### 本報告書 sync commit
 
 | 項目       | 値                                                                         |
 | ---------- | -------------------------------------------------------------------------- |
@@ -205,4 +205,15 @@
 | メッセージ | `docs: align section 7 final HEAD with ad07e9a and CI #103`                |
 | push 結果  | **成功** — `ad07e9a..1c09bc2  main -> main`                                |
 | CI Run     | **#104** — https://github.com/koji-isono/WithTama/actions/runs/35073157609 |
+| CI 結果    | **success**                                                                |
+
+### 本報告書 最終 sync commit（§7 最終 HEAD）
+
+| 項目       | 値                                                                         |
+| ---------- | -------------------------------------------------------------------------- |
+| 短縮 SHA   | **`2809582`**                                                              |
+| 完全 SHA   | **`28095821615e7b9d18223c6d5f6707fa9613ef58`**                             |
+| メッセージ | `docs: set section 7 final HEAD to 1c09bc2 and CI #104`                    |
+| push 結果  | **成功** — `1c09bc2..2809582  main -> main`                                |
+| CI Run     | **#105** — https://github.com/koji-isono/WithTama/actions/runs/35073580408 |
 | CI 結果    | **success**                                                                |
