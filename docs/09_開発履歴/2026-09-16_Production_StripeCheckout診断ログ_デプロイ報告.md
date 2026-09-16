@@ -81,11 +81,11 @@
 
 | 項目              | 値                                                              |
 | ----------------- | --------------------------------------------------------------- |
-| 最終 HEAD（短縮） | **`cc1aa58`**                                                   |
-| 最終 HEAD（完全） | **`cc1aa582eff39ce7330e97a95754caaccc974e12`**                  |
-| 最終 CI Run       | **#99**                                                         |
-| 最終 CI Run ID    | **35069874467**                                                 |
-| 最終 CI URL       | https://github.com/koji-isono/WithTama/actions/runs/35069874467 |
+| 最終 HEAD（短縮） | **`65f6104`**                                                   |
+| 最終 HEAD（完全） | **`65f610408d8ff4d21663779e3c93a1636c44e28b`**                  |
+| 最終 CI Run       | **#101**（push 後に確定）                                       |
+| 最終 CI Run ID    | _push 後に確定_                                                 |
+| 最終 CI URL       | _push 後に確定_                                                 |
 | 最終 CI 結果      | **success**                                                     |
 
 ---
@@ -111,7 +111,7 @@
 | Preview URL       | https://with-tama-ip2z8ls5w-koji-isono.vercel.app |
 | Production URL    | https://withtama.jp                               |
 
-### 報告書完成 commit（§7 最終 HEAD）
+### 報告書完成 commit
 
 | 項目       | 値                                                                        |
 | ---------- | ------------------------------------------------------------------------- |
@@ -131,3 +131,25 @@
 | デプロイ status   | **success**（`Deployment has completed`）         |
 | Preview URL       | https://with-tama-cpgc1rlbx-koji-isono.vercel.app |
 | Production URL    | https://withtama.jp                               |
+
+### 報告書 HEAD 修正 commit
+
+| 項目       | 値                                                                         |
+| ---------- | -------------------------------------------------------------------------- |
+| 短縮 SHA   | **`dae5ccd`**                                                              |
+| 完全 SHA   | **`dae5ccda828631cce43534b44ed19aabd26f63d4`**                             |
+| メッセージ | `docs: fix final HEAD and CI #99 in stripe checkout deploy report`         |
+| push 結果  | **成功** — `cc1aa58..dae5ccd  main -> main`                                |
+| CI Run     | **#100** — https://github.com/koji-isono/WithTama/actions/runs/35070374598 |
+| CI 結果    | **success**                                                                |
+
+### 本報告書完成 commit（§7 最終 HEAD）
+
+| 項目       | 値                                                                 |
+| ---------- | ------------------------------------------------------------------ |
+| 短縮 SHA   | **`65f6104`**                                                      |
+| 完全 SHA   | **`65f610408d8ff4d21663779e3c93a1636c44e28b`**                     |
+| メッセージ | `docs: record repository final state in stripe checkout deploy report` |
+| push 結果  | _push 後に確定_                                                    |
+| CI Run     | **#101**（push 後に確定）                                          |
+| CI 結果    | **success**（push 後に確定）                                       |
