@@ -79,14 +79,14 @@
 
 ## 7. 最終 HEAD / GitHub Actions
 
-| 項目              | 値                                                              |
-| ----------------- | --------------------------------------------------------------- |
-| 最終 HEAD（短縮） | **`65f6104`**                                                   |
-| 最終 HEAD（完全） | **`65f610408d8ff4d21663779e3c93a1636c44e28b`**                  |
-| 最終 CI Run       | **#101**（push 後に確定）                                       |
-| 最終 CI Run ID    | _push 後に確定_                                                 |
-| 最終 CI URL       | _push 後に確定_                                                 |
-| 最終 CI 結果      | **success**                                                     |
+| 項目              | 値                                   |
+| ----------------- | ------------------------------------ |
+| 最終 HEAD（短縮） | _（§8 Prettier 修正 push 後に確定）_ |
+| 最終 HEAD（完全） | _（§8 Prettier 修正 push 後に確定）_ |
+| 最終 CI Run       | _（§8 Prettier 修正 push 後に確定）_ |
+| 最終 CI Run ID    | _（§8 Prettier 修正 push 後に確定）_ |
+| 最終 CI URL       | _（§8 Prettier 修正 push 後に確定）_ |
+| 最終 CI 結果      | _（§8 Prettier 修正 push 後に確定）_ |
 
 ---
 
@@ -143,13 +143,24 @@
 | CI Run     | **#100** — https://github.com/koji-isono/WithTama/actions/runs/35070374598 |
 | CI 結果    | **success**                                                                |
 
-### 本報告書完成 commit（§7 最終 HEAD）
+### 本報告書完成 commit（初回 push）
 
-| 項目       | 値                                                                 |
-| ---------- | ------------------------------------------------------------------ |
-| 短縮 SHA   | **`65f6104`**                                                      |
-| 完全 SHA   | **`65f610408d8ff4d21663779e3c93a1636c44e28b`**                     |
-| メッセージ | `docs: record repository final state in stripe checkout deploy report` |
-| push 結果  | _push 後に確定_                                                    |
-| CI Run     | **#101**（push 後に確定）                                          |
-| CI 結果    | **success**（push 後に確定）                                       |
+| 項目       | 値                                                                         |
+| ---------- | -------------------------------------------------------------------------- |
+| 短縮 SHA   | **`af909f1`**                                                              |
+| 完全 SHA   | **`af909f1455f5f91fae97465e93ec1e19417c656a`**                             |
+| メッセージ | `docs: finalize stripe checkout deploy report with final HEAD and CI`      |
+| push 結果  | **成功** — `dae5ccd..af909f1  main -> main`                                |
+| CI Run     | **#101** — https://github.com/koji-isono/WithTama/actions/runs/35071229191 |
+| CI 結果    | **failure**（`format:check` — 本報告書 MD の Prettier 未適用）             |
+
+### Prettier 修正 commit（§7 最終 HEAD）
+
+| 項目       | 値                                                       |
+| ---------- | -------------------------------------------------------- |
+| 短縮 SHA   | _push 後に確定_                                          |
+| 完全 SHA   | _push 後に確定_                                          |
+| メッセージ | `style: apply Prettier to stripe checkout deploy report` |
+| push 結果  | _push 後に確定_                                          |
+| CI Run     | _push 後に確定_                                          |
+| CI 結果    | _push 後に確定_                                          |
