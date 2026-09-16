@@ -165,8 +165,7 @@ export function TermsContent() {
       <LegalSection id="membership-fee" title="17. ブリーダー月額会費">
         <LegalParagraph>
           ブリーダー会員は、本サービスの掲載機能等を利用するため、{BREEDER_MONTHLY_FEE_LABEL}
-          を支払うものとします。決済は
-          Stripe を通じて行います。
+          を支払うものとします。決済は Stripe を通じて行います。
         </LegalParagraph>
         <LegalParagraph>
           課金開始は、ブリーダー審査承認後、ブリーダー本人が Stripe

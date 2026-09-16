@@ -88,8 +88,7 @@ record("terms: no pet payment", terms.includes("犬猫代金を受領せず"));
 const legalNotice = read("src/features/legal/components/legal-notice-content.tsx");
 record(
   "legal: monthly fee tax exclusive",
-  legalNotice.includes("BREEDER_MONTHLY_FEE_LABEL") &&
-    !legalNotice.includes("5,000円（税込）"),
+  legalNotice.includes("BREEDER_MONTHLY_FEE_LABEL") && !legalNotice.includes("5,000円（税込）"),
 );
 record("legal: pet sales separated", legalNotice.includes("犬猫の販売主体ではありません"));
 
