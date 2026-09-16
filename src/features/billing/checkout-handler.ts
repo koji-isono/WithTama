@@ -4,6 +4,7 @@ import { isAdminUser, parseMemberUserRole } from "@/features/auth/types";
 import { createClient } from "@/lib/supabase/server";
 
 import { validateCheckoutClientInput } from "./checkout-request";
+import { logBreederCheckoutSessionFailure } from "./checkout-diagnostics";
 import { createBreederCheckoutSessionUrl } from "./create-checkout-session";
 import {
   BILLING_CHECKOUT_BREEDER_NOT_FOUND_MESSAGE,
@@ -86,10 +87,8 @@ export async function handleBreederCheckoutRequest(
   try {
     const url = await createBreederCheckoutSessionUrl(breeder, customerEmail);
     return { success: true, url };
-  } catch {
-    if (process.env.NODE_ENV === "development") {
-      console.error("[billing/checkout] Stripe Checkout Session creation failed");
-    }
+  } catch (error) {
+    logBreederCheckoutSessionFailure(error);
     return {
       success: false,
       httpStatus: 500,
