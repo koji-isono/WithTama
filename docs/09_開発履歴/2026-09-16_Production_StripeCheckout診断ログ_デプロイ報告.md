@@ -81,11 +81,11 @@
 
 | 項目              | 値                                                              |
 | ----------------- | --------------------------------------------------------------- |
-| 最終 HEAD（短縮） | **`ad07e9a`**                                                   |
-| 最終 HEAD（完全） | **`ad07e9a8f896a9b2d8d4fb127e4ef643349d2ea6`**                  |
-| 最終 CI Run       | **#103**                                                        |
-| 最終 CI Run ID    | **35072574871**                                                 |
-| 最終 CI URL       | https://github.com/koji-isono/WithTama/actions/runs/35072574871 |
+| 最終 HEAD（短縮） | **`1c09bc2`**                                                   |
+| 最終 HEAD（完全） | **`1c09bc2636b6a5892b6eb90b8d8cb26029e2246e`**                  |
+| 最終 CI Run       | **#104**                                                        |
+| 最終 CI Run ID    | **35073157609**                                                 |
+| 最終 CI URL       | https://github.com/koji-isono/WithTama/actions/runs/35073157609 |
 | 最終 CI 結果      | **success**                                                     |
 
 ---
@@ -175,7 +175,7 @@
 | Preview URL       | https://with-tama-c5kael97d-koji-isono.vercel.app |
 | Production URL    | https://withtama.jp                               |
 
-### 報告書 HEAD 確定 commit（§7 最終 HEAD）
+### 報告書確定 commit
 
 | 項目       | 値                                                                         |
 | ---------- | -------------------------------------------------------------------------- |
@@ -186,7 +186,7 @@
 | CI Run     | **#103** — https://github.com/koji-isono/WithTama/actions/runs/35072574871 |
 | CI 結果    | **success**                                                                |
 
-### Vercel Production（§7 最終 HEAD）
+### Vercel Production（報告書確定 commit）
 
 | 項目              | 値                                                |
 | ----------------- | ------------------------------------------------- |
@@ -195,3 +195,14 @@
 | デプロイ status   | **success**（`Deployment has completed`）         |
 | Preview URL       | https://with-tama-6mptnq2d3-koji-isono.vercel.app |
 | Production URL    | https://withtama.jp                               |
+
+### 本報告書 sync commit（§7 最終 HEAD）
+
+| 項目       | 値                                                                         |
+| ---------- | -------------------------------------------------------------------------- |
+| 短縮 SHA   | **`1c09bc2`**                                                              |
+| 完全 SHA   | **`1c09bc2636b6a5892b6eb90b8d8cb26029e2246e`**                             |
+| メッセージ | `docs: align section 7 final HEAD with ad07e9a and CI #103`                |
+| push 結果  | **成功** — `ad07e9a..1c09bc2  main -> main`                                |
+| CI Run     | **#104** — https://github.com/koji-isono/WithTama/actions/runs/35073157609 |
+| CI 結果    | **success**                                                                |
