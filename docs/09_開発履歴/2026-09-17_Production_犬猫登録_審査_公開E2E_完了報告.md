@@ -89,8 +89,9 @@ Production では **pet-photos** の Storage / RLS 経路が未確認領域だ�
 
 ## 6. Git / CI（本報告書）
 
-| 項目                  | 値                           |
-| --------------------- | ---------------------------- |
-| **report commit SHA** | **（commit push 後に追記）** |
-| **final HEAD**        | **（commit push 後に追記）** |
-| **GitHub Actions**    | **（commit push 後に追記）** |
+| 項目                  | 値                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------- |
+| **report commit SHA** | **`4a7b053`**（`4a7b05321a26ca54f26e4ee3a3d704e58b1909cf`）                         |
+| **final HEAD**        | **`4a7b053`**                                                                       |
+| **GitHub Actions**    | **[#117 success](https://github.com/koji-isono/WithTama/actions/runs/35181406860)** |
+| push range            | `1904e3a..4a7b053` → **成功**                                                       |
