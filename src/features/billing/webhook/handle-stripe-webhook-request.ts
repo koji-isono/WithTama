@@ -12,9 +12,11 @@ import {
 } from "./constants";
 import { processStripeWebhookEvent } from "./process-webhook-event";
 import { claimWebhookEvent, finalizeWebhookEvent, releaseWebhookEventClaim } from "./repository";
+import { logStripeWebhookProcessingFailure } from "./webhook-diagnostics";
 
 export type StripeWebhookRequestResult =
-  { success: true; duplicate: boolean } | { success: false; httpStatus: number; error: string };
+  | { success: true; duplicate: boolean }
+  | { success: false; httpStatus: number; error: string };
 
 export async function handleStripeWebhookRequest(
   rawBody: string,
@@ -37,11 +39,19 @@ export async function handleStripeWebhookRequest(
   let event: Stripe.Event;
   try {
     event = Stripe.webhooks.constructEvent(rawBody, signatureHeader, webhookSecret);
-  } catch {
+  } catch (error) {
+    logStripeWebhookProcessingFailure("signature verification", error);
     return { success: false, httpStatus: 400, error: STRIPE_WEBHOOK_INVALID_SIGNATURE_MESSAGE };
   }
 
-  const claim = await claimWebhookEvent(event.id, event.type);
+  let claim: Awaited<ReturnType<typeof claimWebhookEvent>>;
+  try {
+    claim = await claimWebhookEvent(event.id, event.type);
+  } catch (error) {
+    logStripeWebhookProcessingFailure("webhook event insert", error);
+    throw error;
+  }
+
   if (claim === "duplicate") {
     return { success: true, duplicate: true };
   }
@@ -51,20 +61,22 @@ export async function handleStripeWebhookRequest(
 
   try {
     await processStripeWebhookEvent(event);
-    await finalizeWebhookEvent(event.id);
-    return { success: true, duplicate: false };
   } catch (error) {
     await releaseWebhookEventClaim(event.id).catch(() => {
       // Best-effort release; original error takes precedence for Stripe retry.
     });
-
-    if (process.env.NODE_ENV === "development") {
-      console.error("[webhooks/stripe] processing failed", {
-        eventId: event.id,
-        eventType: event.type,
-      });
-    }
-
     throw error;
   }
+
+  try {
+    await finalizeWebhookEvent(event.id);
+  } catch (error) {
+    await releaseWebhookEventClaim(event.id).catch(() => {
+      // Best-effort release; original error takes precedence for Stripe retry.
+    });
+    logStripeWebhookProcessingFailure("webhook event insert", error);
+    throw error;
+  }
+
+  return { success: true, duplicate: false };
 }

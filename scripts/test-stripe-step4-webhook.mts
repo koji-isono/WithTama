@@ -573,15 +573,19 @@ function testBreederSafetyAndSync(checks: Check[]): void {
     !readSource("src/app/api/webhooks/stripe/route.ts").includes("whsec_") &&
       !readSource("src/app/api/webhooks/stripe/route.ts").includes("STRIPE_WEBHOOK_SECRET"),
   );
+  const diagnosticsSource = readSource("src/features/billing/webhook/webhook-diagnostics.ts");
+  const handlerSourceForDiagnostics = readSource(
+    "src/features/billing/webhook/handle-stripe-webhook-request.ts",
+  );
   record(
     checks,
-    "39. dev log limited to eventId/eventType",
-    readSource("src/features/billing/webhook/handle-stripe-webhook-request.ts").includes(
-      "eventId: event.id",
-    ) &&
-      !readSource("src/features/billing/webhook/handle-stripe-webhook-request.ts").includes(
-        "console.log",
-      ),
+    "39. production-safe webhook failure diagnostics",
+    diagnosticsSource.includes("logStripeWebhookProcessingFailure") &&
+      diagnosticsSource.includes("postgrestCode") &&
+      handlerSourceForDiagnostics.includes("logStripeWebhookProcessingFailure") &&
+      !handlerSourceForDiagnostics.includes('NODE_ENV === "development"') &&
+      !handlerSourceForDiagnostics.includes("eventId:") &&
+      !handlerSourceForDiagnostics.includes("console.log"),
   );
 }
 
