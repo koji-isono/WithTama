@@ -61,8 +61,7 @@ function listMigrationFiles(): string[] {
 const files = listMigrationFiles();
 
 const GRANTS = "20260914100000_grant_phase1_table_privileges.sql";
-const STRIPE_WEBHOOK_EVENTS_GRANT =
-  "20260917100000_grant_stripe_webhook_events_service_role.sql";
+const STRIPE_WEBHOOK_EVENTS_GRANT = "20260917100000_grant_stripe_webhook_events_service_role.sql";
 
 record("migration count is 35", files.length === EXPECTED_COUNT, `got ${files.length}`);
 
