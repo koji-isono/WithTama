@@ -107,12 +107,12 @@
 
 ## 7. Git / CI（本報告書）
 
-| 項目                  | 値                                                                                  |
-| --------------------- | ----------------------------------------------------------------------------------- |
-| **report commit SHA** | **`525cca5`**（`525cca596c1fbd56fb7faa44b12dc2517b821829`）                         |
-| **final HEAD**        | **`525cca5`**                                                                       |
-| **GitHub Actions**    | **[#113 success](https://github.com/koji-isono/WithTama/actions/runs/35178914687)** |
-| push range            | `64a55bd..525cca5` → **成功**                                                       |
+| 項目                  | 値                                                                                                                                                                |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **report commit SHA** | **`525cca5`**（`525cca596c1fbd56fb7faa44b12dc2517b821829`）                                                                                                       |
+| **final HEAD**        | **`f7ed633`**（`f7ed6332e7d7592d421029806655a76ffdc54685`）                                                                                                       |
+| **GitHub Actions**    | [#113 success](https://github.com/koji-isono/WithTama/actions/runs/35178914687) / [#114 success](https://github.com/koji-isono/WithTama/actions/runs/35179076889) |
+| push range            | `64a55bd..525cca5` → `525cca5..f7ed633` → **成功**                                                                                                                |
 
 **関連 feature commit:** `84cb579`（stripe_webhook_events GRANT）/ `64a55bd`（breeders GRANT）
 
