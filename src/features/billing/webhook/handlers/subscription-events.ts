@@ -63,9 +63,7 @@ export async function handleCustomerSubscriptionDeleted(event: Stripe.Event): Pr
   let breeder: BreederWebhookRow;
   try {
     const customerId =
-      typeof subscription.customer === "string"
-        ? subscription.customer
-        : subscription.customer?.id;
+      typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id;
     if (!customerId) {
       throw new WebhookHandlerError("missing_customer", "Deleted subscription has no customer");
     }

@@ -15,8 +15,7 @@ import { claimWebhookEvent, finalizeWebhookEvent, releaseWebhookEventClaim } fro
 import { logStripeWebhookProcessingFailure } from "./webhook-diagnostics";
 
 export type StripeWebhookRequestResult =
-  | { success: true; duplicate: boolean }
-  | { success: false; httpStatus: number; error: string };
+  { success: true; duplicate: boolean } | { success: false; httpStatus: number; error: string };
 
 export async function handleStripeWebhookRequest(
   rawBody: string,

@@ -53,8 +53,7 @@ export async function handleInvoicePaymentFailed(event: Stripe.Event): Promise<v
 
   let fields: BreederWebhookUpdate;
   try {
-    const subscription =
-      await getStripeServerClient().subscriptions.retrieve(stripeSubscriptionId);
+    const subscription = await getStripeServerClient().subscriptions.retrieve(stripeSubscriptionId);
     assertBreederSubscriptionProduct(subscription);
 
     fields = buildBreederUpdateFromSubscription({
