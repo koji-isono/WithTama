@@ -124,8 +124,9 @@
 
 ## 7. Git / CI（本報告書）
 
-| 項目                  | 値                           |
-| --------------------- | ---------------------------- |
-| **report commit SHA** | **（commit push 後に追記）** |
-| **final HEAD**        | **（commit push 後に追記）** |
-| **GitHub Actions**    | **（commit push 後に追記）** |
+| 項目                  | 値                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------- |
+| **report commit SHA** | **`b0615d9`**（`b0615d9da7ab65f8894d13695c697d684e326b50`）                         |
+| **final HEAD**        | **`b0615d9`**                                                                       |
+| **GitHub Actions**    | **[#123 success](https://github.com/koji-isono/WithTama/actions/runs/35199651968)** |
+| push range            | `18a766a..b0615d9` → **成功**                                                       |
