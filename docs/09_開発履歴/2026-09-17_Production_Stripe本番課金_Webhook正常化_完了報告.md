@@ -107,11 +107,14 @@
 
 ## 7. Git / CI（本報告書）
 
-| 項目                  | 値                           |
-| --------------------- | ---------------------------- |
-| **report commit SHA** | **（commit push 後に追記）** |
-| **final HEAD**        | **（commit push 後に追記）** |
-| **GitHub Actions**    | **（commit push 後に追記）** |
+| 項目                  | 値                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------- |
+| **report commit SHA** | **`525cca5`**（`525cca596c1fbd56fb7faa44b12dc2517b821829`）                         |
+| **final HEAD**        | **`525cca5`**                                                                       |
+| **GitHub Actions**    | **[#113 success](https://github.com/koji-isono/WithTama/actions/runs/35178914687)** |
+| push range            | `64a55bd..525cca5` → **成功**                                                       |
+
+**関連 feature commit:** `84cb579`（stripe_webhook_events GRANT）/ `64a55bd`（breeders GRANT）
 
 ---
 
