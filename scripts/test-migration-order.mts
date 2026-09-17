@@ -11,7 +11,7 @@ import { join } from "node:path";
 
 const MIGRATIONS_DIR = join(process.cwd(), "supabase/migrations");
 
-const EXPECTED_COUNT = 35;
+const EXPECTED_COUNT = 36;
 const BUYERS = "20260804160000_create_buyers.sql";
 const FAVORITES = "20260804161228_create_favorites.sql";
 const INQUIRIES = "20260804163239_create_inquiries_messages_visits.sql";
@@ -62,8 +62,9 @@ const files = listMigrationFiles();
 
 const GRANTS = "20260914100000_grant_phase1_table_privileges.sql";
 const STRIPE_WEBHOOK_EVENTS_GRANT = "20260917100000_grant_stripe_webhook_events_service_role.sql";
+const PHASE1_SERVICE_ROLE_GRANT = "20260918100000_grant_phase1_service_role_table_privileges.sql";
 
-record("migration count is 35", files.length === EXPECTED_COUNT, `got ${files.length}`);
+record("migration count is 36", files.length === EXPECTED_COUNT, `got ${files.length}`);
 
 record("create_buyers uses corrected version", files.includes(BUYERS));
 record("old create_buyers version removed", !files.includes(OLD_BUYERS));
@@ -107,9 +108,19 @@ record(
   files.includes(STRIPE_WEBHOOK_EVENTS_GRANT),
 );
 record(
-  "grant_stripe_webhook_events_service_role migration is last",
-  files.length > 0 && files[files.length - 1] === STRIPE_WEBHOOK_EVENTS_GRANT,
+  "grant_phase1_service_role_table_privileges migration exists",
+  files.includes(PHASE1_SERVICE_ROLE_GRANT),
+);
+record(
+  "grant_phase1_service_role_table_privileges migration is last",
+  files.length > 0 && files[files.length - 1] === PHASE1_SERVICE_ROLE_GRANT,
   files.length > 0 ? `last=${files[files.length - 1]}` : undefined,
+);
+record(
+  "grant_stripe_webhook_events_service_role before phase1 service_role grant",
+  files.indexOf(STRIPE_WEBHOOK_EVENTS_GRANT) >= 0 &&
+    files.indexOf(PHASE1_SERVICE_ROLE_GRANT) >= 0 &&
+    files.indexOf(STRIPE_WEBHOOK_EVENTS_GRANT) < files.indexOf(PHASE1_SERVICE_ROLE_GRANT),
 );
 
 const failed = checks.filter((c) => !c.passed);
