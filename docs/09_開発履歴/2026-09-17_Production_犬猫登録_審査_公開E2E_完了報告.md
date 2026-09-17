@@ -89,9 +89,9 @@ Production では **pet-photos** の Storage / RLS 経路が未確認領域だ�
 
 ## 6. Git / CI（本報告書）
 
-| 項目                  | 値                                                                                  |
-| --------------------- | ----------------------------------------------------------------------------------- |
-| **report commit SHA** | **`4a7b053`**（`4a7b05321a26ca54f26e4ee3a3d704e58b1909cf`）                         |
-| **final HEAD**        | **`4a7b053`**                                                                       |
-| **GitHub Actions**    | **[#117 success](https://github.com/koji-isono/WithTama/actions/runs/35181406860)** |
-| push range            | `1904e3a..4a7b053` → **成功**                                                       |
+| 項目                  | 値                                                                                                                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **report commit SHA** | **`4a7b053`**（`4a7b05321a26ca54f26e4ee3a3d704e58b1909cf`）                                                                                                                                       |
+| **final HEAD**        | **`7eda9aa`**（`7eda9aae14909f402f6a4132e0f58c2708db4e62`）                                                                                                                                       |
+| **GitHub Actions**    | **[#117 success](https://github.com/koji-isono/WithTama/actions/runs/35181406860)**（report） / **[#118 success](https://github.com/koji-isono/WithTama/actions/runs/35181554428)**（final HEAD） |
+| push range            | `1904e3a..4a7b053` → **成功** / `4a7b053..7eda9aa` → **成功**                                                                                                                                     |
