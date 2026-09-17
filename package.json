@@ -21,6 +21,7 @@
     "test:pet-price-display": "npx tsx scripts/test-pet-price-display.mts",
     "test:legal-pages": "npx tsx scripts/test-legal-pages.mts",
     "test:migration-order": "npx tsx scripts/test-migration-order.mts",
+    "test:stripe-webhook-events-grant": "npx tsx scripts/test-stripe-webhook-events-grant.mts",
     "test:phase1-table-grants": "node --env-file=.env.local --experimental-strip-types scripts/test-phase1-table-grants.mts",
     "prepare:sec-test-description-revision": "node --env-file=.env.local --experimental-strip-types scripts/prepare-sec-test-description-revision.mts",
     "test:pet-description-revision-db": "npm run prepare:sec-test-description-revision && npm run prepare:sec-test-submit-pet && node --env-file=.env.local --experimental-strip-types scripts/test-pet-description-revision-db.mts",

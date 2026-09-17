@@ -5,12 +5,13 @@
  * Usage: npx tsx scripts/test-migration-order.mts
  */
 
+import { execSync } from "node:child_process";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const MIGRATIONS_DIR = join(process.cwd(), "supabase/migrations");
 
-const EXPECTED_COUNT = 34;
+const EXPECTED_COUNT = 35;
 const BUYERS = "20260804160000_create_buyers.sql";
 const FAVORITES = "20260804161228_create_favorites.sql";
 const INQUIRIES = "20260804163239_create_inquiries_messages_visits.sql";
@@ -36,13 +37,34 @@ function migrationVersion(filename: string): string {
   return match[1];
 }
 
-const files = readdirSync(MIGRATIONS_DIR)
-  .filter((name) => name.endsWith(".sql"))
-  .sort((a, b) => migrationVersion(a).localeCompare(migrationVersion(b)));
+function listMigrationFiles(): string[] {
+  try {
+    const tracked = execSync('git ls-files "supabase/migrations/*.sql"', {
+      encoding: "utf8",
+      cwd: process.cwd(),
+    }).trim();
+    if (tracked) {
+      return tracked
+        .split("\n")
+        .map((path) => path.replace(/^supabase\/migrations\//, ""))
+        .sort((a, b) => migrationVersion(a).localeCompare(migrationVersion(b)));
+    }
+  } catch {
+    // fall through to filesystem listing (e.g. outside git)
+  }
+
+  return readdirSync(MIGRATIONS_DIR)
+    .filter((name) => name.endsWith(".sql"))
+    .sort((a, b) => migrationVersion(a).localeCompare(migrationVersion(b)));
+}
+
+const files = listMigrationFiles();
 
 const GRANTS = "20260914100000_grant_phase1_table_privileges.sql";
+const STRIPE_WEBHOOK_EVENTS_GRANT =
+  "20260917100000_grant_stripe_webhook_events_service_role.sql";
 
-record("migration count is 34", files.length === EXPECTED_COUNT, `got ${files.length}`);
+record("migration count is 35", files.length === EXPECTED_COUNT, `got ${files.length}`);
 
 record("create_buyers uses corrected version", files.includes(BUYERS));
 record("old create_buyers version removed", !files.includes(OLD_BUYERS));
@@ -82,8 +104,12 @@ record("first 7 migrations in expected order", headMatches);
 
 record("grant_phase1_table_privileges migration exists", files.includes(GRANTS));
 record(
-  "grant migration is last",
-  files.length > 0 && files[files.length - 1] === GRANTS,
+  "grant_stripe_webhook_events_service_role migration exists",
+  files.includes(STRIPE_WEBHOOK_EVENTS_GRANT),
+);
+record(
+  "grant_stripe_webhook_events_service_role migration is last",
+  files.length > 0 && files[files.length - 1] === STRIPE_WEBHOOK_EVENTS_GRANT,
   files.length > 0 ? `last=${files[files.length - 1]}` : undefined,
 );
 
