@@ -109,11 +109,12 @@
 
 ## 6. Git / CI（本報告書）
 
-| 項目                              | 値                  |
-| --------------------------------- | ------------------- |
-| **report commit SHA**             | _（push 後に記録）_ |
-| **final HEAD**                    | _（push 後に記録）_ |
-| **GitHub Actions**                | _（push 後に記録）_ |
-| **Production テストデータ後処理** | **PASS**            |
-| **DB / Migration 変更**           | **なし**            |
-| **Supabase / Stripe 設定変更**    | **なし**            |
+| 項目                              | 値                                                                                                                                                                                                                           |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **report commit SHA**             | **`c6c74be`**（`c6c74be50fda23c453585590738db184d3eccad4`）                                                                                                                                                                  |
+| **final HEAD**                    | _（metadata commit 後に記録）_                                                                                                                                                                                               |
+| **GitHub Actions**                | **[#125 failure](https://github.com/koji-isono/WithTama/actions/runs/35291281503)**（report・`format:check`） / **[#126 success](https://github.com/koji-isono/WithTama/actions/runs/35291519287)**（`311d84f` format 修正） |
+| push range                        | `2bd942c..c6c74be` → **#125 failure** / `c6c74be..311d84f` → **#126 success**                                                                                                                                                |
+| **Production テストデータ後処理** | **PASS**                                                                                                                                                                                                                     |
+| **DB / Migration 変更**           | **なし**                                                                                                                                                                                                                     |
+| **Supabase / Stripe 設定変更**    | **なし**                                                                                                                                                                                                                     |
